@@ -1,0 +1,250 @@
+"use client";
+
+import { useState } from "react";
+import type { PromoCode as PromoCodeType } from "@/types/database";
+
+interface PromoCodeProps {
+  clubId: string;
+  onApply: (promoCode: PromoCodeType | null) => void;
+  appliedPromo: PromoCodeType | null;
+}
+
+// Mock promo codes for development
+const mockPromoCodes: PromoCodeType[] = [
+  {
+    id: "promo-1",
+    code: "EARLYBIRD",
+    discount_percent: 10,
+    valid_from: "2025-01-01T00:00:00Z",
+    valid_until: "2025-12-31T23:59:59Z",
+    max_uses: 100,
+    times_used: 25,
+    club_id: null, // Valid for all clubs
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+  },
+  {
+    id: "promo-2",
+    code: "SUMMER20",
+    discount_percent: 20,
+    valid_from: "2025-06-01T00:00:00Z",
+    valid_until: "2025-08-31T23:59:59Z",
+    max_uses: 50,
+    times_used: 10,
+    club_id: null,
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+  },
+];
+
+export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
+  const [code, setCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const validatePromoCode = (
+    inputCode: string
+  ): PromoCodeType | { error: string } => {
+    const normalizedCode = inputCode.trim().toUpperCase();
+    const promo = mockPromoCodes.find(
+      (p) => p.code.toUpperCase() === normalizedCode
+    );
+
+    if (!promo) {
+      return { error: "Invalid promo code" };
+    }
+
+    if (!promo.is_active) {
+      return { error: "This promo code is no longer active" };
+    }
+
+    const now = new Date();
+    const validFrom = new Date(promo.valid_from);
+    const validUntil = new Date(promo.valid_until);
+
+    if (now < validFrom || now > validUntil) {
+      return { error: "This promo code has expired" };
+    }
+
+    if (promo.max_uses !== null && promo.times_used >= promo.max_uses) {
+      return { error: "This promo code has reached its usage limit" };
+    }
+
+    if (promo.club_id !== null && promo.club_id !== clubId) {
+      return { error: "This promo code is not valid for this club" };
+    }
+
+    return promo;
+  };
+
+  const handleApply = async () => {
+    if (!code.trim()) {
+      setError("Please enter a promo code");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const result = validatePromoCode(code);
+
+    if ("error" in result) {
+      setError(result.error);
+      onApply(null);
+    } else {
+      onApply(result);
+      setError(null);
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleRemove = () => {
+    setCode("");
+    setError(null);
+    onApply(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleApply();
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <label
+        htmlFor="promoCode"
+        className="block text-sm font-medium text-stone"
+      >
+        Promo Code
+      </label>
+
+      {appliedPromo ? (
+        // Applied promo code display
+        <div className="bg-sage/20 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-forest flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="font-display font-semibold text-bark">
+                  {appliedPromo.code}
+                </p>
+                <p className="text-sm text-forest font-medium">
+                  {appliedPromo.discount_percent}% discount applied
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="text-sm text-stone hover:text-bark underline transition-colors"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Promo code input
+        <div>
+          <div className="flex gap-2">
+            <input
+              id="promoCode"
+              type="text"
+              value={code}
+              onChange={(e) => {
+                setCode(e.target.value.toUpperCase());
+                if (error) setError(null);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter code"
+              className={`
+                flex-1 px-4 py-3 rounded-lg border bg-white font-body text-bark uppercase
+                transition-all focus:outline-none
+                ${
+                  error
+                    ? "border-error focus:border-error focus:ring-2 focus:ring-error/30"
+                    : "border-stone focus:border-forest focus:ring-2 focus:ring-sage/30"
+                }
+              `}
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={handleApply}
+              disabled={isLoading || !code.trim()}
+              className={`
+                px-6 py-3 rounded-lg font-display font-semibold transition-all
+                ${
+                  isLoading || !code.trim()
+                    ? "bg-cloud text-pebble cursor-not-allowed"
+                    : "bg-forest text-white hover:bg-meadow"
+                }
+              `}
+            >
+              {isLoading ? (
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              ) : (
+                "Apply"
+              )}
+            </button>
+          </div>
+
+          {error && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-error">
+              <svg
+                className="w-4 h-4 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
