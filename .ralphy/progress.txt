@@ -48,3 +48,28 @@
 - [✓] 2026-01-20 14:46 - Create the club edit page at src/app/admin/clubs/[id]/page.tsx (also handle 'new' as id for creating) with: 1) Form for club details (name, slug, description, start/end dates, times, age range, image URL), 2) Auto-generate days section when dates change, showing generated days with checkboxes to skip specific days, 3) Capacity settings per day (morning/afternoon), 4) Booking options section to add/edit/remove pricing options, 5) Save and Cancel buttons. Use react-hook-form. Style according to BRANDING.md
 - [✓] 2026-01-20 14:48 - Create the promo codes management page at src/app/admin/promo-codes/page.tsx with: 1) 'Create New Code' button that opens a modal/form, 2) Promo codes table with: Code, Discount %, Valid From/Until, Max Uses, Times Used, Club (or All), Status (active/inactive), Actions, 3) Create/Edit form with fields: code (uppercase), discount_percent, valid_from, valid_until, max_uses, club_id (dropdown or All Clubs), is_active toggle, 4) Delete confirmation. Use mock data. Style according to BRANDING.md
 - [✓] 2026-01-20 14:49 - Update the admin layout sidebar at src/app/admin/layout.tsx to link 'Daily View' to /admin/day/[today's date in YYYY-MM-DD format]. Use a dynamic link that generates today's date.
+
+# ===========================================
+# BACKEND INTEGRATION PHASE
+# ===========================================
+
+- [✓] 2026-01-20 - Set up Supabase project and push database schema with migrations
+- [✓] 2026-01-20 - Create seed script (scripts/seed.ts) to populate test clubs, booking options, and promo codes
+- [✓] 2026-01-20 - Replace mock data with real Supabase queries on /clubs and /clubs/[slug] pages
+- [✓] 2026-01-20 - Connect booking flow to create real bookings in Supabase database
+- [✓] 2026-01-20 - Refactor booking pages to server/client component pattern (BookingForm.tsx, CompleteForm.tsx, ConfirmationContent.tsx)
+- [✓] 2026-01-20 - Update /api/checkout to create pending bookings in Supabase before Stripe checkout
+- [✓] 2026-01-20 - Update /api/stripe/webhook to update booking status and create booking_days records
+- [✓] 2026-01-20 - Update /api/children to save children to Supabase and mark booking complete
+- [✓] 2026-01-20 - Make email service (src/lib/email.ts) gracefully handle missing Resend API key
+- [✓] 2026-01-20 - Make SMS service (src/lib/sms.ts) gracefully handle missing Twilio credentials
+- [✓] 2026-01-20 - Set up Stripe test mode with publishable key, secret key, and webhook secret
+- [✓] 2026-01-20 - Install Stripe CLI and configure webhook forwarding for local development
+- [✓] 2026-01-20 - Test complete booking flow end-to-end with Stripe test card (4242...)
+
+# PENDING BACKEND TASKS:
+# - [ ] Connect Resend for transactional emails (need API key)
+# - [ ] Connect Twilio for SMS notifications (need credentials)
+# - [ ] Connect Brevo for newsletter subscriptions (need API key)
+# - [ ] Set up admin authentication with Supabase Auth
+# - [ ] Connect admin pages to real Supabase data
