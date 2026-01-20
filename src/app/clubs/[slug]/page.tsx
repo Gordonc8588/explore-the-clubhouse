@@ -1,282 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Club, BookingOption, TimeSlot } from "@/types/database";
+import type { Club, TimeSlot } from "@/types/database";
 import {
   AvailabilityCalendar,
   type ClubDayWithAvailability,
 } from "@/components/AvailabilityCalendar";
+import {
+  mockClubs,
+  getClubBySlug,
+  getBookingOptions,
+  getClubDays,
+  formatPrice,
+} from "@/lib/mock-data";
 
-// Mock data for clubs (will be replaced with Supabase fetch)
-const mockClubs: Club[] = [
-  {
-    id: "1",
-    slug: "february-half-term-2025",
-    name: "February Half Term",
-    description:
-      "A week of outdoor adventures during the February break. Join us for exciting activities including animal care, nature walks, craft sessions, and plenty of outdoor play. Your children will learn about farm life while making new friends and unforgettable memories.",
-    image_url: null,
-    start_date: "2025-02-17",
-    end_date: "2025-02-21",
-    morning_start: "09:00:00",
-    morning_end: "12:30:00",
-    afternoon_start: "13:30:00",
-    afternoon_end: "17:00:00",
-    min_age: 5,
-    max_age: 11,
-    is_active: true,
-    created_at: "2025-01-01T00:00:00Z",
-  },
-  {
-    id: "2",
-    slug: "easter-holidays-2025",
-    name: "Easter Holidays",
-    description:
-      "Spring adventures with baby animals and Easter fun. Experience the magic of spring on the farm with lambing season, chick hatching, and seasonal crafts. Children will enjoy egg hunts, spring planting, and getting up close with our newest arrivals.",
-    image_url: null,
-    start_date: "2025-04-07",
-    end_date: "2025-04-18",
-    morning_start: "09:00:00",
-    morning_end: "12:30:00",
-    afternoon_start: "13:30:00",
-    afternoon_end: "17:00:00",
-    min_age: 5,
-    max_age: 11,
-    is_active: true,
-    created_at: "2025-01-01T00:00:00Z",
-  },
-  {
-    id: "3",
-    slug: "may-half-term-2025",
-    name: "May Half Term",
-    description:
-      "Explore nature as the countryside comes alive. With longer days and warmer weather, this is the perfect time for outdoor adventures. Activities include pond dipping, bug hunts, den building, and exploring our woodland trails.",
-    image_url: null,
-    start_date: "2025-05-26",
-    end_date: "2025-05-30",
-    morning_start: "09:00:00",
-    morning_end: "12:30:00",
-    afternoon_start: "13:30:00",
-    afternoon_end: "17:00:00",
-    min_age: 5,
-    max_age: 11,
-    is_active: true,
-    created_at: "2025-01-01T00:00:00Z",
-  },
-  {
-    id: "4",
-    slug: "summer-holidays-2025",
-    name: "Summer Holidays",
-    description:
-      "Six weeks of farm fun, outdoor games, and nature exploration. Our biggest club of the year offers endless adventures including water play, camping skills, animal care, gardening, and so much more. Book individual days or the full week.",
-    image_url: null,
-    start_date: "2025-07-21",
-    end_date: "2025-08-29",
-    morning_start: "09:00:00",
-    morning_end: "12:30:00",
-    afternoon_start: "13:30:00",
-    afternoon_end: "17:00:00",
-    min_age: 5,
-    max_age: 11,
-    is_active: true,
-    created_at: "2025-01-01T00:00:00Z",
-  },
-];
-
-// Mock booking options
-const mockBookingOptions: Record<string, BookingOption[]> = {
-  "1": [
-    {
-      id: "opt-1-1",
-      club_id: "1",
-      name: "Full Week",
-      description: "All 5 days, full day (9am - 5pm)",
-      option_type: "full_week",
-      time_slot: "full_day",
-      price_per_child: 22500, // £225.00
-      sort_order: 1,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-1-2",
-      club_id: "1",
-      name: "Full Week (Mornings)",
-      description: "All 5 days, mornings only (9am - 12:30pm)",
-      option_type: "full_week",
-      time_slot: "morning",
-      price_per_child: 12500, // £125.00
-      sort_order: 2,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-1-3",
-      club_id: "1",
-      name: "Full Week (Afternoons)",
-      description: "All 5 days, afternoons only (1:30pm - 5pm)",
-      option_type: "full_week",
-      time_slot: "afternoon",
-      price_per_child: 12500, // £125.00
-      sort_order: 3,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-1-4",
-      club_id: "1",
-      name: "Single Day",
-      description: "Pick your day, full day (9am - 5pm)",
-      option_type: "single_day",
-      time_slot: "full_day",
-      price_per_child: 5000, // £50.00
-      sort_order: 4,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-1-5",
-      club_id: "1",
-      name: "Single Session",
-      description: "Pick your day, morning or afternoon",
-      option_type: "single_day",
-      time_slot: "morning",
-      price_per_child: 2800, // £28.00
-      sort_order: 5,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-  ],
-  "2": [
-    {
-      id: "opt-2-1",
-      club_id: "2",
-      name: "Full Week",
-      description: "5 consecutive days, full day (9am - 5pm)",
-      option_type: "full_week",
-      time_slot: "full_day",
-      price_per_child: 22500,
-      sort_order: 1,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-2-2",
-      club_id: "2",
-      name: "Single Day",
-      description: "Pick your day, full day (9am - 5pm)",
-      option_type: "single_day",
-      time_slot: "full_day",
-      price_per_child: 5000,
-      sort_order: 2,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-2-3",
-      club_id: "2",
-      name: "Multi-Day Pass (3 days)",
-      description: "Choose any 3 days, full day",
-      option_type: "multi_day",
-      time_slot: "full_day",
-      price_per_child: 13500, // £135.00
-      sort_order: 3,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-  ],
-  "3": [
-    {
-      id: "opt-3-1",
-      club_id: "3",
-      name: "Full Week",
-      description: "All 5 days, full day (9am - 5pm)",
-      option_type: "full_week",
-      time_slot: "full_day",
-      price_per_child: 22500,
-      sort_order: 1,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-3-2",
-      club_id: "3",
-      name: "Single Day",
-      description: "Pick your day, full day (9am - 5pm)",
-      option_type: "single_day",
-      time_slot: "full_day",
-      price_per_child: 5000,
-      sort_order: 2,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-  ],
-  "4": [
-    {
-      id: "opt-4-1",
-      club_id: "4",
-      name: "Full Week",
-      description: "5 consecutive days, full day (9am - 5pm)",
-      option_type: "full_week",
-      time_slot: "full_day",
-      price_per_child: 22500,
-      sort_order: 1,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-4-2",
-      club_id: "4",
-      name: "Single Day",
-      description: "Pick your day, full day (9am - 5pm)",
-      option_type: "single_day",
-      time_slot: "full_day",
-      price_per_child: 5000,
-      sort_order: 2,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-    {
-      id: "opt-4-3",
-      club_id: "4",
-      name: "Single Session",
-      description: "Morning or afternoon only",
-      option_type: "single_day",
-      time_slot: "morning",
-      price_per_child: 2800,
-      sort_order: 3,
-      is_active: true,
-      created_at: "2025-01-01T00:00:00Z",
-    },
-  ],
-};
-
-// Generate mock club days for a given club
-function generateMockClubDays(club: Club): ClubDayWithAvailability[] {
-  const days: ClubDayWithAvailability[] = [];
-  const start = new Date(club.start_date);
-  const end = new Date(club.end_date);
-
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    // Skip weekends
-    const dayOfWeek = d.getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-
-    const dateStr = d.toISOString().split("T")[0];
-    const randomMorning = Math.floor(Math.random() * 20);
-    const randomAfternoon = Math.floor(Math.random() * 20);
-
-    days.push({
-      id: `day-${dateStr}`,
-      date: dateStr,
-      morning_capacity: 20,
-      afternoon_capacity: 20,
-      morning_booked: randomMorning,
-      afternoon_booked: randomAfternoon,
-      is_available: true,
-    });
-  }
-
-  return days;
+// Convert mock club days to ClubDayWithAvailability format
+function getClubDaysWithAvailability(clubId: string): ClubDayWithAvailability[] {
+  const days = getClubDays(clubId);
+  return days.map((day) => ({
+    id: day.id,
+    date: day.date,
+    morning_capacity: day.morning_capacity,
+    afternoon_capacity: day.afternoon_capacity,
+    morning_booked: Math.floor(Math.random() * day.morning_capacity),
+    afternoon_booked: Math.floor(Math.random() * day.afternoon_capacity),
+    is_available: day.is_available,
+  }));
 }
 
 function formatDateRange(startDate: string, endDate: string): string {
@@ -307,10 +55,6 @@ function formatTime(time: string): string {
   return `${hour12}${minutes !== "00" ? `:${minutes}` : ""}${ampm}`;
 }
 
-function formatPrice(priceInPence: number): string {
-  return `£${(priceInPence / 100).toFixed(2)}`;
-}
-
 function getTimeSlotLabel(slot: TimeSlot): string {
   switch (slot) {
     case "full_day":
@@ -337,7 +81,7 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
   const { slug } = await params;
 
   // In production, fetch from Supabase
-  const club = mockClubs.find((c) => c.slug === slug);
+  const club = getClubBySlug(slug);
 
   if (!club) {
     return (
@@ -360,8 +104,8 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
     );
   }
 
-  const bookingOptions = mockBookingOptions[club.id] || [];
-  const clubDays = generateMockClubDays(club);
+  const bookingOptions = getBookingOptions(club.id);
+  const clubDays = getClubDaysWithAvailability(club.id);
 
   const dateRange = formatDateRange(club.start_date, club.end_date);
   const morningTime = `${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}`;
