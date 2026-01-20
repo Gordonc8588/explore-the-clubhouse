@@ -1,71 +1,29 @@
-import {
-  Heart,
-  Leaf,
-  Users,
-  Shield,
-  Sparkles,
-  TreePine,
-} from "lucide-react";
-
-const values = [
-  {
-    icon: Heart,
-    title: "Nurturing Care",
-    description:
-      "Every child is welcomed into a warm, supportive environment where they feel safe to explore, learn, and grow at their own pace.",
-  },
-  {
-    icon: Leaf,
-    title: "Connection to Nature",
-    description:
-      "We believe in the power of outdoor play and hands-on experiences with nature to foster curiosity, resilience, and a love for the environment.",
-  },
-  {
-    icon: Users,
-    title: "Community Spirit",
-    description:
-      "We build lasting friendships and a sense of belonging, creating a community where children and families feel part of something special.",
-  },
-  {
-    icon: Shield,
-    title: "Safety First",
-    description:
-      "The wellbeing of every child is our top priority. Our qualified staff and comprehensive policies ensure a secure environment for all.",
-  },
-  {
-    icon: Sparkles,
-    title: "Joy & Adventure",
-    description:
-      "We create magical moments filled with laughter, discovery, and excitement that children will treasure and talk about for years to come.",
-  },
-  {
-    icon: TreePine,
-    title: "Sustainable Practices",
-    description:
-      "We teach children to respect and care for our planet through eco-friendly activities and responsible stewardship of our farm and land.",
-  },
-];
+import Image from "next/image";
 
 const teamMembers = [
   {
-    name: "Sarah Thompson",
-    role: "Founder & Director",
-    bio: "With over 15 years of experience in childcare and a passion for outdoor education, Sarah founded The Clubhouse to give children the farm adventures she loved as a child.",
+    name: "Nicole Calder",
+    role: "Founder",
+    bio: "Nicole founded The Clubhouse after time spent in Africa, where she discovered a farm that allowed kids to participate in everyday life. Wanting to create something similar in Scotland, she combined experience from delivering events and familiarity with childcare, having grown up with her mum running a nursery, to build a space where children could learn, explore, and be part of real farm life.",
+    image: "https://res.cloudinary.com/dqicgqgmx/image/upload/v1768934188/05658c31-5bc1-45db-882a-59274dba8dca-e1745677786658_jikvsn.jpg",
   },
   {
-    name: "James Wilson",
-    role: "Activities Manager",
-    bio: "A qualified forest school leader and wildlife enthusiast, James designs our engaging outdoor programmes that spark curiosity and wonder in every child.",
+    name: "Chris Hardie",
+    role: "Activities Lead",
+    bio: "Chris joined us this past Spring; he is an animal biologist who spent six years as a local forest ranger and the last five as an animal encounters zookeeper. He leads the children in a wide range of activities, from forest skills, survival skills, and exploration to interacting with and caring for the friendly animals around the farm.",
+    image: "https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924049/9a27d5e0-f273-4833-8022-13d8f768d058_mlspf0.jpg",
   },
   {
-    name: "Emily Chen",
-    role: "Farm & Animal Care Lead",
-    bio: "Emily brings her agricultural background and gentle nature to manage our animal family, teaching children about responsibility and compassion through hands-on care.",
+    name: "Lisa Taylor",
+    role: "Animal Care Lead",
+    bio: "Lisa is a farm girl through and through, raised on her family dairy farm and splitting her days between her own and neighbouring farms. She is currently studying to become a veterinarian and leads lessons in animal care, health checks, feeding, and animal growth stages.",
+    image: "https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924054/6e5ba4bf-9c64-4b31-bca4-3e1523a17737_zqglgr.jpg",
   },
   {
-    name: "Michael Davies",
-    role: "Safeguarding Officer",
-    bio: "With extensive experience in child protection, Michael ensures our policies and practices keep every child safe while maintaining a fun, welcoming atmosphere.",
+    name: "Kirsteen Benson",
+    role: "Crafts & Workshops Lead",
+    bio: "Kirsteen, BA (Hons), the child of two artists from Glasgow, has decades of experience teaching in schools, running workshops, and leading craft fairs. She brings a wide range of craft skills to The Clubhouse, from woodworking and kite making to building structures for the allotment, helping turn everyday activities into creative projects.",
+    image: "https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924049/ed7d91f4-e867-4028-9bdb-1bd660d79b7e_w613ht.jpg",
   },
 ];
 
@@ -92,15 +50,16 @@ export default function AboutPage() {
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            {/* Image Placeholder */}
+            {/* Image */}
             <div className="relative">
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-sage/20">
-                <div className="flex h-full items-center justify-center">
-                  <div className="text-center">
-                    <TreePine className="mx-auto h-16 w-16 text-sage" />
-                    <p className="mt-4 font-body text-stone">Farm image placeholder</p>
-                  </div>
-                </div>
+              <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                <Image
+                  src="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/IMG_3328-scaled_tkpsb8.jpg"
+                  alt="Children enjoying activities at The Clubhouse"
+                  width={800}
+                  height={600}
+                  className="h-full w-full object-cover"
+                />
               </div>
               {/* Decorative element */}
               <div className="absolute -bottom-4 -right-4 -z-10 h-full w-full rounded-2xl bg-sunshine/20" />
@@ -111,25 +70,20 @@ export default function AboutPage() {
               <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
                 Our Story
               </h2>
-              <div className="mt-6 space-y-4 font-body text-stone">
+              <div className="mt-6 space-y-4 font-body text-lg text-stone leading-relaxed">
                 <p>
-                  The Clubhouse was born from a simple belief: children
-                  thrive when they connect with nature, animals, and the great
-                  outdoors. Founded in the heart of the countryside, our
-                  farm-based holiday club offers something truly special for
-                  families during school breaks.
+                  At The Clubhouse at Craigies, we believe learning should feel like
+                  an adventure – full of curiosity, creativity and fun. Our approach
+                  is all about hands-on experiences that spark imagination and build
+                  a lifelong love of learning.
                 </p>
                 <p>
-                  What started as a small summer programme has grown into a
-                  beloved destination where children aged 4-12 discover the joys
-                  of farm life, outdoor adventures, and making friends in a safe,
-                  nurturing environment.
+                  We&apos;ve created a nurturing environment where children can thrive
+                  by connecting with nature, developing real-world skills, and getting
+                  involved in the day to day activities of a working farm.
                 </p>
-                <p>
-                  Every day at the Clubhouse is filled with opportunities to
-                  explore, learn, and play. From feeding our friendly farm animals
-                  to building dens in the woods, pond dipping to nature crafts,
-                  we create experiences that children remember for a lifetime.
+                <p className="font-display text-xl font-semibold text-forest">
+                  Join us in creating unforgettable memories!
                 </p>
               </div>
 
@@ -149,38 +103,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="bg-forest py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
-              Our Values
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl font-body text-lg text-sage">
-              These core values guide everything we do at The Clubhouse,
-              shaping the experiences we create and the care we provide.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {values.map((value) => (
-              <div
-                key={value.title}
-                className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-colors hover:bg-white/15"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sunshine/20">
-                  <value.icon className="h-6 w-6 text-sunshine" />
-                </div>
-                <h3 className="mt-4 font-display text-xl font-semibold text-white">
-                  {value.title}
-                </h3>
-                <p className="mt-2 font-body text-sage">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Team Section */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -195,28 +117,34 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-8 sm:grid-cols-2">
             {teamMembers.map((member) => (
               <div
                 key={member.name}
                 className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] transition-shadow hover:shadow-[var(--shadow-lg)]"
               >
-                {/* Avatar Placeholder */}
-                <div className="mx-auto h-24 w-24 overflow-hidden rounded-full bg-sage/30">
-                  <div className="flex h-full items-center justify-center">
-                    <Users className="h-10 w-10 text-sage" />
+                <div className="flex flex-col sm:flex-row gap-6">
+                  {/* Photo */}
+                  <div className="mx-auto sm:mx-0 h-32 w-32 flex-shrink-0 overflow-hidden rounded-full">
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      width={128}
+                      height={128}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                </div>
-                <div className="mt-4 text-center">
-                  <h3 className="font-display text-lg font-semibold text-bark">
-                    {member.name}
-                  </h3>
-                  <p className="font-body text-sm font-medium text-meadow">
-                    {member.role}
-                  </p>
-                  <p className="mt-3 font-body text-sm text-stone">
-                    {member.bio}
-                  </p>
+                  <div className="text-center sm:text-left">
+                    <h3 className="font-display text-xl font-semibold text-bark">
+                      {member.name}
+                    </h3>
+                    <p className="font-body text-sm font-medium text-meadow">
+                      {member.role}
+                    </p>
+                    <p className="mt-3 font-body text-sm text-stone leading-relaxed">
+                      {member.bio}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
