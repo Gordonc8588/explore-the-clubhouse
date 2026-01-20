@@ -6,7 +6,7 @@ export const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NA
 // Gallery photo type
 export interface GalleryPhoto {
   id: string;
-  publicId: string; // Cloudinary public ID (e.g., "gallery/photo1")
+  publicId: string; // Cloudinary public ID
   alt: string;
   category?: string;
 }
@@ -63,31 +63,24 @@ export function getBlurPlaceholderUrl(publicId: string): string {
   return getCloudinaryUrl(publicId, { width: 20, quality: 30 });
 }
 
-// Example gallery photos - replace with your actual Cloudinary public IDs
+// Your gallery photos from Cloudinary
+// Update the 'alt' descriptions and 'category' to match your photos
 export const galleryPhotos: GalleryPhoto[] = [
-  // Farm Animals
-  { id: '1', publicId: 'gallery/goats', alt: 'Children meeting the goats', category: 'Farm Animals' },
-  { id: '2', publicId: 'gallery/bunnies', alt: 'Bunny cuddles', category: 'Farm Animals' },
-  { id: '3', publicId: 'gallery/chickens', alt: 'Feeding the chickens', category: 'Farm Animals' },
-  { id: '4', publicId: 'gallery/eggs', alt: 'Egg collecting', category: 'Farm Animals' },
-  { id: '5', publicId: 'gallery/pigs', alt: 'Meeting the pigs', category: 'Farm Animals' },
-  { id: '6', publicId: 'gallery/lambs', alt: 'Spring lambs', category: 'Farm Animals' },
-
-  // Outdoor Activities
-  { id: '7', publicId: 'gallery/den-building', alt: 'Den building in the woods', category: 'Outdoor Activities' },
-  { id: '8', publicId: 'gallery/campfire', alt: 'Campfire stories', category: 'Outdoor Activities' },
-  { id: '9', publicId: 'gallery/hay-bales', alt: 'Hay bale fun', category: 'Outdoor Activities' },
-  { id: '10', publicId: 'gallery/outdoor-games', alt: 'Outdoor games', category: 'Outdoor Activities' },
-  { id: '11', publicId: 'gallery/nature-walk', alt: 'Nature walk exploration', category: 'Outdoor Activities' },
-  { id: '12', publicId: 'gallery/pond-dipping', alt: 'Pond dipping', category: 'Outdoor Activities' },
-
-  // Creative Activities
-  { id: '13', publicId: 'gallery/nature-crafts', alt: 'Nature crafts', category: 'Creative Activities' },
-  { id: '14', publicId: 'gallery/painting', alt: 'Outdoor painting', category: 'Creative Activities' },
-  { id: '15', publicId: 'gallery/flower-pressing', alt: 'Flower pressing', category: 'Creative Activities' },
-  { id: '16', publicId: 'gallery/mud-kitchen', alt: 'Mud kitchen play', category: 'Creative Activities' },
-
-  // Add more photos as needed...
+  { id: '1', publicId: 'IMG_3328-scaled_tkpsb8', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '2', publicId: '6e5ba4bf-9c64-4b31-bca4-3e1523a17737_zqglgr', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '3', publicId: '6114853b-707b-4c3e-be86-8d20e8c2dba2-scaled_of1aga', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '4', publicId: 'd12ad9e7-690c-4cb0-8761-efb841ffbade_jgrvaf', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '5', publicId: 'IMG_1176-scaled_pemded', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '6', publicId: '8133f034-a169-43c6-9038-0f46d3517cae_xz0a88', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '7', publicId: '043917ba-162f-4160-8072-97e389e93b92-2_aswr8s', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '8', publicId: '9a27d5e0-f273-4833-8022-13d8f768d058_mlspf0', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '9', publicId: 'ed7d91f4-e867-4028-9bdb-1bd660d79b7e_w613ht', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '10', publicId: 'IMG_8408_cktueb', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '11', publicId: 'IMG_8406_ejjgwy', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '12', publicId: 'b615ecfd-3de5-443d-a1b4-b35fa544a023_smgsbt', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '13', publicId: 'e943d70a-6f1e-4780-bc15-d2b0921fcf62_xrklgb', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '14', publicId: 'PHOTO-2025-07-29-18-26-06_ixlfl6', alt: 'Clubhouse activity', category: 'Activities' },
+  { id: '15', publicId: '54c29f9e-752f-4cb1-ac2e-712e9206a2df_berynp', alt: 'Clubhouse activity', category: 'Activities' },
 ];
 
 // Get photos by category
