@@ -234,11 +234,11 @@ export default function ContactPage() {
                         Address
                       </h3>
                       <p className="mt-1 font-body text-stone">
-                        The Clubhouse Farm
+                        The Clubhouse
                         <br />
-                        123 Meadow Lane
+                        West Craigie Farm
                         <br />
-                        Countryside, CC1 2AB
+                        South Queensferry EH30 9AR
                       </p>
                     </div>
                   </div>
@@ -254,10 +254,10 @@ export default function ContactPage() {
                       </h3>
                       <p className="mt-1 font-body text-stone">
                         <a
-                          href="tel:+441onal234567890"
+                          href="tel:+447907879303"
                           className="transition-colors hover:text-forest"
                         >
-                          01onal 234567890
+                          07907 879303
                         </a>
                       </p>
                     </div>
@@ -304,18 +304,20 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
+              {/* Map */}
               <div className="overflow-hidden rounded-2xl bg-white shadow-[var(--shadow-md)]">
-                <div className="aspect-[16/10] bg-sage/20">
-                  <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                    <MapPin className="h-12 w-12 text-sage" />
-                    <p className="mt-4 font-display font-semibold text-bark">
-                      Map Placeholder
-                    </p>
-                    <p className="mt-1 font-body text-sm text-stone">
-                      Interactive map will be displayed here
-                    </p>
-                  </div>
+                <div className="aspect-[16/10]">
+                  <iframe
+                    src="https://maps.google.com/maps?q=Craigies+Farm+South+Queensferry+EH30+9AR&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="The Clubhouse Location - West Craigie Farm, South Queensferry"
+                    className="h-full w-full"
+                  />
                 </div>
               </div>
             </div>

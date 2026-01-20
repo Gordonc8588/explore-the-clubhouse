@@ -15,7 +15,7 @@ export default function GalleryPage() {
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
           <div className="text-center">
             <h1 className="font-display text-4xl font-extrabold tracking-tight text-bark sm:text-5xl">
-              Our Gallery
+              Gallery
             </h1>
             <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-stone sm:text-xl">
               Take a peek at the wonderful adventures and magical moments that

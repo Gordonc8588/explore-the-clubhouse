@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/clubs", label: "Book Now" },
+  { href: "/clubs", label: "What's On" },
   { href: "/about", label: "About" },
   { href: "/gallery", label: "Gallery" },
   { href: "/contact", label: "Contact" },
@@ -68,18 +68,18 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-sunshine" />
                 <span className="font-body text-sm text-sage">
-                  123 Farm Lane
+                  West Craigie Farm
                   <br />
-                  Countryside, AB12 3CD
+                  South Queensferry EH30 9AR
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 flex-shrink-0 text-sunshine" />
                 <a
-                  href="tel:+441onal234567"
+                  href="tel:+447907879303"
                   className="font-body text-sm text-sage transition-colors hover:text-sunshine"
                 >
-                  01onal 234 567
+                  07907 879303
                 </a>
               </li>
               <li className="flex items-center gap-2">
