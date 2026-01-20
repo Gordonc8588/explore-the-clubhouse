@@ -10,6 +10,10 @@ export function getStripe(): Promise<StripeClient | null> {
   return stripePromise
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  typescript: true,
-})
+// Only initialize Stripe on the server if the secret key is available
+// This allows the build to succeed without the secret key set
+export const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      typescript: true,
+    })
+  : (null as unknown as Stripe)
