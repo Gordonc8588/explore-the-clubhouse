@@ -16,7 +16,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { formatPrice } from "@/lib/mock-data";
-import type { Booking, BookingOption, Club, Child } from "@/types/database";
+import { generateGoogleCalendarUrl } from "@/lib/calendar";
+import type { Booking, BookingOption, Club, Child, TimeSlot } from "@/types/database";
 
 // Mock booking data for development
 const mockBookings: Record<
@@ -239,16 +240,12 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   // Generate booking reference from ID
   const bookingRef = booking.id.toUpperCase().replace("BOOKING-", "ETC-");
 
-  // Placeholder handlers for calendar buttons
-  const handleDownloadICS = () => {
-    // TODO: Implement ICS file generation
-    alert("ICS download coming soon!");
-  };
-
-  const handleAddToGoogleCalendar = () => {
-    // TODO: Implement Google Calendar integration
-    alert("Google Calendar integration coming soon!");
-  };
+  // Generate Google Calendar URL
+  const googleCalendarUrl = generateGoogleCalendarUrl(
+    booking,
+    club,
+    bookingOption.time_slot as TimeSlot
+  );
 
   return (
     <div className="bg-cream min-h-screen">
@@ -468,20 +465,23 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleDownloadICS}
+            <a
+              href={`/api/calendar/${booking.id}`}
+              download
               className="flex items-center justify-center gap-2 bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
             >
               <Download className="w-5 h-5" />
               Download .ics File
-            </button>
-            <button
-              onClick={handleAddToGoogleCalendar}
+            </a>
+            <a
+              href={googleCalendarUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 border-2 border-forest text-forest font-display font-semibold py-3 px-6 rounded-lg hover:bg-forest hover:text-white transition-colors"
             >
               <ExternalLink className="w-5 h-5" />
               Add to Google Calendar
-            </button>
+            </a>
           </div>
         </div>
 
