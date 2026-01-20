@@ -1,120 +1,11 @@
-import {
-  Bird,
-  Flower2,
-  Leaf,
-  PawPrint,
-  Palette,
-  TreePine,
-  Sun,
-  Rabbit,
-  Bug,
-  Tent,
-  Wheat,
-  Egg,
-  Carrot,
-  Droplets,
-  Mountain,
-  Sparkles,
-} from "lucide-react";
+import { Gallery } from "@/components/Gallery";
+import { galleryPhotos } from "@/lib/cloudinary";
 
-const galleryItems = [
-  {
-    icon: PawPrint,
-    title: "Meeting the Goats",
-    description: "Children love feeding and petting our friendly goats",
-    category: "Farm Animals",
-  },
-  {
-    icon: Rabbit,
-    title: "Bunny Cuddles",
-    description: "Gentle moments with our adorable rabbits",
-    category: "Farm Animals",
-  },
-  {
-    icon: Bird,
-    title: "Chicken Care",
-    description: "Learning to care for our feathered friends",
-    category: "Farm Animals",
-  },
-  {
-    icon: Egg,
-    title: "Egg Collecting",
-    description: "The excitement of finding fresh eggs each morning",
-    category: "Farm Activities",
-  },
-  {
-    icon: TreePine,
-    title: "Den Building",
-    description: "Creating secret hideaways in the woodland",
-    category: "Outdoor Play",
-  },
-  {
-    icon: Tent,
-    title: "Campfire Stories",
-    description: "Gathering around for songs and storytelling",
-    category: "Outdoor Play",
-  },
-  {
-    icon: Palette,
-    title: "Nature Crafts",
-    description: "Making art with leaves, sticks, and natural treasures",
-    category: "Creative Activities",
-  },
-  {
-    icon: Flower2,
-    title: "Flower Pressing",
-    description: "Preserving beautiful blooms from our meadow",
-    category: "Creative Activities",
-  },
-  {
-    icon: Carrot,
-    title: "Veggie Patch",
-    description: "Growing and harvesting our own vegetables",
-    category: "Gardening",
-  },
-  {
-    icon: Wheat,
-    title: "Hay Bale Fun",
-    description: "Jumping and playing in the hay barn",
-    category: "Outdoor Play",
-  },
-  {
-    icon: Bug,
-    title: "Bug Hunting",
-    description: "Discovering minibeasts in the garden",
-    category: "Nature Exploration",
-  },
-  {
-    icon: Droplets,
-    title: "Pond Dipping",
-    description: "Exploring aquatic life in our wildlife pond",
-    category: "Nature Exploration",
-  },
-  {
-    icon: Leaf,
-    title: "Woodland Walks",
-    description: "Adventures through our beautiful forest trails",
-    category: "Nature Exploration",
-  },
-  {
-    icon: Sun,
-    title: "Outdoor Games",
-    description: "Running, playing, and having fun in the fresh air",
-    category: "Outdoor Play",
-  },
-  {
-    icon: Mountain,
-    title: "Hill Climbing",
-    description: "Conquering our meadow hills and enjoying the views",
-    category: "Outdoor Play",
-  },
-  {
-    icon: Sparkles,
-    title: "Seasonal Celebrations",
-    description: "Special events and holiday-themed activities",
-    category: "Special Events",
-  },
-];
+export const metadata = {
+  title: "Gallery",
+  description:
+    "See the wonderful adventures and magical moments at Explore the Clubhouse. From farm animals to forest fun!",
+};
 
 export default function GalleryPage() {
   return (
@@ -135,33 +26,10 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Gallery Grid */}
+      {/* Gallery Grid with Lightbox */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {galleryItems.map((item, index) => (
-              <div
-                key={index}
-                className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-xl bg-sage/20 shadow-[var(--shadow-md)] transition-all duration-300 hover:shadow-[var(--shadow-lg)] hover:scale-[1.02]"
-              >
-                {/* Placeholder Content */}
-                <div className="flex h-full flex-col items-center justify-center p-6">
-                  <item.icon className="h-12 w-12 text-sage transition-colors group-hover:text-meadow" />
-                  <p className="mt-3 font-body text-sm text-stone">{item.category}</p>
-                </div>
-
-                {/* Hover Overlay with Caption */}
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-forest/90 via-forest/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <h3 className="font-display text-lg font-semibold text-white">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1 font-body text-sm text-sage">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Gallery photos={galleryPhotos} />
         </div>
       </section>
 
@@ -179,7 +47,7 @@ export default function GalleryPage() {
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <a
-                href="/book"
+                href="/clubs"
                 className="inline-block rounded-lg bg-sunshine px-8 py-3 font-display text-lg font-semibold text-bark transition-colors hover:bg-amber focus:outline-none focus:ring-2 focus:ring-sunshine focus:ring-offset-2 focus:ring-offset-forest"
               >
                 Book a Place
