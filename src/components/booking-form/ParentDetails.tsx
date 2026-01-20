@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,6 +33,7 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ParentDetailsFormValues>({
     resolver: zodResolver(parentDetailsSchema),
@@ -41,6 +43,12 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
       parentPhone: formData.parentPhone,
     },
   });
+
+  // Sync form values to parent as user types (for canProceed validation)
+  const watchedValues = watch();
+  useEffect(() => {
+    onNext(watchedValues);
+  }, [watchedValues.parentName, watchedValues.parentEmail, watchedValues.parentPhone]);
 
   const onSubmit = (data: ParentDetailsFormValues) => {
     onNext(data);

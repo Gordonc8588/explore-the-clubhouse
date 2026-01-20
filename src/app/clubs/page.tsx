@@ -1,19 +1,26 @@
 import Image from "next/image";
 import { ClubCard } from "@/components/ClubCard";
-import { mockClubs } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
 import type { Club } from "@/types/database";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 
-function getUpcomingClubs(clubs: Club[]): Club[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+async function getUpcomingClubs(): Promise<Club[]> {
+  const supabase = await createClient();
+  const today = new Date().toISOString().split('T')[0];
 
-  return clubs
-    .filter((club) => {
-      const endDate = new Date(club.end_date);
-      return endDate >= today && club.is_active;
-    })
-    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+  const { data: clubs, error } = await supabase
+    .from('clubs')
+    .select('*')
+    .eq('is_active', true)
+    .gte('end_date', today)
+    .order('start_date', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching clubs:', error);
+    return [];
+  }
+
+  return clubs || [];
 }
 
 const activities = [
@@ -55,8 +62,8 @@ const activities = [
   },
 ];
 
-export default function WhatsOnPage() {
-  const upcomingClubs = getUpcomingClubs(mockClubs);
+export default async function WhatsOnPage() {
+  const upcomingClubs = await getUpcomingClubs();
 
   return (
     <div className="bg-cream">

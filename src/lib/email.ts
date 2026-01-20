@@ -6,8 +6,19 @@
 import { Resend } from 'resend';
 import type { Booking, Club, Child } from '@/types/database';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialize Resend client to avoid errors when API key is not set
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY is not configured - emails will not be sent');
+    return null;
+  }
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@exploretheclubhouse.co.uk';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk';
@@ -223,6 +234,11 @@ export async function sendBookingConfirmation(
   `;
 
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { success: false, error: 'Email service not configured' };
+    }
+
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
@@ -341,6 +357,11 @@ export async function sendBookingComplete(
   `;
 
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { success: false, error: 'Email service not configured' };
+    }
+
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
@@ -437,6 +458,11 @@ export async function sendAdminNotification(
   `;
 
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { success: false, error: 'Email service not configured' };
+    }
+
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: adminEmail,
@@ -525,6 +551,11 @@ export async function sendIncompleteReminder(
   `;
 
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { success: false, error: 'Email service not configured' };
+    }
+
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,

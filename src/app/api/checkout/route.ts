@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import {
-  getClubById,
-  getBookingOptions,
-  formatPrice,
-} from "@/lib/mock-data";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 interface CheckoutRequestBody {
   clubId: string;
@@ -17,20 +13,6 @@ interface CheckoutRequestBody {
   childrenCount: number;
   promoCodeId: string | null;
 }
-
-// Mock promo codes - in production, fetch from database
-const mockPromoCodes = [
-  {
-    id: "promo-1",
-    code: "EARLYBIRD",
-    discount_percent: 10,
-  },
-  {
-    id: "promo-2",
-    code: "SUMMER20",
-    discount_percent: 20,
-  },
-];
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,18 +46,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get club and booking option
-    const club = getClubById(clubId);
-    if (!club) {
+    const supabase = createAdminClient();
+
+    // Get club from database
+    const { data: club, error: clubError } = await supabase
+      .from('clubs')
+      .select('*')
+      .eq('id', clubId)
+      .single();
+
+    if (clubError || !club) {
       return NextResponse.json(
         { error: "Club not found" },
         { status: 404 }
       );
     }
 
-    const bookingOptions = getBookingOptions(clubId);
-    const bookingOption = bookingOptions.find((opt) => opt.id === bookingOptionId);
-    if (!bookingOption) {
+    // Get booking option from database
+    const { data: bookingOption, error: optionError } = await supabase
+      .from('booking_options')
+      .select('*')
+      .eq('id', bookingOptionId)
+      .eq('club_id', clubId)
+      .single();
+
+    if (optionError || !bookingOption) {
       return NextResponse.json(
         { error: "Booking option not found" },
         { status: 404 }
@@ -97,14 +92,46 @@ export async function POST(request: NextRequest) {
     let discountPercent = 0;
     let promoCode = null;
     if (promoCodeId) {
-      promoCode = mockPromoCodes.find((p) => p.id === promoCodeId);
-      if (promoCode) {
-        discountPercent = promoCode.discount_percent;
+      const { data: promo } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .eq('id', promoCodeId)
+        .eq('is_active', true)
+        .single();
+
+      if (promo) {
+        promoCode = promo;
+        discountPercent = promo.discount_percent;
       }
     }
 
     const discountAmount = Math.round((subtotal * discountPercent) / 100);
     const total = subtotal - discountAmount;
+
+    // Create pending booking in database
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .insert({
+        club_id: clubId,
+        booking_option_id: bookingOptionId,
+        parent_name: parentName,
+        parent_email: parentEmail,
+        parent_phone: parentPhone,
+        num_children: childrenCount,
+        total_amount: total,
+        status: 'pending',
+        promo_code_id: promoCodeId || null,
+      })
+      .select()
+      .single();
+
+    if (bookingError || !booking) {
+      console.error('Booking creation error:', bookingError);
+      return NextResponse.json(
+        { error: "Failed to create booking" },
+        { status: 500 }
+      );
+    }
 
     // Build line item description
     let description = `${bookingOption.name} - ${childrenCount} ${childrenCount === 1 ? "child" : "children"}`;
@@ -133,6 +160,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: {
+        bookingId: booking.id,
         clubId,
         clubSlug,
         bookingOptionId,
@@ -146,9 +174,15 @@ export async function POST(request: NextRequest) {
         discountAmount: String(discountAmount),
         total: String(total),
       },
-      success_url: `${baseUrl}/book/${clubSlug}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${baseUrl}/complete/${booking.id}`,
       cancel_url: `${baseUrl}/book/${clubSlug}?cancelled=true`,
     });
+
+    // Update booking with Stripe session ID
+    await supabase
+      .from('bookings')
+      .update({ stripe_checkout_session_id: session.id })
+      .eq('id', booking.id);
 
     return NextResponse.json({ url: session.url });
   } catch (error) {

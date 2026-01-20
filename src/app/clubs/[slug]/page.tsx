@@ -1,30 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Club, TimeSlot } from "@/types/database";
+import { notFound } from "next/navigation";
+import type { Club, ClubDay, BookingOption, TimeSlot } from "@/types/database";
+import { createClient } from "@/lib/supabase/server";
 import {
   AvailabilityCalendar,
   type ClubDayWithAvailability,
 } from "@/components/AvailabilityCalendar";
-import {
-  mockClubs,
-  getClubBySlug,
-  getBookingOptions,
-  getClubDays,
-  formatPrice,
-} from "@/lib/mock-data";
 
-// Convert mock club days to ClubDayWithAvailability format
-function getClubDaysWithAvailability(clubId: string): ClubDayWithAvailability[] {
-  const days = getClubDays(clubId);
-  return days.map((day) => ({
-    id: day.id,
-    date: day.date,
-    morning_capacity: day.morning_capacity,
-    afternoon_capacity: day.afternoon_capacity,
-    morning_booked: Math.floor(Math.random() * day.morning_capacity),
-    afternoon_booked: Math.floor(Math.random() * day.afternoon_capacity),
-    is_available: day.is_available,
-  }));
+function formatPrice(priceInPence: number): string {
+  return `£${(priceInPence / 100).toFixed(2)}`;
 }
 
 function formatDateRange(startDate: string, endDate: string): string {
@@ -70,42 +55,85 @@ interface ClubDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  // In production, fetch slugs from Supabase
-  return mockClubs.map((club) => ({
-    slug: club.slug,
-  }));
+async function getClubData(slug: string) {
+  const supabase = await createClient();
+
+  // Fetch club by slug
+  const { data: club, error: clubError } = await supabase
+    .from('clubs')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single();
+
+  if (clubError || !club) {
+    return null;
+  }
+
+  // Fetch booking options
+  const { data: bookingOptions } = await supabase
+    .from('booking_options')
+    .select('*')
+    .eq('club_id', club.id)
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+
+  // Fetch club days with availability
+  const { data: clubDays } = await supabase
+    .from('club_days')
+    .select('*')
+    .eq('club_id', club.id)
+    .eq('is_available', true)
+    .order('date', { ascending: true });
+
+  // Get booked counts for each day
+  const clubDaysWithAvailability: ClubDayWithAvailability[] = await Promise.all(
+    (clubDays || []).map(async (day) => {
+      const { data: availability } = await supabase
+        .rpc('get_club_day_availability', { day_id: day.id });
+
+      const avail = availability?.[0] || {
+        morning_booked: 0,
+        afternoon_booked: 0,
+      };
+
+      return {
+        id: day.id,
+        date: day.date,
+        morning_capacity: day.morning_capacity,
+        afternoon_capacity: day.afternoon_capacity,
+        morning_booked: avail.morning_booked || 0,
+        afternoon_booked: avail.afternoon_booked || 0,
+        is_available: day.is_available,
+      };
+    })
+  );
+
+  return {
+    club: club as Club,
+    bookingOptions: (bookingOptions || []) as BookingOption[],
+    clubDays: clubDaysWithAvailability,
+  };
 }
+
+export async function generateStaticParams() {
+  // For dynamic rendering, return empty array
+  // Clubs will be fetched at request time
+  return [];
+}
+
+// Force dynamic rendering since we need real-time availability
+export const dynamic = 'force-dynamic';
 
 export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
   const { slug } = await params;
+  const data = await getClubData(slug);
 
-  // In production, fetch from Supabase
-  const club = getClubBySlug(slug);
-
-  if (!club) {
-    return (
-      <div className="bg-cream min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="font-display text-3xl font-bold text-bark mb-4">
-            Club Not Found
-          </h1>
-          <p className="font-body text-stone mb-6">
-            The club you&apos;re looking for doesn&apos;t exist.
-          </p>
-          <Link
-            href="/clubs"
-            className="inline-block bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
-          >
-            View All Clubs
-          </Link>
-        </div>
-      </div>
-    );
+  if (!data) {
+    notFound();
   }
 
-  const bookingOptions = getBookingOptions(club.id);
-  const clubDays = getClubDaysWithAvailability(club.id);
+  const { club, bookingOptions, clubDays } = data;
 
   const dateRange = formatDateRange(club.start_date, club.end_date);
   const morningTime = `${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}`;
