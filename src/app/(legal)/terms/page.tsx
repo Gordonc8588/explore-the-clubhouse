@@ -30,7 +30,7 @@ export default function TermsPage() {
             {/* Introduction */}
             <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:p-8">
               <p className="font-body text-stone">
-                Welcome to Explore the Clubhouse. By booking a place for your
+                Welcome to The Clubhouse. By booking a place for your
                 child at our holiday club, you agree to be bound by these Terms
                 & Conditions. Please read them carefully before making a
                 booking.

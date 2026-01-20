@@ -58,7 +58,7 @@ function emailTemplate(content: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Explore the Clubhouse</title>
+  <title>The Clubhouse</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #FEFDF8; color: #3D3D3D;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FEFDF8;">
@@ -69,7 +69,7 @@ function emailTemplate(content: string): string {
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <h1 style="margin: 0; font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 700; color: #2D5A3D;">
-                Explore the Clubhouse
+                The Clubhouse
               </h1>
             </td>
           </tr>
@@ -83,7 +83,7 @@ function emailTemplate(content: string): string {
           <tr>
             <td align="center" style="padding-top: 32px;">
               <p style="margin: 0 0 8px; font-size: 14px; color: #6B7280;">
-                Explore the Clubhouse | Outdoor adventures for children aged 5-11
+                The Clubhouse | Outdoor adventures for children aged 5-11
               </p>
               <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
                 If you have any questions, please contact us at<br>
@@ -218,13 +218,13 @@ export async function sendBookingConfirmation(
 
     <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
       Warm regards,<br>
-      <strong style="color: #2D5A3D;">The Explore the Clubhouse Team</strong>
+      <strong style="color: #2D5A3D;">The The Clubhouse Team</strong>
     </p>
   `;
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `Explore the Clubhouse <${fromEmail}>`,
+      from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
       subject: `Booking Confirmed - ${club.name}`,
       html: emailTemplate(content),
@@ -336,13 +336,13 @@ export async function sendBookingComplete(
 
     <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
       See you soon!<br>
-      <strong style="color: #2D5A3D;">The Explore the Clubhouse Team</strong>
+      <strong style="color: #2D5A3D;">The The Clubhouse Team</strong>
     </p>
   `;
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `Explore the Clubhouse <${fromEmail}>`,
+      from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
       subject: `Booking Complete - ${club.name}`,
       html: emailTemplate(content),
@@ -438,7 +438,7 @@ export async function sendAdminNotification(
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `Explore the Clubhouse <${fromEmail}>`,
+      from: `The Clubhouse <${fromEmail}>`,
       to: adminEmail,
       subject: `New Booking: ${booking.parent_name} - ${club.name}`,
       html: emailTemplate(content),
@@ -520,13 +520,13 @@ export async function sendIncompleteReminder(
 
     <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
       Thanks,<br>
-      <strong style="color: #2D5A3D;">The Explore the Clubhouse Team</strong>
+      <strong style="color: #2D5A3D;">The The Clubhouse Team</strong>
     </p>
   `;
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `Explore the Clubhouse <${fromEmail}>`,
+      from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
       subject: `Action Required: Complete your booking for ${club.name}`,
       html: emailTemplate(content),

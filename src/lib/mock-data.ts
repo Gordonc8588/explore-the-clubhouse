@@ -1,6 +1,6 @@
 /**
  * Mock data for development until Supabase is connected
- * Uses realistic dates and prices for the Explore the Clubhouse booking platform
+ * Uses realistic dates and prices for the The Clubhouse booking platform
  */
 
 import type { Club, ClubDay, BookingOption, Booking, Child } from '@/types/database';

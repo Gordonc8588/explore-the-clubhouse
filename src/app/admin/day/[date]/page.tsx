@@ -355,7 +355,7 @@ export default function DailyAttendancePage() {
             Daily Attendance - {formatDateForDisplay(selectedDate)}
           </h1>
           <p className="mt-1 font-body text-stone">
-            Explore the Clubhouse - Printed on{" "}
+            The Clubhouse - Printed on{" "}
             {new Date().toLocaleDateString("en-GB")}
           </p>
         </div>

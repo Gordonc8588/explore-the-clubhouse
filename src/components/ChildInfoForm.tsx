@@ -312,7 +312,7 @@ export function ChildInfoForm({
                 </div>
                 <p className="mt-1 text-sm text-stone">
                   I give permission for photographs and videos of my child to be
-                  taken during activities for use on the Explore the Clubhouse
+                  taken during activities for use on the The Clubhouse
                   website, social media, and promotional materials.
                 </p>
               </div>

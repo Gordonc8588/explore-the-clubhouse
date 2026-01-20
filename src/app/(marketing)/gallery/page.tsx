@@ -4,7 +4,7 @@ import { galleryPhotos } from "@/lib/cloudinary";
 export const metadata = {
   title: "Gallery",
   description:
-    "See the wonderful adventures and magical moments at Explore the Clubhouse. From farm animals to forest fun!",
+    "See the wonderful adventures and magical moments at The Clubhouse. From farm animals to forest fun!",
 };
 
 export default function GalleryPage() {
@@ -19,7 +19,7 @@ export default function GalleryPage() {
             </h1>
             <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-stone sm:text-xl">
               Take a peek at the wonderful adventures and magical moments that
-              happen every day at Explore the Clubhouse. From farm animals to
+              happen every day at The Clubhouse. From farm animals to
               forest fun, see what your children could be enjoying!
             </p>
           </div>

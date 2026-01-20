@@ -256,7 +256,7 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
             href="/"
             className="font-display text-lg font-bold text-white hover:text-sage transition-colors"
           >
-            Explore the Clubhouse
+            The Clubhouse
           </Link>
         </div>
       </header>

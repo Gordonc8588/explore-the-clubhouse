@@ -137,7 +137,7 @@ export default function AdminLayout({
               <Menu className="h-6 w-6" />
             </button>
             <h1 className="font-display text-lg font-bold text-bark sm:text-xl">
-              Explore the Clubhouse Admin
+              The Clubhouse Admin
             </h1>
           </div>
 

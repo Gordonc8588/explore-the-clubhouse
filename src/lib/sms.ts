@@ -88,7 +88,7 @@ export async function sendBookingConfirmationSMS(
   const bookingRef = getBookingRef(booking.id);
   const startDate = formatShortDate(club.start_date);
 
-  const message = `Explore the Clubhouse: Booking confirmed! Ref: ${bookingRef}. ${club.name} starts ${startDate}. We'll send a reminder before the club. See you soon!`;
+  const message = `The Clubhouse: Booking confirmed! Ref: ${bookingRef}. ${club.name} starts ${startDate}. We'll send a reminder before the club. See you soon!`;
 
   try {
     const client = getClient();
@@ -122,7 +122,7 @@ export async function sendReminderSMS(
   const dropOffTime = formatTime(club.morning_start);
   const firstName = booking.parent_name.split(' ')[0];
 
-  const message = `Hi ${firstName}! Reminder: ${club.name} starts today. Drop-off from ${dropOffTime}. Please bring packed lunch, water & outdoor clothes. See you soon! - Explore the Clubhouse`;
+  const message = `Hi ${firstName}! Reminder: ${club.name} starts today. Drop-off from ${dropOffTime}. Please bring packed lunch, water & outdoor clothes. See you soon! - The Clubhouse`;
 
   try {
     const client = getClient();

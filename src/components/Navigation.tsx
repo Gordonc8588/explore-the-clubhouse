@@ -25,7 +25,7 @@ export function Navigation() {
             href="/"
             className="font-display text-xl font-bold text-forest"
           >
-            Explore the Clubhouse
+            The Clubhouse
           </Link>
 
           {/* Desktop Navigation */}

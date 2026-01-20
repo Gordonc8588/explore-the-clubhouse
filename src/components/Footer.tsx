@@ -36,7 +36,7 @@ export function Footer() {
           {/* Brand & About */}
           <div>
             <Link href="/" className="font-display text-xl font-bold">
-              Explore the Clubhouse
+              The Clubhouse
             </Link>
             <p className="mt-4 font-body text-sm text-sage">
               A children&apos;s holiday club offering outdoor, farm-based
@@ -175,7 +175,7 @@ export function Footer() {
 
             {/* Copyright */}
             <p className="font-body text-xs text-sage">
-              &copy; {new Date().getFullYear()} Explore the Clubhouse. All
+              &copy; {new Date().getFullYear()} The Clubhouse. All
               rights reserved.
             </p>
           </div>

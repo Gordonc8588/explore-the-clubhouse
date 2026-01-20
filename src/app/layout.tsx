@@ -19,8 +19,8 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Explore the Clubhouse | Children's Holiday Club",
-    template: "%s | Explore the Clubhouse",
+    default: "The Clubhouse | Children's Holiday Club",
+    template: "%s | The Clubhouse",
   },
   description:
     "Outdoor holiday clubs for children during school holidays. Farm activities, nature exploration, and hands-on learning in a safe, fun environment.",
@@ -32,11 +32,11 @@ export const metadata: Metadata = {
     "outdoor learning",
     "holiday club booking",
   ],
-  authors: [{ name: "Explore the Clubhouse" }],
+  authors: [{ name: "The Clubhouse" }],
   openGraph: {
     type: "website",
     locale: "en_GB",
-    siteName: "Explore the Clubhouse",
+    siteName: "The Clubhouse",
   },
 };
 

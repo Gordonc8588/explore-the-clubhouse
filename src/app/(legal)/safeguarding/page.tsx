@@ -38,7 +38,7 @@ export default function SafeguardingPage() {
                     Our Commitment
                   </h2>
                   <p className="mt-2 font-body text-sage">
-                    At Explore the Clubhouse, the safety and wellbeing of every
+                    At The Clubhouse, the safety and wellbeing of every
                     child is our absolute priority. We are committed to creating
                     a safe, nurturing environment where children can explore,
                     learn, and have fun with confidence.
@@ -77,7 +77,7 @@ export default function SafeguardingPage() {
               <div className="mt-4 rounded-xl bg-white p-6 shadow-[var(--shadow-md)]">
                 <p className="font-body text-stone">
                   Our Designated Safeguarding Lead (DSL) is responsible for
-                  overseeing all safeguarding matters at Explore the Clubhouse.
+                  overseeing all safeguarding matters at The Clubhouse.
                   They are trained to the appropriate level and keep their
                   knowledge up to date.
                 </p>

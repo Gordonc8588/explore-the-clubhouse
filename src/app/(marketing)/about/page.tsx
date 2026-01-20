@@ -50,7 +50,7 @@ const teamMembers = [
   {
     name: "Sarah Thompson",
     role: "Founder & Director",
-    bio: "With over 15 years of experience in childcare and a passion for outdoor education, Sarah founded Explore the Clubhouse to give children the farm adventures she loved as a child.",
+    bio: "With over 15 years of experience in childcare and a passion for outdoor education, Sarah founded The Clubhouse to give children the farm adventures she loved as a child.",
   },
   {
     name: "James Wilson",
@@ -80,7 +80,7 @@ export default function AboutPage() {
               About Us
             </h1>
             <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-stone sm:text-xl">
-              Discover the heart behind Explore the Clubhouse and the passionate
+              Discover the heart behind The Clubhouse and the passionate
               team dedicated to creating unforgettable outdoor adventures for
               your children.
             </p>
@@ -113,7 +113,7 @@ export default function AboutPage() {
               </h2>
               <div className="mt-6 space-y-4 font-body text-stone">
                 <p>
-                  Explore the Clubhouse was born from a simple belief: children
+                  The Clubhouse was born from a simple belief: children
                   thrive when they connect with nature, animals, and the great
                   outdoors. Founded in the heart of the countryside, our
                   farm-based holiday club offers something truly special for
@@ -157,7 +157,7 @@ export default function AboutPage() {
               Our Values
             </h2>
             <p className="mx-auto mt-4 max-w-2xl font-body text-lg text-sage">
-              These core values guide everything we do at Explore the Clubhouse,
+              These core values guide everything we do at The Clubhouse,
               shaping the experiences we create and the care we provide.
             </p>
           </div>

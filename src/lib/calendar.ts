@@ -144,7 +144,7 @@ export function generateICS(
         '',
         'Questions? Contact hello@exploretheclubhouse.co.uk',
       ].join('\n'),
-      location: 'Explore the Clubhouse (address to be confirmed)',
+      location: 'The Clubhouse (address to be confirmed)',
       start: [year, month, day, start.hours, start.minutes],
       end: [year, month, day, end.hours, end.minutes],
       startInputType: 'local' as const,
@@ -152,7 +152,7 @@ export function generateICS(
       endInputType: 'local' as const,
       endOutputType: 'local' as const,
       organizer: {
-        name: 'Explore the Clubhouse',
+        name: 'The Clubhouse',
         email: 'hello@exploretheclubhouse.co.uk',
       },
       categories: ['Holiday Club', 'Children Activities'],
@@ -232,7 +232,7 @@ export function generateGoogleCalendarUrl(
   );
 
   // Build the location
-  const location = encodeURIComponent('Explore the Clubhouse (address to be confirmed)');
+  const location = encodeURIComponent('The Clubhouse (address to be confirmed)');
 
   // Calculate recurrence rule for weekdays until end date
   // RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;UNTIL=YYYYMMDD
@@ -305,7 +305,7 @@ export function generateGoogleCalendarUrlForDay(
   );
 
   // Build the location
-  const location = encodeURIComponent('Explore the Clubhouse (address to be confirmed)');
+  const location = encodeURIComponent('The Clubhouse (address to be confirmed)');
 
   // Build the Google Calendar URL
   const baseUrl = 'https://calendar.google.com/calendar/render';

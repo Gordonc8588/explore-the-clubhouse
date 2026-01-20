@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             {/* Introduction */}
             <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:p-8">
               <p className="font-body text-stone">
-                At Explore the Clubhouse, we take your privacy seriously. This
+                At The Clubhouse, we take your privacy seriously. This
                 Privacy Policy explains how we collect, use, store, and protect
                 your personal information and that of your children when you use
                 our services.
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
               </h2>
               <div className="mt-4 space-y-4 font-body text-stone">
                 <p>
-                  Explore the Clubhouse is a children&apos;s holiday club
+                  The Clubhouse is a children&apos;s holiday club
                   providing outdoor, farm-based activities. We are the data
                   controller for the personal information we collect and
                   process.
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                 <p>
                   <strong className="text-bark">Contact Details:</strong>
                   <br />
-                  Explore the Clubhouse
+                  The Clubhouse
                   <br />
                   123 Farm Lane, Countryside, AB12 3CD
                   <br />

@@ -520,7 +520,7 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
               href="/"
               className="font-display text-lg font-bold text-white hover:text-sage transition-colors"
             >
-              Explore the Clubhouse
+              The Clubhouse
             </Link>
           </div>
         </header>
@@ -570,7 +570,7 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
             href="/"
             className="font-display text-lg font-bold text-white hover:text-sage transition-colors"
           >
-            Explore the Clubhouse
+            The Clubhouse
           </Link>
         </div>
       </header>
