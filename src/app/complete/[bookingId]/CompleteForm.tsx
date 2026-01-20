@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Calendar, Users, CreditCard, AlertCircle } from "lucide-react";
@@ -28,43 +28,57 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   const [validationErrors, setValidationErrors] = useState<boolean[]>(
     Array(booking.num_children).fill(false)
   );
+  // Use a ref to track data immediately without waiting for React state updates
+  const childrenDataRef = useRef<(ChildInfoFormValues | null)[]>(
+    Array(booking.num_children).fill(null)
+  );
 
   const isAlreadyComplete = booking.status === "complete" || existingChildren.length > 0;
 
   const handleChildSubmit = (index: number) => (data: ChildInfoFormValues) => {
+    // Update ref immediately (sync)
+    childrenDataRef.current[index] = data;
+
+    // Also update state for UI
     const newData = [...childrenData];
     newData[index] = data;
     setChildrenData(newData);
-    
+
     const newErrors = [...validationErrors];
     newErrors[index] = false;
     setValidationErrors(newErrors);
   };
 
   const handleSubmitAll = async () => {
-    // Trigger all form submissions by clicking their hidden submit buttons
-    let allValid = true;
-    const newErrors = [...validationErrors];
-    
+    setError(null);
+
+    // Trigger all form submissions to run validation
     for (let i = 0; i < booking.num_children; i++) {
       const form = document.getElementById("child-info-form-" + i) as HTMLFormElement | null;
       if (form) {
         form.requestSubmit();
       }
-      if (!childrenData[i]) {
-        allValid = false;
+    }
+
+    // Wait for form validation and onSubmit callbacks to complete
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Check the ref for completed data (ref updates are synchronous)
+    const newErrors: boolean[] = [];
+    let hasIncomplete = false;
+
+    for (let i = 0; i < booking.num_children; i++) {
+      if (!childrenDataRef.current[i]) {
         newErrors[i] = true;
+        hasIncomplete = true;
+      } else {
+        newErrors[i] = false;
       }
     }
-    
+
     setValidationErrors(newErrors);
-    
-    // Wait a bit for forms to validate
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Check if all forms are filled
-    const filledData = childrenData.filter(Boolean);
-    if (filledData.length !== booking.num_children) {
+
+    if (hasIncomplete) {
       setError("Please fill in all child information forms");
       return;
     }
@@ -78,7 +92,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId: booking.id,
-          children: childrenData,
+          children: childrenDataRef.current,
         }),
       });
 
