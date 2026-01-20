@@ -1,0 +1,165 @@
+"use client";
+
+import type { BookingFormData } from "./OptionSelect";
+
+interface ChildrenCountProps {
+  formData: BookingFormData;
+  onNext: (data: Partial<BookingFormData>) => void;
+  minChildren?: number;
+  maxChildren?: number;
+}
+
+export function ChildrenCount({
+  formData,
+  onNext,
+  minChildren = 1,
+  maxChildren = 10,
+}: ChildrenCountProps) {
+  const count = formData.childrenCount;
+
+  const handleDecrement = () => {
+    if (count > minChildren) {
+      onNext({ childrenCount: count - 1 });
+    }
+  };
+
+  const handleIncrement = () => {
+    if (count < maxChildren) {
+      onNext({ childrenCount: count + 1 });
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && value >= minChildren && value <= maxChildren) {
+      onNext({ childrenCount: value });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-bark">
+          Number of Children
+        </h2>
+        <p className="mt-1 text-stone">
+          How many children will be attending? You'll provide their details after booking.
+        </p>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6">
+        <div className="flex items-center justify-center gap-4">
+          {/* Decrement Button */}
+          <button
+            type="button"
+            onClick={handleDecrement}
+            disabled={count <= minChildren}
+            className={`
+              w-12 h-12 rounded-full flex items-center justify-center
+              font-display text-2xl font-bold transition-all
+              ${
+                count <= minChildren
+                  ? "bg-cloud text-pebble cursor-not-allowed"
+                  : "bg-forest text-white hover:bg-meadow"
+              }
+            `}
+            aria-label="Decrease number of children"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M20 12H4"
+              />
+            </svg>
+          </button>
+
+          {/* Count Display/Input */}
+          <div className="relative">
+            <input
+              type="number"
+              value={count}
+              onChange={handleChange}
+              min={minChildren}
+              max={maxChildren}
+              className="w-20 h-16 text-center font-display text-3xl font-bold text-bark
+                border-2 border-sage rounded-xl focus:border-forest focus:outline-none
+                focus:ring-2 focus:ring-sage/30 transition-all
+                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              aria-label="Number of children"
+            />
+          </div>
+
+          {/* Increment Button */}
+          <button
+            type="button"
+            onClick={handleIncrement}
+            disabled={count >= maxChildren}
+            className={`
+              w-12 h-12 rounded-full flex items-center justify-center
+              font-display text-2xl font-bold transition-all
+              ${
+                count >= maxChildren
+                  ? "bg-cloud text-pebble cursor-not-allowed"
+                  : "bg-forest text-white hover:bg-meadow"
+              }
+            `}
+            aria-label="Increase number of children"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <p className="mt-4 text-center text-sm text-stone">
+          {count === 1 ? "1 child" : `${count} children`}
+        </p>
+      </div>
+
+      <div className="bg-sage/20 rounded-2xl p-4">
+        <div className="flex gap-3">
+          <svg
+            className="w-5 h-5 text-forest flex-shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div className="text-sm text-bark">
+            <p className="font-semibold">Good to know</p>
+            <p className="text-stone mt-1">
+              You'll be asked to provide each child's details (name, age, dietary
+              requirements, etc.) after completing your booking.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
