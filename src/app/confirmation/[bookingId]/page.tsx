@@ -501,10 +501,10 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
                   come back! Book additional days at the same club.
                 </p>
                 <Link
-                  href={`/book/${club.slug}`}
+                  href={`/add-days/${booking.id}`}
                   className="inline-flex items-center gap-2 bg-sunshine text-bark font-display font-semibold py-2 px-4 rounded-lg hover:bg-amber transition-colors"
                 >
-                  Book More Days
+                  Add More Days
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
