@@ -41,9 +41,10 @@ export default function AdminLayout({
     return <>{children}</>;
   }
 
-  const handleLogout = () => {
-    // Clear any auth state here when real auth is implemented
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin/login");
+    router.refresh();
   };
 
   return (

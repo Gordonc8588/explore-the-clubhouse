@@ -29,14 +29,23 @@ export default function AdminLoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setError(null);
 
-    // Mock authentication - replace with real auth later
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-    // Mock credentials check
-    if (data.email === "admin@exploretheclubhouse.co.uk" && data.password === "admin123") {
-      router.push("/admin");
-    } else {
-      setError("Invalid email or password. Please try again.");
+      const result = await response.json();
+
+      if (result.success) {
+        router.push("/admin");
+        router.refresh(); // Refresh to pick up the new cookie
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
+    } catch {
+      setError("An error occurred. Please try again.");
     }
   };
 
