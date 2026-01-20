@@ -1,0 +1,18 @@
+project:
+  name: explore-the-clubhouse
+  language: TypeScript
+  framework: Next.js
+  description: ""
+commands:
+  test: ""
+  lint: npm run lint
+  build: npm run build
+rules:
+  - Always read BRANDING.md before creating any UI components to understand the
+    brand colors, fonts, and styling guidelines
+  - "Use Tailwind CSS classes with brand colors: bg-forest, bg-meadow, bg-sage
+    for greens; bg-sunshine, bg-amber for accents; bg-bark, bg-stone for text"
+  - Use font-display (Nunito) for headings and font-body (Nunito Sans) for body
+    text
+boundaries:
+  never_touch: []

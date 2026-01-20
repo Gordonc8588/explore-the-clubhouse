@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
+/* ============================================
+   EXPLORE THE CLUBHOUSE - BRAND TOKENS
+   See BRANDING.md for full guidelines
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors */
+  --color-forest: #2D5A3D;
+  --color-meadow: #4A7C59;
+  --color-sage: #87A878;
+
+  /* Accent Colors */
+  --color-sunshine: #F5A623;
+  --color-amber: #E8912D;
+  --color-coral: #E07A5F;
+
+  /* Neutral Colors */
+  --color-bark: #3D3D3D;
+  --color-stone: #6B7280;
+  --color-pebble: #9CA3AF;
+  --color-cloud: #F3F4F6;
+  --color-cream: #FEFDF8;
+
+  /* Supporting Colors */
+  --color-sky: #7DD3FC;
+  --color-berry: #C084FC;
+  --color-rose: #FDA4AF;
+
+  /* Semantic Colors */
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* Shadows (using forest green tint) */
+  --shadow-sm: 0 1px 3px rgba(45, 90, 61, 0.1);
+  --shadow-md: 0 4px 6px rgba(45, 90, 61, 0.1);
+  --shadow-lg: 0 10px 25px rgba(45, 90, 61, 0.15);
+  --shadow-xl: 0 20px 40px rgba(45, 90, 61, 0.2);
+
+  /* Background & Foreground */
+  --background: var(--color-cream);
+  --foreground: var(--color-bark);
 }
 
+/* Tailwind v4 Theme Configuration */
 @theme inline {
+  /* Background & Foreground */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Primary Brand Colors */
+  --color-forest: var(--color-forest);
+  --color-meadow: var(--color-meadow);
+  --color-sage: var(--color-sage);
+
+  /* Accent Colors */
+  --color-sunshine: var(--color-sunshine);
+  --color-amber: var(--color-amber);
+  --color-coral: var(--color-coral);
+
+  /* Neutral Colors */
+  --color-bark: var(--color-bark);
+  --color-stone: var(--color-stone);
+  --color-pebble: var(--color-pebble);
+  --color-cloud: var(--color-cloud);
+  --color-cream: var(--color-cream);
+
+  /* Supporting Colors */
+  --color-sky: var(--color-sky);
+  --color-berry: var(--color-berry);
+  --color-rose: var(--color-rose);
+
+  /* Semantic Colors */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  /* Typography - uses Next.js font loader variables */
+  --font-display: var(--font-nunito), system-ui, sans-serif;
+  --font-body: var(--font-nunito-sans), system-ui, sans-serif;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base Styles */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+}
+
+/* Heading Font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Focus Styles for Accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-sunshine);
+  outline-offset: 2px;
+}
+
+/* Selection Color */
+::selection {
+  background-color: var(--color-sage);
+  color: var(--color-bark);
+}
+
+/* Scrollbar Styling (Webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cloud);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sage);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-meadow);
 }
