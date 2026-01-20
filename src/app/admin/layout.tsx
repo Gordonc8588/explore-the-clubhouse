@@ -14,9 +14,14 @@ import {
   X,
 } from "lucide-react";
 
+function getTodayDateString(): string {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+}
+
 const sidebarLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/daily", label: "Daily View", icon: Calendar },
+  { href: () => `/admin/day/${getTodayDateString()}`, label: "Daily View", icon: Calendar },
   { href: "/admin/bookings", label: "Bookings", icon: BookOpen },
   { href: "/admin/clubs", label: "Clubs", icon: Users },
   { href: "/admin/promo-codes", label: "Promo Codes", icon: Ticket },
@@ -80,13 +85,15 @@ export default function AdminLayout({
           <ul className="space-y-1">
             {sidebarLinks.map((link) => {
               const Icon = link.icon;
+              const href = typeof link.href === "function" ? link.href() : link.href;
               const isActive =
-                pathname === link.href ||
-                (link.href !== "/admin" && pathname.startsWith(link.href));
+                pathname === href ||
+                (link.label === "Daily View" && pathname.startsWith("/admin/day")) ||
+                (href !== "/admin" && link.label !== "Daily View" && pathname.startsWith(href));
               return (
-                <li key={link.href}>
+                <li key={link.label}>
                   <Link
-                    href={link.href}
+                    href={href}
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-4 py-3 font-body text-sm font-medium transition-colors ${
                       isActive
