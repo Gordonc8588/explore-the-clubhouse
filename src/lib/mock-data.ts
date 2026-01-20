@@ -3,7 +3,7 @@
  * Uses realistic dates and prices for the Explore the Clubhouse booking platform
  */
 
-import type { Club, ClubDay, BookingOption } from '@/types/database';
+import type { Club, ClubDay, BookingOption, Booking, Child } from '@/types/database';
 
 // =============================================================================
 // CLUBS
@@ -270,6 +270,109 @@ export const mockBookingOptions: BookingOption[] = [
 ];
 
 // =============================================================================
+// BOOKINGS
+// =============================================================================
+
+export const mockBookings: Booking[] = [
+  {
+    id: 'booking-001',
+    club_id: 'club-easter-2025',
+    booking_option_id: 'club-easter-2025-option-full-week-full-day',
+    parent_name: 'Sarah Thompson',
+    parent_email: 'sarah.thompson@example.com',
+    parent_phone: '07700 900123',
+    num_children: 2,
+    total_amount: 30000, // £300 (2 children × £150)
+    status: 'complete',
+    promo_code_id: null,
+    stripe_payment_intent_id: 'pi_mock_001',
+    stripe_checkout_session_id: 'cs_mock_001',
+    created_at: '2025-03-15T14:30:00Z',
+  },
+  {
+    id: 'booking-002',
+    club_id: 'club-summer-week1-2025',
+    booking_option_id: 'club-summer-week1-2025-option-single-day-full-day',
+    parent_name: 'James Wilson',
+    parent_email: 'james.wilson@example.com',
+    parent_phone: '07700 900456',
+    num_children: 1,
+    total_amount: 3500, // £35
+    status: 'paid',
+    promo_code_id: null,
+    stripe_payment_intent_id: 'pi_mock_002',
+    stripe_checkout_session_id: 'cs_mock_002',
+    created_at: '2025-06-20T09:15:00Z',
+  },
+  {
+    id: 'booking-003',
+    club_id: 'club-easter-2025',
+    booking_option_id: 'club-easter-2025-option-multi-day-morning',
+    parent_name: 'Emma Davies',
+    parent_email: 'emma.davies@example.com',
+    parent_phone: '07700 900789',
+    num_children: 1,
+    total_amount: 6000, // £60 (3 mornings × £20)
+    status: 'complete',
+    promo_code_id: null,
+    stripe_payment_intent_id: 'pi_mock_003',
+    stripe_checkout_session_id: 'cs_mock_003',
+    created_at: '2025-03-10T16:45:00Z',
+  },
+];
+
+// =============================================================================
+// CHILDREN
+// =============================================================================
+
+export const mockChildren: Child[] = [
+  // Children for booking-001 (Sarah Thompson's 2 children)
+  {
+    id: 'child-001',
+    booking_id: 'booking-001',
+    name: 'Oliver Thompson',
+    date_of_birth: '2017-05-12',
+    allergies: 'None',
+    medical_notes: '',
+    emergency_contact_name: 'David Thompson',
+    emergency_contact_phone: '07700 900124',
+    photo_consent: true,
+    activity_consent: true,
+    medical_consent: true,
+    created_at: '2025-03-15T15:00:00Z',
+  },
+  {
+    id: 'child-002',
+    booking_id: 'booking-001',
+    name: 'Emily Thompson',
+    date_of_birth: '2019-08-23',
+    allergies: 'Peanuts',
+    medical_notes: 'Carries EpiPen in bag',
+    emergency_contact_name: 'David Thompson',
+    emergency_contact_phone: '07700 900124',
+    photo_consent: true,
+    activity_consent: true,
+    medical_consent: true,
+    created_at: '2025-03-15T15:00:00Z',
+  },
+  // Child for booking-003 (Emma Davies's child)
+  {
+    id: 'child-003',
+    booking_id: 'booking-003',
+    name: 'Lily Davies',
+    date_of_birth: '2018-02-14',
+    allergies: 'None',
+    medical_notes: 'Asthma - inhaler in bag',
+    emergency_contact_name: 'Michael Davies',
+    emergency_contact_phone: '07700 900790',
+    photo_consent: false,
+    activity_consent: true,
+    medical_consent: true,
+    created_at: '2025-03-10T17:00:00Z',
+  },
+];
+
+// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
@@ -313,4 +416,18 @@ export function getActiveClubs(): Club[] {
  */
 export function formatPrice(priceInPence: number): string {
   return `£${(priceInPence / 100).toFixed(2)}`;
+}
+
+/**
+ * Get a booking by its ID
+ */
+export function getBookingById(id: string): Booking | undefined {
+  return mockBookings.find(booking => booking.id === id);
+}
+
+/**
+ * Get all children for a specific booking
+ */
+export function getChildrenByBookingId(bookingId: string): Child[] {
+  return mockChildren.filter(child => child.booking_id === bookingId);
 }
