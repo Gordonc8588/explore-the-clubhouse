@@ -123,7 +123,7 @@ export default function ClubsPage() {
   };
 
   const handleCardClick = (clubId: string) => {
-    router.push(`/admin/clubs/${clubId}/edit`);
+    router.push(`/admin/clubs/${clubId}`);
   };
 
   return (
