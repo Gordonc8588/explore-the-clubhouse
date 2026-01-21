@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,7 +28,7 @@ declare global {
 export function ContactForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
 
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -42,7 +42,14 @@ export function ContactForm() {
   });
 
   const getRecaptchaToken = useCallback(async (): Promise<string | null> => {
-    if (!recaptchaSiteKey || !recaptchaLoaded) {
+    if (!recaptchaSiteKey) {
+      console.log("reCAPTCHA site key not configured");
+      return null;
+    }
+
+    // Check if grecaptcha is available
+    if (typeof window === "undefined" || !window.grecaptcha) {
+      console.log("grecaptcha not available");
       return null;
     }
 
@@ -53,13 +60,22 @@ export function ContactForm() {
             action: "contact",
           });
           resolve(token);
-        } catch {
-          console.error("reCAPTCHA execution failed");
+        } catch (err) {
+          console.error("reCAPTCHA execution failed:", err);
           resolve(null);
         }
       });
     });
-  }, [recaptchaSiteKey, recaptchaLoaded]);
+  }, [recaptchaSiteKey]);
+
+  const handleRecaptchaLoad = () => {
+    // Wait for grecaptcha to be fully ready
+    if (window.grecaptcha) {
+      window.grecaptcha.ready(() => {
+        setRecaptchaReady(true);
+      });
+    }
+  };
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitError(null);
@@ -125,7 +141,8 @@ export function ContactForm() {
       {recaptchaSiteKey && (
         <Script
           src={`https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`}
-          onLoad={() => setRecaptchaLoaded(true)}
+          onLoad={handleRecaptchaLoad}
+          strategy="afterInteractive"
         />
       )}
 

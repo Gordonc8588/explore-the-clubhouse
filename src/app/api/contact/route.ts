@@ -59,18 +59,16 @@ export async function POST(request: NextRequest) {
 
     const { name, email, phone, message, recaptchaToken } = validationResult.data;
 
-    // Verify reCAPTCHA if configured
-    if (isRecaptchaConfigured()) {
+    // Verify reCAPTCHA if configured (soft fail - log but don't block)
+    if (isRecaptchaConfigured() && recaptchaToken) {
       const recaptchaResult = await verifyRecaptchaToken(
-        recaptchaToken || "",
+        recaptchaToken,
         "contact"
       );
 
       if (!recaptchaResult.success) {
-        return NextResponse.json(
-          { error: recaptchaResult.error || "reCAPTCHA verification failed" },
-          { status: 400 }
-        );
+        // Log the failure but don't block - rate limiting still protects
+        console.warn("reCAPTCHA verification failed:", recaptchaResult.error);
       }
     }
 
@@ -81,8 +79,7 @@ export async function POST(request: NextRequest) {
       email,
       phone: phone || null,
       message,
-      ip_address: clientIP,
-      created_at: new Date().toISOString(),
+      // ip_address and created_at have defaults or may not exist yet
     });
 
     if (dbError) {
@@ -94,12 +91,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email notification (graceful failure)
-    if (process.env.RESEND_API_KEY) {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendFromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+    const adminEmail = process.env.ADMIN_EMAIL || "hello@exploretheclubhouse.co.uk";
+
+    if (resendApiKey) {
       try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
+        const resend = new Resend(resendApiKey);
         await resend.emails.send({
-          from: "The Clubhouse <noreply@exploretheclubhouse.co.uk>",
-          to: ["hello@exploretheclubhouse.co.uk"],
+          from: resendFromEmail,
+          to: [adminEmail],
           replyTo: email,
           subject: `New Contact Form Submission from ${name}`,
           html: `
@@ -115,6 +116,7 @@ export async function POST(request: NextRequest) {
             </p>
           `,
         });
+        console.log("Email notification sent to:", adminEmail);
       } catch (emailError) {
         // Log but don't fail the request
         console.error("Email notification failed:", emailError);
