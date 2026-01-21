@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { TestimonialCarousel } from "@/components/TestimonialCarousel";
+
+export const metadata: Metadata = {
+  title: "The Clubhouse | Children's Holiday Club at Craigies Farm",
+  description:
+    "Join our outdoor holiday clubs for children aged 5-12 at Craigies Farm, South Queensferry. Farm activities, forest exploration, animal care, and creative workshops during school holidays.",
+  openGraph: {
+    title: "The Clubhouse | Children's Holiday Club at Craigies Farm",
+    description:
+      "Outdoor holiday clubs for children aged 5-12 at Craigies Farm, South Queensferry. Farm activities, forest exploration, and hands-on learning.",
+  },
+};
 
 const activities = [
   {

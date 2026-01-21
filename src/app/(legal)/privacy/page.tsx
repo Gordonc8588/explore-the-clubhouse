@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "Read The Clubhouse's privacy policy. Learn how we collect, use, store, and protect your personal information and that of your children.",
+  openGraph: {
+    title: "Privacy Policy | The Clubhouse",
+    description: "Learn how we collect, use, store, and protect your personal information.",
+  },
+};
 
 export default function PrivacyPage() {
   return (

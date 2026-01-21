@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+  description:
+    "Read The Clubhouse's terms and conditions. Important information about booking, cancellation, collection, and other policies.",
+  openGraph: {
+    title: "Terms & Conditions | The Clubhouse",
+    description:
+      "Important information about booking, cancellation, collection, and other policies.",
+  },
+};
 
 export default function TermsPage() {
   return (

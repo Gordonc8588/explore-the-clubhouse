@@ -1,0 +1,31 @@
+{
+  "name": "The Clubhouse",
+  "short_name": "Clubhouse",
+  "description": "Outdoor holiday clubs for children at Craigies Farm, South Queensferry",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FEFDF8",
+  "theme_color": "#2D5A3D",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["kids", "education", "lifestyle"],
+  "lang": "en-GB",
+  "orientation": "portrait-primary"
+}

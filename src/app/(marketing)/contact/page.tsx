@@ -1,45 +1,19 @@
-"use client";
+import type { Metadata } from "next";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { ContactForm } from "@/components/ContactForm";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Clock,
-  CheckCircle,
-  Send,
-} from "lucide-react";
-
-const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description:
+    "Get in touch with The Clubhouse. We're happy to answer questions about our holiday clubs, booking, or anything else. Located at Craigies Farm, South Queensferry.",
+  openGraph: {
+    title: "Contact Us | The Clubhouse",
+    description:
+      "Get in touch with The Clubhouse. We're happy to answer questions about our holiday clubs, booking, or anything else.",
+  },
+};
 
 export default function ContactPage() {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
-  });
-
-  const onSubmit = async (data: ContactFormData) => {
-    // Simulate form submission
-    console.log("Form submitted:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitted(true);
-  };
-
   return (
     <div className="bg-cream">
       {/* Hero Section */}
@@ -64,151 +38,7 @@ export default function ContactPage() {
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Contact Form */}
             <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:p-8">
-              {isSubmitted ? (
-                <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                  <h3 className="mt-6 font-display text-2xl font-bold text-bark">
-                    Message Sent!
-                  </h3>
-                  <p className="mt-3 max-w-sm font-body text-stone">
-                    Thank you for getting in touch. We&apos;ll respond to your
-                    message as soon as possible, usually within 24 hours.
-                  </p>
-                  <button
-                    onClick={() => setIsSubmitted(false)}
-                    className="mt-6 font-display font-semibold text-forest transition-colors hover:text-meadow"
-                  >
-                    Send another message
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <h2 className="font-display text-2xl font-bold text-bark sm:text-3xl">
-                    Send Us a Message
-                  </h2>
-                  <p className="mt-2 font-body text-stone">
-                    Fill out the form below and we&apos;ll get back to you soon.
-                  </p>
-
-                  <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="mt-8 space-y-6"
-                  >
-                    {/* Name Field */}
-                    <div>
-                      <label
-                        htmlFor="name"
-                        className="block font-body text-sm font-medium text-stone"
-                      >
-                        Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        {...register("name")}
-                        className={`mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
-                          errors.name ? "border-red-500" : "border-stone/30"
-                        }`}
-                        placeholder="Your name"
-                      />
-                      {errors.name && (
-                        <p className="mt-1 font-body text-sm text-red-500">
-                          {errors.name.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Email Field */}
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block font-body text-sm font-medium text-stone"
-                      >
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        {...register("email")}
-                        className={`mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
-                          errors.email ? "border-red-500" : "border-stone/30"
-                        }`}
-                        placeholder="you@example.com"
-                      />
-                      {errors.email && (
-                        <p className="mt-1 font-body text-sm text-red-500">
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Phone Field (Optional) */}
-                    <div>
-                      <label
-                        htmlFor="phone"
-                        className="block font-body text-sm font-medium text-stone"
-                      >
-                        Phone{" "}
-                        <span className="font-normal text-pebble">
-                          (optional)
-                        </span>
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        {...register("phone")}
-                        className="mt-2 block w-full rounded-lg border border-stone/30 bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
-                        placeholder="Your phone number"
-                      />
-                    </div>
-
-                    {/* Message Field */}
-                    <div>
-                      <label
-                        htmlFor="message"
-                        className="block font-body text-sm font-medium text-stone"
-                      >
-                        Message <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        id="message"
-                        rows={5}
-                        {...register("message")}
-                        className={`mt-2 block w-full resize-none rounded-lg border bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
-                          errors.message ? "border-red-500" : "border-stone/30"
-                        }`}
-                        placeholder="How can we help you?"
-                      />
-                      {errors.message && (
-                        <p className="mt-1 font-body text-sm text-red-500">
-                          {errors.message.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber focus:outline-none focus:ring-2 focus:ring-sunshine focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="h-5 w-5 animate-spin rounded-full border-2 border-bark border-t-transparent" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-5 w-5" />
-                          Send Message
-                        </>
-                      )}
-                    </button>
-                  </form>
-                </>
-              )}
+              <ContactForm />
             </div>
 
             {/* Contact Information */}

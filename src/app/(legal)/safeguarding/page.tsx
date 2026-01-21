@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, Shield, Phone, Mail } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Safeguarding Statement",
+  description:
+    "Learn about The Clubhouse's commitment to safeguarding children. Our policies, procedures, and how we keep children safe.",
+  openGraph: {
+    title: "Safeguarding Statement | The Clubhouse",
+    description:
+      "Learn about The Clubhouse's commitment to safeguarding children.",
+  },
+};
 
 export default function SafeguardingPage() {
   return (

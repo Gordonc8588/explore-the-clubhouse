@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { ClubCard } from "@/components/ClubCard";
 import { createClient } from "@/lib/supabase/server";
 import type { Club } from "@/types/database";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
+
+export const metadata: Metadata = {
+  title: "What's On",
+  description:
+    "Discover our upcoming holiday clubs at Craigies Farm. From animal care and forest exploration to creative workshops - book your child's adventure today.",
+  openGraph: {
+    title: "What's On | The Clubhouse",
+    description:
+      "Discover our upcoming holiday clubs at Craigies Farm. Book your child's adventure today.",
+  },
+};
 
 async function getUpcomingClubs(): Promise<Club[]> {
   const supabase = await createClient();

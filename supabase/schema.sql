@@ -222,6 +222,7 @@ CREATE TABLE contact_submissions (
     email TEXT NOT NULL,                          -- Sender's email
     phone TEXT,                                   -- Sender's phone (optional)
     message TEXT NOT NULL,                        -- Message content
+    ip_address TEXT,                              -- IP address for rate limiting
     status TEXT NOT NULL DEFAULT 'new',           -- new/read/replied
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 

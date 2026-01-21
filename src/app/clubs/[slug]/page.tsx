@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -124,6 +125,49 @@ export async function generateStaticParams() {
 
 // Force dynamic rendering since we need real-time availability
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+
+  const { data: club } = await supabase
+    .from("clubs")
+    .select("name, description, start_date, end_date, image_url")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
+
+  if (!club) {
+    return {
+      title: "Club Not Found",
+    };
+  }
+
+  const startDate = new Date(club.start_date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+  });
+  const endDate = new Date(club.end_date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const dateRange = `${startDate} - ${endDate}`;
+
+  return {
+    title: club.name,
+    description: `${club.description} Running ${dateRange} at Craigies Farm, South Queensferry.`,
+    openGraph: {
+      title: `${club.name} | The Clubhouse`,
+      description: `${club.description} Running ${dateRange}.`,
+      images: club.image_url ? [{ url: club.image_url }] : undefined,
+    },
+  };
+}
 
 export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
   const { slug } = await params;

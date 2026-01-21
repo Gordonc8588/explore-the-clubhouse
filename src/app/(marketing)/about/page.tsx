@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description:
+    "Meet the passionate team behind The Clubhouse. Learn about our mission to inspire a love of nature and outdoor learning in every child through hands-on farm adventures.",
+  openGraph: {
+    title: "About Us | The Clubhouse",
+    description:
+      "Meet the passionate team behind The Clubhouse. Learn about our mission to inspire a love of nature and outdoor learning in every child.",
+  },
+};
 
 const teamMembers = [
   {
