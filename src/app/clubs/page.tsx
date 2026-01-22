@@ -206,7 +206,7 @@ export default async function WhatsOnPage() {
       </section>
 
       {/* Upcoming Events Section */}
-      <section className="py-16 sm:py-24">
+      <section id="upcoming-events" className="py-16 sm:py-24 scroll-mt-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">

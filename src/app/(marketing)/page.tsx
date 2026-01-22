@@ -125,32 +125,31 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-36">
           <div className="text-center">
             <h1 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl drop-shadow-lg">
-              Join us at Craigies Farm
-              <span className="block text-sage">this Easter</span>
+              Welcome to
+              <span className="block text-sage">The Clubhouse</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-white/90 sm:text-xl">
-              Experience an unforgettable Easter adventure at Craigies Farm, South Queensferry.
-              From meeting adorable spring lambs to egg hunts, nature trails, and hands-on farm
-              activities, your children will love exploring the countryside this school holiday.
+              Outdoor holiday clubs for children aged 5-12 at Craigies Farm, South Queensferry.
+              From caring for animals and exploring forests to hands-on farm activities,
+              your children will love their countryside adventure.
             </p>
 
-            {/* Upcoming Club Placeholder */}
+            {/* CTA Card */}
             <div className="mx-auto mt-10 max-w-md rounded-2xl bg-white/95 backdrop-blur-sm p-6 shadow-[var(--shadow-lg)]">
               <p className="font-display text-sm font-semibold uppercase tracking-wide text-meadow">
-                Now Booking
+                Holiday Clubs
               </p>
               <h2 className="mt-2 font-display text-2xl font-bold text-bark">
-                Easter Holiday Club
+                Book Your Adventure
               </h2>
-              <p className="mt-1 font-body text-stone">7th - 18th April 2025</p>
               <p className="mt-3 font-body text-sm text-pebble">
-                Limited spaces available
+                Check out our upcoming clubs and secure your spot
               </p>
               <Link
-                href="/book"
+                href="/clubs#upcoming-events"
                 className="mt-6 inline-block w-full rounded-lg bg-sunshine px-6 py-3 font-display text-lg font-semibold text-bark transition-colors hover:bg-amber focus:outline-none focus:ring-2 focus:ring-sunshine focus:ring-offset-2"
               >
-                Book Now
+                See What&apos;s On
               </Link>
             </div>
           </div>
