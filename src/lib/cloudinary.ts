@@ -1,7 +1,7 @@
 // Cloudinary configuration and helpers
 // See: https://next-cloudinary.dev/
 
-export const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+export const CLOUDINARY_CLOUD_NAME = (process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '').trim();
 
 // Gallery photo type
 export interface GalleryPhoto {
