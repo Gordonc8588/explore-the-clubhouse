@@ -1,130 +1,71 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Plus,
   Users,
   Calendar,
-  ToggleLeft,
-  ToggleRight,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { ClubsGrid } from "./ClubsGrid";
 
-// Mock data
-const mockClubs = [
-  {
-    id: "CLB001",
-    name: "Adventure Explorers",
-    description: "Outdoor adventures and nature exploration for curious minds",
-    startDate: "2026-01-20",
-    endDate: "2026-01-24",
-    ageMin: 5,
-    ageMax: 8,
-    capacity: 20,
-    bookings: 18,
-    isActive: true,
-  },
-  {
-    id: "CLB002",
-    name: "Farm Friends",
-    description: "Meet the animals and learn about farm life",
-    startDate: "2026-01-20",
-    endDate: "2026-01-24",
-    ageMin: 4,
-    ageMax: 7,
-    capacity: 15,
-    bookings: 12,
-    isActive: true,
-  },
-  {
-    id: "CLB003",
-    name: "Nature Crafts",
-    description: "Create beautiful crafts using natural materials",
-    startDate: "2026-01-27",
-    endDate: "2026-01-31",
-    ageMin: 6,
-    ageMax: 10,
-    capacity: 16,
-    bookings: 8,
-    isActive: true,
-  },
-  {
-    id: "CLB004",
-    name: "Outdoor Adventures",
-    description: "Bush craft, den building, and outdoor skills",
-    startDate: "2026-02-17",
-    endDate: "2026-02-21",
-    ageMin: 7,
-    ageMax: 11,
-    capacity: 18,
-    bookings: 5,
-    isActive: true,
-  },
-  {
-    id: "CLB005",
-    name: "Little Farmers",
-    description: "Introduction to farm life for our youngest explorers",
-    startDate: "2025-12-16",
-    endDate: "2025-12-20",
-    ageMin: 3,
-    ageMax: 5,
-    capacity: 12,
-    bookings: 12,
-    isActive: false,
-  },
-  {
-    id: "CLB006",
-    name: "Wildlife Detectives",
-    description: "Track animals, identify birds, and explore wildlife",
-    startDate: "2026-04-07",
-    endDate: "2026-04-11",
-    ageMin: 6,
-    ageMax: 9,
-    capacity: 20,
-    bookings: 0,
-    isActive: false,
-  },
-];
+async function getClubsData() {
+  const supabase = await createClient();
 
-function formatDateRange(startDate: string, endDate: string): string {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const startStr = start.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
+  // Get all clubs with booking counts
+  const { data: clubs } = await supabase
+    .from("clubs")
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      start_date,
+      end_date,
+      min_age,
+      max_age,
+      is_active,
+      club_days(
+        morning_capacity,
+        afternoon_capacity
+      ),
+      bookings(id, status)
+    `)
+    .order("start_date", { ascending: false });
+
+  if (!clubs) {
+    return [];
+  }
+
+  // Transform data with computed values
+  return clubs.map((club) => {
+    // Calculate total capacity from club days
+    const totalCapacity = club.club_days?.reduce(
+      (sum, day) => sum + (day.morning_capacity || 0),
+      0
+    ) || 0;
+
+    // Count paid/complete bookings
+    const bookingCount = club.bookings?.filter(
+      (b: { status: string }) => b.status === "paid" || b.status === "complete"
+    ).length || 0;
+
+    return {
+      id: club.id,
+      name: club.name,
+      slug: club.slug,
+      description: club.description || "",
+      startDate: club.start_date,
+      endDate: club.end_date,
+      ageMin: club.min_age,
+      ageMax: club.max_age,
+      capacity: totalCapacity > 0 ? totalCapacity : 20, // Default if no days set
+      bookings: bookingCount,
+      isActive: club.is_active,
+    };
   });
-  const endStr = end.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  return `${startStr} - ${endStr}`;
 }
 
-function getCapacityColor(bookings: number, capacity: number): string {
-  const percentage = (bookings / capacity) * 100;
-  if (percentage >= 90) return "bg-coral";
-  if (percentage >= 70) return "bg-amber";
-  return "bg-meadow";
-}
-
-export default function ClubsPage() {
-  const router = useRouter();
-  const [clubs, setClubs] = useState(mockClubs);
-
-  const handleToggleActive = (clubId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setClubs((prevClubs) =>
-      prevClubs.map((club) =>
-        club.id === clubId ? { ...club, isActive: !club.isActive } : club
-      )
-    );
-  };
-
-  const handleCardClick = (clubId: string) => {
-    router.push(`/admin/clubs/${clubId}`);
-  };
+export default async function ClubsPage() {
+  const clubs = await getClubsData();
 
   return (
     <div className="space-y-6">
@@ -145,102 +86,8 @@ export default function ClubsPage() {
         </Link>
       </div>
 
-      {/* Clubs Grid */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {clubs.map((club) => (
-          <div
-            key={club.id}
-            onClick={() => handleCardClick(club.id)}
-            className="cursor-pointer rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] transition-shadow hover:shadow-[var(--shadow-lg)]"
-          >
-            {/* Club Header */}
-            <div className="flex items-start justify-between gap-3">
-              <h3 className="font-display text-lg font-bold text-bark">
-                {club.name}
-              </h3>
-              <span
-                className={`inline-flex shrink-0 rounded-full px-2.5 py-1 font-body text-xs font-medium ${
-                  club.isActive
-                    ? "bg-green-100 text-green-800"
-                    : "bg-cloud text-stone"
-                }`}
-              >
-                {club.isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
-
-            {/* Description */}
-            <p className="mt-2 line-clamp-2 font-body text-sm text-stone">
-              {club.description}
-            </p>
-
-            {/* Club Details */}
-            <div className="mt-4 space-y-3">
-              {/* Dates */}
-              <div className="flex items-center gap-2 text-stone">
-                <Calendar className="h-4 w-4" />
-                <span className="font-body text-sm">
-                  {formatDateRange(club.startDate, club.endDate)}
-                </span>
-              </div>
-
-              {/* Age Range */}
-              <div className="flex items-center gap-2 text-stone">
-                <Users className="h-4 w-4" />
-                <span className="font-body text-sm">
-                  Ages {club.ageMin} - {club.ageMax} years
-                </span>
-              </div>
-
-              {/* Capacity Usage */}
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-body text-sm text-stone">
-                    Bookings: {club.bookings}/{club.capacity}
-                  </span>
-                  <span className="font-body text-sm font-medium text-bark">
-                    {Math.round((club.bookings / club.capacity) * 100)}%
-                  </span>
-                </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-cloud">
-                  <div
-                    className={`h-full rounded-full ${getCapacityColor(club.bookings, club.capacity)}`}
-                    style={{
-                      width: `${Math.min((club.bookings / club.capacity) * 100, 100)}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Toggle Active Status */}
-            <div className="mt-4 flex items-center justify-between border-t border-cloud pt-4">
-              <span className="font-body text-sm text-stone">Status</span>
-              <button
-                onClick={(e) => handleToggleActive(club.id, e)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-body text-sm font-medium transition-colors ${
-                  club.isActive
-                    ? "bg-green-100 text-green-800 hover:bg-green-200"
-                    : "bg-cloud text-stone hover:bg-pebble/20"
-                }`}
-                aria-label={club.isActive ? "Deactivate club" : "Activate club"}
-              >
-                {club.isActive ? (
-                  <>
-                    <ToggleRight className="h-5 w-5" />
-                    Active
-                  </>
-                ) : (
-                  <>
-                    <ToggleLeft className="h-5 w-5" />
-                    Inactive
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Clubs Grid (Client Component for toggle interactions) */}
+      <ClubsGrid clubs={clubs} />
 
       {/* Empty State */}
       {clubs.length === 0 && (

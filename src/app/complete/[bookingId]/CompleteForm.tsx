@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Calendar, Users, CreditCard, AlertCircle } from "lucide-react";
+import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw } from "lucide-react";
 import { ChildInfoForm, type ChildInfoFormValues } from "@/components/ChildInfoForm";
 import type { Booking, BookingOption, Club, Child } from "@/types/database";
 
@@ -21,6 +21,8 @@ interface CompleteFormProps {
 export function CompleteForm({ booking, club, bookingOption, existingChildren }: CompleteFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [childrenData, setChildrenData] = useState<(ChildInfoFormValues | null)[]>(
     Array(booking.num_children).fill(null)
@@ -34,6 +36,35 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   );
 
   const isAlreadyComplete = booking.status === "complete" || existingChildren.length > 0;
+
+  const handleVerifyPayment = async () => {
+    setIsVerifying(true);
+    setVerifyMessage(null);
+
+    try {
+      const response = await fetch("/api/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: booking.id }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.status === "verified") {
+        // Payment verified - refresh the page to show the form
+        window.location.reload();
+      } else if (result.status === "already_paid") {
+        window.location.reload();
+      } else {
+        setVerifyMessage(result.message || "Payment not yet complete. Please finish checkout in Stripe.");
+      }
+    } catch (err) {
+      console.error("Verify error:", err);
+      setVerifyMessage("Failed to verify payment. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleChildSubmit = (index: number) => (data: ChildInfoFormValues) => {
     // Update ref immediately (sync)
@@ -145,12 +176,35 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
             <p className="mt-2 text-stone">
               This booking has not been paid yet. Please complete payment first.
             </p>
-            <Link
-              href="/clubs"
-              className="mt-6 inline-block bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
-            >
-              View Clubs
-            </Link>
+
+            {/* Verify Payment Button */}
+            <div className="mt-6 space-y-3">
+              <button
+                onClick={handleVerifyPayment}
+                disabled={isVerifying}
+                className="inline-flex items-center gap-2 bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={"h-5 w-5 " + (isVerifying ? "animate-spin" : "")} />
+                {isVerifying ? "Checking..." : "Check Payment Status"}
+              </button>
+
+              {verifyMessage && (
+                <p className="text-sm text-stone">{verifyMessage}</p>
+              )}
+
+              <p className="text-sm text-stone">
+                Already paid? Click above to verify your payment.
+              </p>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-stone/20">
+              <Link
+                href="/clubs"
+                className="text-forest hover:text-meadow font-medium"
+              >
+                ← Back to Clubs
+              </Link>
+            </div>
           </div>
         </div>
       </div>
