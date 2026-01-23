@@ -15,12 +15,16 @@ export async function POST(request: Request) {
     const supabase = await createClient();
     const normalizedCode = code.trim().toUpperCase();
 
-    // Fetch promo code from database
+    // Fetch promo code from database using case-insensitive search
     const { data: promo, error } = await supabase
       .from("promo_codes")
       .select("*")
-      .eq("code", normalizedCode)
+      .ilike("code", normalizedCode)
       .single();
+
+    if (error) {
+      console.error("Database error:", error);
+    }
 
     if (error || !promo) {
       return NextResponse.json(
