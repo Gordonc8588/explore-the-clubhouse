@@ -229,7 +229,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* FAQ Prompt Section */}
+      {/* Newsletter Signup Section */}
       <section className="pb-16 sm:pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
@@ -240,31 +240,37 @@ export default function ContactPage() {
               className="text-3xl font-bold text-white sm:text-4xl"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Looking for More Information?
+              Sign Up for Our Newsletter
             </h2>
             <p className="mx-auto mt-4 max-w-xl font-body text-lg text-white/90">
-              Check out our frequently asked questions or book a visit to see
-              our farm in person.
+              Stay updated with our latest activities, holiday club dates, and farm news. Join our mailing list today!
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-              <a
-                href="/clubs"
-                className="inline-block rounded-lg px-8 py-3 text-lg font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style={{
-                  backgroundColor: "var(--craigies-burnt-orange)",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                Book a Visit
-              </a>
-              <a
-                href="/about"
-                className="cta-button-secondary inline-block rounded-lg border-2 border-white px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Learn About Us
-              </a>
-            </div>
+            <form className="mx-auto mt-8 max-w-md">
+              <label htmlFor="contact-newsletter-email" className="sr-only">
+                Email address
+              </label>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="email"
+                  id="contact-newsletter-email"
+                  name="email"
+                  placeholder="your@email.com"
+                  required
+                  className="flex-1 rounded-lg border px-5 py-3 font-body text-white placeholder:text-white/50 focus:outline-none focus:ring-2 bg-white/10 focus:ring-white"
+                  style={{ borderColor: "rgba(255, 255, 255, 0.3)" }}
+                />
+                <button
+                  type="submit"
+                  className="rounded-lg px-8 py-3 font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 whitespace-nowrap"
+                  style={{
+                    backgroundColor: "var(--craigies-burnt-orange)",
+                    fontFamily: "'Playfair Display', serif",
+                  }}
+                >
+                  Subscribe
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </section>

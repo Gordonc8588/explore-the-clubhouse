@@ -7,7 +7,7 @@ export default function HeroSection() {
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Column - Headline */}
-          <div>
+          <div className="text-center lg:text-left">
             <h1
               className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight mb-6"
               style={{
@@ -29,9 +29,9 @@ export default function HeroSection() {
             </Link>
 
             {/* Microcopy */}
-            <p className="mt-6 text-sm" style={{ color: 'var(--craigies-dark-olive)' }}>
-              <strong>LIMITED PLACES AVAILABLE!</strong> Our Easter sessions fill up fast.
-              Book early to secure your child's spot!
+            <p className="mt-6 text-sm leading-relaxed" style={{ color: 'var(--craigies-dark-olive)' }}>
+              <strong className="block mb-1 text-base" style={{ color: 'var(--craigies-olive)' }}>LIMITED PLACES AVAILABLE!</strong>
+              Our Easter sessions fill up fast. Book early to secure your child&apos;s spot!
             </p>
           </div>
 
