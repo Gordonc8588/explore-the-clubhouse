@@ -179,9 +179,12 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
 
   const formatSidebarDates = (): string => {
     if (formData.selectedOption?.option_type === "full_week") {
-      const start = new Date(club.start_date);
-      const end = new Date(club.end_date);
-      return start.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + " - " + end.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+      // Parse YYYY-MM-DD dates in UTC to avoid timezone shifting
+      const [startYear, startMonth, startDay] = club.start_date.split('-').map(Number);
+      const [endYear, endMonth, endDay] = club.end_date.split('-').map(Number);
+      const start = new Date(Date.UTC(startYear, startMonth - 1, startDay, 12, 0, 0));
+      const end = new Date(Date.UTC(endYear, endMonth - 1, endDay, 12, 0, 0));
+      return start.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }) + " - " + end.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
     }
     if (formData.selectedDates.length === 0) return "Not selected";
     return formData.selectedDates.length + " day" + (formData.selectedDates.length !== 1 ? "s" : "") + " selected";

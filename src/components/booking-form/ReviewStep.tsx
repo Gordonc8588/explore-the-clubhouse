@@ -50,15 +50,20 @@ export function ReviewStep({
   // Format dates for display
   const formatDateRange = (): string => {
     if (selectedOption?.option_type === "full_week") {
-      const startDate = new Date(club.start_date);
-      const endDate = new Date(club.end_date);
+      // Parse YYYY-MM-DD dates in UTC to avoid timezone shifting
+      const [startYear, startMonth, startDay] = club.start_date.split('-').map(Number);
+      const [endYear, endMonth, endDay] = club.end_date.split('-').map(Number);
+      const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay, 12, 0, 0));
+      const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay, 12, 0, 0));
       return `${startDate.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
+        timeZone: "UTC",
       })} - ${endDate.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric",
+        timeZone: "UTC",
       })}`;
     }
 
@@ -66,22 +71,28 @@ export function ReviewStep({
 
     const sortedDates = [...selectedDates].sort();
     if (sortedDates.length === 1) {
-      const date = new Date(sortedDates[0]);
+      // Parse YYYY-MM-DD date in UTC to avoid timezone shifting
+      const [year, month, day] = sortedDates[0].split('-').map(Number);
+      const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
       return date.toLocaleDateString("en-GB", {
         weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
+        timeZone: "UTC",
       });
     }
 
     return sortedDates
       .map((dateStr) => {
-        const date = new Date(dateStr);
+        // Parse YYYY-MM-DD date in UTC to avoid timezone shifting
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
         return date.toLocaleDateString("en-GB", {
           weekday: "short",
           day: "numeric",
           month: "short",
+          timeZone: "UTC",
         });
       })
       .join(", ");

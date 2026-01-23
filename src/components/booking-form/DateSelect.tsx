@@ -63,7 +63,8 @@ export function DateSelect({
     }
 
     for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
-      days.push(new Date(year, month, day));
+      // Create date in UTC to avoid timezone shifting
+      days.push(new Date(Date.UTC(year, month, day, 12, 0, 0)));
     }
 
     return days;
@@ -152,11 +153,14 @@ export function DateSelect({
 
     const sorted = [...selectedDates].sort();
     return sorted.map((dateStr) => {
-      const date = new Date(dateStr);
+      // Parse date as YYYY-MM-DD and format without timezone conversion
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
       return date.toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
         month: "short",
+        timeZone: "UTC",
       });
     });
   };
