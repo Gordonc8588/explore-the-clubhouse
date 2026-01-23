@@ -39,7 +39,13 @@ export function ChildrenCount({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-bark">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           Number of Children
         </h2>
         <p className="mt-1 text-stone">
@@ -47,22 +53,23 @@ export function ChildrenCount({
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6">
+      <div className="bg-white rounded-2xl shadow-md p-6">
         <div className="flex items-center justify-center gap-4">
           {/* Decrement Button */}
           <button
             type="button"
             onClick={handleDecrement}
             disabled={count <= minChildren}
-            className={`
-              w-12 h-12 rounded-full flex items-center justify-center
-              font-display text-2xl font-bold transition-all
-              ${
+            className="w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold transition-all"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              backgroundColor:
                 count <= minChildren
-                  ? "bg-cloud text-pebble cursor-not-allowed"
-                  : "bg-forest text-white hover:bg-meadow"
-              }
-            `}
+                  ? "#F3F4F6"
+                  : "var(--craigies-burnt-orange)",
+              color: count <= minChildren ? "#9CA3AF" : "white",
+              cursor: count <= minChildren ? "not-allowed" : "pointer",
+            }}
             aria-label="Decrease number of children"
           >
             <svg
@@ -89,10 +96,19 @@ export function ChildrenCount({
               onChange={handleChange}
               min={minChildren}
               max={maxChildren}
-              className="w-20 h-16 text-center font-display text-3xl font-bold text-bark
-                border-2 border-sage rounded-xl focus:border-forest focus:outline-none
-                focus:ring-2 focus:ring-sage/30 transition-all
+              className="w-20 h-16 text-center text-3xl font-bold border-2 rounded-xl transition-all
                 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+                borderColor: "var(--craigies-dark-olive)",
+              }}
+              onFocus={(e) =>
+                (e.target.style.borderColor = "var(--craigies-burnt-orange)")
+              }
+              onBlur={(e) =>
+                (e.target.style.borderColor = "var(--craigies-dark-olive)")
+              }
               aria-label="Number of children"
             />
           </div>
@@ -102,15 +118,16 @@ export function ChildrenCount({
             type="button"
             onClick={handleIncrement}
             disabled={count >= maxChildren}
-            className={`
-              w-12 h-12 rounded-full flex items-center justify-center
-              font-display text-2xl font-bold transition-all
-              ${
+            className="w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold transition-all"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              backgroundColor:
                 count >= maxChildren
-                  ? "bg-cloud text-pebble cursor-not-allowed"
-                  : "bg-forest text-white hover:bg-meadow"
-              }
-            `}
+                  ? "#F3F4F6"
+                  : "var(--craigies-burnt-orange)",
+              color: count >= maxChildren ? "#9CA3AF" : "white",
+              cursor: count >= maxChildren ? "not-allowed" : "pointer",
+            }}
             aria-label="Increase number of children"
           >
             <svg
@@ -135,10 +152,14 @@ export function ChildrenCount({
         </p>
       </div>
 
-      <div className="bg-sage/20 rounded-2xl p-4">
+      <div
+        className="rounded-2xl p-4"
+        style={{ backgroundColor: "var(--craigies-olive)" }}
+      >
         <div className="flex gap-3">
           <svg
-            className="w-5 h-5 text-forest flex-shrink-0 mt-0.5"
+            className="w-5 h-5 flex-shrink-0 mt-0.5"
+            style={{ color: "var(--craigies-burnt-orange)" }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -151,9 +172,9 @@ export function ChildrenCount({
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <div className="text-sm text-bark">
+          <div className="text-sm text-white">
             <p className="font-semibold">Good to know</p>
-            <p className="text-stone mt-1">
+            <p className="text-white/90 mt-1">
               You'll be asked to provide each child's details (name, age, dietary
               requirements, etc.) after completing your booking.
             </p>

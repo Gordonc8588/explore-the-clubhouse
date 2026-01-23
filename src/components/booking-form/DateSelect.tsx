@@ -159,7 +159,13 @@ export function DateSelect({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-bark">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           {isSingleDay ? "Select Your Day" : "Select Your Days"}
         </h2>
         <p className="mt-1 text-stone">
@@ -195,7 +201,13 @@ export function DateSelect({
             </svg>
           </button>
 
-          <h3 className="font-display text-xl font-bold text-bark">
+          <h3
+            className="text-xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             {monthLabel}
           </h3>
 
@@ -258,17 +270,20 @@ export function DateSelect({
                   aspect-square p-1 rounded-lg flex items-center justify-center transition-all
                   ${
                     isClickable
-                      ? "hover:bg-sage/20 cursor-pointer"
+                      ? "hover:bg-[rgba(122,124,74,0.1)] cursor-pointer"
                       : "cursor-default"
-                  }
-                  ${
-                    isSelected
-                      ? "bg-forest text-white"
-                      : ""
                   }
                   ${!inRange ? "opacity-30" : ""}
                   ${inRange && !clubDay?.is_available ? "opacity-50" : ""}
                 `}
+                style={
+                  isSelected
+                    ? {
+                        backgroundColor: "var(--craigies-burnt-orange)",
+                        color: "white",
+                      }
+                    : {}
+                }
                 aria-label={`${date.toLocaleDateString("en-GB", {
                   weekday: "long",
                   day: "numeric",
@@ -276,9 +291,12 @@ export function DateSelect({
                 })}${isSelected ? " (selected)" : ""}`}
               >
                 <span
-                  className={`text-sm font-semibold ${
-                    isSelected ? "text-white" : "text-bark"
-                  }`}
+                  className="text-sm font-semibold"
+                  style={{
+                    color: isSelected
+                      ? "white"
+                      : "var(--craigies-dark-olive)",
+                  }}
                 >
                   {date.getDate()}
                 </span>
@@ -291,7 +309,10 @@ export function DateSelect({
         <div className="mt-6 pt-4 border-t border-cloud">
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-stone">
             <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-lg bg-forest" />
+              <div
+                className="w-6 h-6 rounded-lg"
+                style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
+              />
               <span>Selected</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -308,8 +329,17 @@ export function DateSelect({
 
       {/* Selected Days Summary */}
       {selectedDates.length > 0 && (
-        <div className="bg-sage/20 rounded-2xl p-4">
-          <p className="font-display font-semibold text-bark mb-2">
+        <div
+          className="rounded-2xl p-4"
+          style={{ backgroundColor: "var(--craigies-cream)" }}
+        >
+          <p
+            className="font-semibold mb-2"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             {selectedDates.length} day{selectedDates.length !== 1 ? "s" : ""}{" "}
             selected
           </p>
@@ -317,7 +347,11 @@ export function DateSelect({
             {formatSelectedDates()?.map((dateLabel, idx) => (
               <span
                 key={idx}
-                className="bg-white text-bark text-sm px-3 py-1 rounded-full"
+                className="text-sm px-3 py-1 rounded-full"
+                style={{
+                  backgroundColor: "white",
+                  color: "var(--craigies-dark-olive)",
+                }}
               >
                 {dateLabel}
               </span>

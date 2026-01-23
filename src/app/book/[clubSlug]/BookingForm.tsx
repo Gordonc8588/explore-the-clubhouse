@@ -150,11 +150,24 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="font-display text-2xl font-bold text-bark">Have a Promo Code?</h2>
-              <p className="mt-1 text-stone">Enter your promo code below to apply a discount.</p>
+              <h2
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
+                Have a Promo Code?
+              </h2>
+              <p
+                className="mt-1"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                Enter your promo code below to apply a discount.
+              </p>
             </div>
             <PromoCode clubId={club.id} onApply={setAppliedPromo} appliedPromo={appliedPromo} />
-            <p className="text-sm text-pebble">No code? No worries, just click Next to continue.</p>
+            <p className="text-sm text-gray-500">No code? No worries, just click Next to continue.</p>
           </div>
         );
       case 6:
@@ -175,20 +188,32 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
   };
 
   return (
-    <div className="bg-cream min-h-screen">
-      <header className="bg-white shadow-[var(--shadow-sm)] sticky top-0 z-10">
+    <div style={{ backgroundColor: "var(--craigies-cream)" }} className="min-h-screen">
+      <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <Link href={"/clubs/" + club.slug} className="inline-flex items-center gap-2 text-stone hover:text-forest transition-colors font-body text-sm">
+            <Link
+              href={"/clubs/" + club.slug}
+              className="inline-flex items-center gap-2 transition-opacity hover:opacity-80 font-body text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               Back to {club.name}
             </Link>
-            <h1 className="font-display text-lg font-bold text-bark sm:text-xl">Book Your Place</h1>
+            <h1
+              className="text-lg font-bold sm:text-xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Book Your Place
+            </h1>
           </div>
         </div>
       </header>
 
-      <div className="bg-white border-b border-cloud">
+      <div className="bg-white border-b" style={{ borderColor: "#F3F4F6" }}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {STEPS.map((step, index) => {
@@ -197,12 +222,39 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
               const isCompleted = currentStep > step.number;
               return (
                 <div key={step.number} className="flex items-center">
-                  {index > 0 && <div className={"hidden sm:block w-8 md:w-12 lg:w-16 h-0.5 mx-1 md:mx-2 " + (isCompleted ? "bg-forest" : "bg-cloud")} />}
+                  {index > 0 && (
+                    <div
+                      className="hidden sm:block w-8 md:w-12 lg:w-16 h-0.5 mx-1 md:mx-2"
+                      style={{
+                        backgroundColor: isCompleted
+                          ? "var(--craigies-burnt-orange)"
+                          : "#F3F4F6",
+                      }}
+                    />
+                  )}
                   <div className="flex flex-col items-center">
-                    <div className={"w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors " + (isActive || isCompleted ? "bg-forest text-white" : "bg-cloud text-stone")}>
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors"
+                      style={{
+                        backgroundColor:
+                          isActive || isCompleted
+                            ? "var(--craigies-burnt-orange)"
+                            : "#F3F4F6",
+                        color: isActive || isCompleted ? "white" : "#6B7280",
+                      }}
+                    >
                       {isCompleted ? <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg> : step.number}
                     </div>
-                    <span className={"mt-1 text-xs font-medium hidden sm:block " + (isActive ? "text-forest" : "text-stone")}>{step.label}</span>
+                    <span
+                      className="mt-1 text-xs font-medium hidden sm:block"
+                      style={{
+                        color: isActive
+                          ? "var(--craigies-burnt-orange)"
+                          : "var(--craigies-dark-olive)",
+                      }}
+                    >
+                      {step.label}
+                    </span>
                   </div>
                 </div>
               );
@@ -214,17 +266,38 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 sm:p-8">
+            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8">
               {renderStepContent()}
               {currentStep !== 6 && (
-                <div className="mt-8 pt-6 border-t border-cloud flex items-center justify-between">
-                  <button type="button" onClick={handleBack} disabled={currentStep === 1} className={"py-3 px-6 rounded-lg font-display font-semibold transition-all " + (currentStep === 1 ? "text-pebble cursor-not-allowed" : "text-forest hover:bg-sage/20")}>
+                <div className="mt-8 pt-6 border-t flex items-center justify-between" style={{ borderColor: "#F3F4F6" }}>
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    disabled={currentStep === 1}
+                    className="py-3 px-6 rounded-lg font-semibold transition-opacity"
+                    style={{
+                      color: currentStep === 1 ? "#9CA3AF" : "var(--craigies-olive)",
+                      cursor: currentStep === 1 ? "not-allowed" : "pointer",
+                      fontFamily: "'Playfair Display', serif",
+                    }}
+                  >
                     <span className="flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                       Back
                     </span>
                   </button>
-                  <button type="button" onClick={handleNext} disabled={!canProceed} className={"py-3 px-6 rounded-lg font-display font-semibold transition-all " + (canProceed ? "bg-sunshine text-bark hover:bg-amber" : "bg-cloud text-pebble cursor-not-allowed")}>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canProceed}
+                    className="py-3 px-6 rounded-lg font-semibold transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor: canProceed ? "var(--craigies-burnt-orange)" : "#F3F4F6",
+                      color: canProceed ? "white" : "#9CA3AF",
+                      cursor: canProceed ? "pointer" : "not-allowed",
+                      fontFamily: "'Playfair Display', serif",
+                    }}
+                  >
                     <span className="flex items-center gap-2">
                       Next
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
@@ -236,45 +309,142 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
           </div>
 
           <div className="hidden lg:block">
-            <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 sticky top-24">
-              <div className="pb-4 border-b border-cloud">
-                <h3 className="font-display text-xl font-bold text-bark">{club.name}</h3>
-                <p className="text-sm text-stone mt-1">Ages {club.min_age}-{club.max_age}</p>
+            <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24">
+              <div className="pb-4 border-b" style={{ borderColor: "#F3F4F6" }}>
+                <h3
+                  className="text-xl font-bold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
+                  {club.name}
+                </h3>
+                <p
+                  className="text-sm mt-1"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  Ages {club.min_age}-{club.max_age}
+                </p>
               </div>
               <div className="py-4 space-y-3">
                 <div className="flex justify-between items-start">
-                  <span className="text-sm text-stone">Option</span>
-                  <span className="text-sm font-semibold text-bark text-right max-w-[60%]">{formData.selectedOption?.name || "Not selected"}</span>
+                  <span
+                    className="text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    Option
+                  </span>
+                  <span
+                    className="text-sm font-semibold text-right max-w-[60%]"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    {formData.selectedOption?.name || "Not selected"}
+                  </span>
                 </div>
                 {formData.selectedOption?.option_type !== "full_week" && (
                   <div className="flex justify-between items-start">
-                    <span className="text-sm text-stone">Dates</span>
-                    <span className="text-sm font-semibold text-bark text-right">{formatSidebarDates()}</span>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      Dates
+                    </span>
+                    <span
+                      className="text-sm font-semibold text-right"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      {formatSidebarDates()}
+                    </span>
                   </div>
                 )}
                 <div className="flex justify-between items-start">
-                  <span className="text-sm text-stone">Children</span>
-                  <span className="text-sm font-semibold text-bark">{formData.childrenCount}</span>
+                  <span
+                    className="text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    Children
+                  </span>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    {formData.childrenCount}
+                  </span>
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between items-start">
-                    <span className="text-sm text-stone">Promo</span>
-                    <span className="text-sm font-semibold text-forest">{appliedPromo.code} (-{appliedPromo.discount_percent}%)</span>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      Promo
+                    </span>
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--craigies-olive)" }}
+                    >
+                      {appliedPromo.code} (-{appliedPromo.discount_percent}%)
+                    </span>
                   </div>
                 )}
               </div>
-              <div className="pt-4 border-t border-cloud">
+              <div className="pt-4 border-t" style={{ borderColor: "#F3F4F6" }}>
                 <div className="flex justify-between items-center">
-                  <span className="font-display font-bold text-bark">Total</span>
-                  <span className="font-display text-2xl font-bold text-forest">{formatPrice(calculateTotal())}</span>
+                  <span
+                    className="font-bold"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      color: "var(--craigies-dark-olive)",
+                    }}
+                  >
+                    Total
+                  </span>
+                  <span
+                    className="text-2xl font-bold"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      color: "var(--craigies-burnt-orange)",
+                    }}
+                  >
+                    {formatPrice(calculateTotal())}
+                  </span>
                 </div>
               </div>
-              <div className="mt-6 bg-sage/20 rounded-xl p-4">
+              <div
+                className="mt-6 rounded-xl p-4"
+                style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+              >
                 <div className="flex gap-3">
-                  <svg className="w-5 h-5 text-forest flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg
+                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    style={{ color: "var(--craigies-burnt-orange)" }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   <div className="text-sm">
-                    <p className="font-semibold text-bark">Need help?</p>
-                    <p className="text-stone mt-1">Contact us at <a href="mailto:hello@exploretheclubhouse.co.uk" className="text-forest hover:underline">hello@exploretheclubhouse.co.uk</a></p>
+                    <p
+                      className="font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      Need help?
+                    </p>
+                    <p
+                      className="mt-1"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      Contact us at{" "}
+                      <a
+                        href="mailto:hello@exploretheclubhouse.co.uk"
+                        className="hover:underline"
+                        style={{ color: "var(--craigies-olive)" }}
+                      >
+                        hello@exploretheclubhouse.co.uk
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>

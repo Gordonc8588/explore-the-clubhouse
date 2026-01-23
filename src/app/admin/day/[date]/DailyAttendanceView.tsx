@@ -129,7 +129,13 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
             >
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <h1 className="font-display text-2xl font-bold text-bark">
+            <h1
+              className="text-2xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Daily Attendance
             </h1>
           </div>
@@ -150,7 +156,19 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                 type="date"
                 value={date}
                 onChange={(e) => handleDateChange(e.target.value)}
-                className="rounded-lg border border-cloud bg-white py-2 pl-10 pr-4 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="rounded-lg border py-2 pl-10 pr-4 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
 
@@ -164,7 +182,11 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
 
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 rounded-lg bg-forest px-4 py-2 font-display font-semibold text-white transition-colors hover:bg-meadow"
+              className="flex items-center gap-2 rounded-lg px-4 py-2 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               <Printer className="h-5 w-5" />
               <span className="hidden sm:inline">Print</span>
@@ -174,7 +196,13 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
 
         {/* Print header (only visible when printing) */}
         <div className="hidden print:block">
-          <h1 className="font-display text-2xl font-bold text-bark">
+          <h1
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             Daily Attendance - {formatDateForDisplay(date)}
           </h1>
           <p className="mt-1 font-body text-stone">
@@ -184,50 +212,86 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
         </div>
 
         {/* Date display */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h2 className="font-display text-xl font-bold text-bark">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h2
+            className="text-xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             {formatDateForDisplay(date)}
           </h2>
         </div>
 
         {/* Summary cards */}
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+          <div className="rounded-2xl bg-white p-6 shadow-md">
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-forest/10 p-3">
-                <Users className="h-6 w-6 text-forest" />
+              <div
+                className="rounded-full p-3"
+                style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+              >
+                <Users className="h-6 w-6" style={{ color: "var(--craigies-olive)" }} />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Total Attendance</p>
-                <p className="font-display text-2xl font-bold text-bark">
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Total Attendance
+                </p>
+                <p
+                  className="text-2xl font-bold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
                   {totalAttendance}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+          <div className="rounded-2xl bg-white p-6 shadow-md">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-sunshine/10 p-3">
                 <Sun className="h-6 w-6 text-amber" />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Morning (AM)</p>
-                <p className="font-display text-2xl font-bold text-bark">
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Morning (AM)
+                </p>
+                <p
+                  className="text-2xl font-bold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
                   {morningCount}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+          <div className="rounded-2xl bg-white p-6 shadow-md">
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-meadow/10 p-3">
-                <Sunset className="h-6 w-6 text-meadow" />
+              <div
+                className="rounded-full p-3"
+                style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+              >
+                <Sunset className="h-6 w-6" style={{ color: "var(--craigies-burnt-orange)" }} />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Afternoon (PM)</p>
-                <p className="font-display text-2xl font-bold text-bark">
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Afternoon (PM)
+                </p>
+                <p
+                  className="text-2xl font-bold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
                   {afternoonCount}
                 </p>
               </div>
@@ -240,7 +304,10 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
           <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-6">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-6 w-6 text-red-600" />
-              <h3 className="font-display text-lg font-bold text-red-800">
+              <h3
+                className="text-lg font-bold text-red-800"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
                 Allergy Alert - {childrenWithAllergies.length} Child
                 {childrenWithAllergies.length !== 1 ? "ren" : ""} with Allergies
               </h3>
@@ -249,18 +316,24 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
               {childrenWithAllergies.map((child) => (
                 <div
                   key={child.id}
-                  className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-[var(--shadow-sm)]"
+                  className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-sm"
                 >
                   <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
                   <div>
-                    <p className="font-display font-semibold text-bark">
+                    <p
+                      className="font-semibold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                    >
                       {child.name}
                     </p>
-                    <p className="mt-1 font-body text-sm font-medium text-red-700">
+                    <p className="mt-1 text-sm font-medium text-red-700">
                       {child.allergies.join(", ")}
                     </p>
                     {child.medicalNotes && (
-                      <p className="mt-1 font-body text-sm text-stone">
+                      <p className="mt-1 text-sm text-stone">
                         {child.medicalNotes}
                       </p>
                     )}
@@ -272,8 +345,14 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
         )}
 
         {/* Attendance Table */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h3 className="font-display text-lg font-bold text-bark">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h3
+            className="text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             Attendance List
           </h3>
 
@@ -289,22 +368,40 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
               <table className="w-full min-w-[900px]">
                 <thead>
                   <tr className="border-b border-cloud">
-                    <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                    <th
+                      className="pb-3 text-left text-sm font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       Child Name
                     </th>
-                    <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                    <th
+                      className="pb-3 text-left text-sm font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       Parent
                     </th>
-                    <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                    <th
+                      className="pb-3 text-left text-sm font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       Session
                     </th>
-                    <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                    <th
+                      className="pb-3 text-left text-sm font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       Allergies
                     </th>
-                    <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                    <th
+                      className="pb-3 text-left text-sm font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       Medical Notes
                     </th>
-                    <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                    <th
+                      className="pb-3 text-left text-sm font-semibold"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       Emergency Contact
                     </th>
                   </tr>
@@ -312,11 +409,17 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                 <tbody className="divide-y divide-cloud">
                   {attendance.map((child) => (
                     <tr key={child.id} className="hover:bg-cloud/50">
-                      <td className="py-4 font-body text-sm font-medium text-bark">
+                      <td
+                        className="py-4 text-sm font-medium"
+                        style={{ color: "var(--craigies-dark-olive)" }}
+                      >
                         {child.name}
                       </td>
                       <td className="py-4">
-                        <p className="font-body text-sm text-bark">
+                        <p
+                          className="text-sm"
+                          style={{ color: "var(--craigies-dark-olive)" }}
+                        >
                           {child.parentName}
                         </p>
                         {child.parentPhone && (
@@ -328,13 +431,23 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       </td>
                       <td className="py-4">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 font-body text-xs font-medium ${
+                          className="inline-flex rounded-full px-3 py-1 text-xs font-medium"
+                          style={
                             child.session === "Full"
-                              ? "bg-forest/10 text-forest"
+                              ? {
+                                  backgroundColor: "rgba(122, 124, 74, 0.1)",
+                                  color: "var(--craigies-olive)",
+                                }
                               : child.session === "AM"
-                                ? "bg-sunshine/10 text-amber"
-                                : "bg-meadow/10 text-meadow"
-                          }`}
+                                ? {
+                                    backgroundColor: "rgba(245, 158, 11, 0.1)",
+                                    color: "#D97706",
+                                  }
+                                : {
+                                    backgroundColor: "rgba(212, 132, 62, 0.1)",
+                                    color: "var(--craigies-burnt-orange)",
+                                  }
+                          }
                         >
                           {child.session === "Full"
                             ? "Full Day"
@@ -357,11 +470,14 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       </td>
                       <td className="max-w-[200px] py-4">
                         {child.medicalNotes ? (
-                          <span className="font-body text-sm text-bark">
+                          <span
+                            className="text-sm"
+                            style={{ color: "var(--craigies-dark-olive)" }}
+                          >
                             {child.medicalNotes}
                           </span>
                         ) : (
-                          <span className="font-body text-sm text-pebble">
+                          <span className="text-sm text-pebble">
                             None
                           </span>
                         )}
@@ -369,7 +485,10 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       <td className="py-4">
                         {child.emergencyContact.name ? (
                           <>
-                            <p className="font-body text-sm text-bark">
+                            <p
+                              className="text-sm"
+                              style={{ color: "var(--craigies-dark-olive)" }}
+                            >
                               {child.emergencyContact.name}
                             </p>
                             {child.emergencyContact.relationship && (

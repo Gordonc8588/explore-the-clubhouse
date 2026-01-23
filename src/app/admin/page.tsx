@@ -110,24 +110,43 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-        <h2 className="font-display text-2xl font-bold text-bark">
+      <div className="rounded-2xl bg-white p-6 shadow-md">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           Welcome back!
         </h2>
-        <p className="mt-1 font-body text-stone">{getTodayFormatted()}</p>
+        <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
+          {getTodayFormatted()}
+        </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Today's Attendance */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-forest/10 p-3">
-              <Users className="h-6 w-6 text-forest" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+            >
+              <Users className="h-6 w-6" style={{ color: "var(--craigies-olive)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Today&apos;s Attendance</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Today&apos;s Attendance
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {stats.todayAttendance}
               </p>
             </div>
@@ -135,14 +154,25 @@ export default async function AdminDashboard() {
         </div>
 
         {/* This Week's Bookings */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-meadow/10 p-3">
-              <CalendarDays className="h-6 w-6 text-meadow" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+            >
+              <CalendarDays className="h-6 w-6" style={{ color: "var(--craigies-burnt-orange)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Week&apos;s Bookings</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Week&apos;s Bookings
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {stats.weekBookings}
               </p>
             </div>
@@ -150,14 +180,25 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Monthly Revenue */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-sunshine/10 p-3">
-              <PoundSterling className="h-6 w-6 text-amber" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+            >
+              <PoundSterling className="h-6 w-6" style={{ color: "var(--craigies-olive)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Revenue This Month</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Revenue This Month
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 £{stats.monthRevenue.toLocaleString()}
               </p>
             </div>
@@ -165,14 +206,25 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Incomplete Bookings */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-coral/10 p-3">
-              <AlertCircle className="h-6 w-6 text-coral" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+            >
+              <AlertCircle className="h-6 w-6" style={{ color: "var(--craigies-burnt-orange)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Incomplete Bookings</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Incomplete Bookings
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {stats.incompleteBookings}
               </p>
             </div>
@@ -184,14 +236,23 @@ export default async function AdminDashboard() {
       <div className="flex flex-wrap gap-3">
         <Link
           href="/admin/daily"
-          className="inline-flex items-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber"
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+          style={{
+            backgroundColor: "var(--craigies-burnt-orange)",
+            fontFamily: "'Playfair Display', serif",
+          }}
         >
           <Eye className="h-5 w-5" />
           View Today
         </Link>
         <Link
           href="/admin/clubs/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-forest px-6 py-3 font-display font-semibold text-white transition-colors hover:bg-meadow"
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold border-2 transition-colors"
+          style={{
+            borderColor: "var(--craigies-dark-olive)",
+            color: "var(--craigies-dark-olive)",
+            fontFamily: "'Playfair Display', serif",
+          }}
         >
           <Plus className="h-5 w-5" />
           New Club
@@ -199,66 +260,106 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Recent Bookings Table */}
-      <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-        <h3 className="font-display text-lg font-bold text-bark">
+      <div className="rounded-2xl bg-white p-6 shadow-md">
+        <h3
+          className="text-lg font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           Recent Bookings
         </h3>
         {recentBookings.length === 0 ? (
-          <p className="mt-4 font-body text-stone">No bookings yet.</p>
+          <p className="mt-4" style={{ color: "var(--craigies-dark-olive)" }}>
+            No bookings yet.
+          </p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-cloud">
-                  <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <tr
+                  className="border-b"
+                  style={{ borderColor: "rgba(122, 124, 74, 0.2)" }}
+                >
+                  <th
+                    className="pb-3 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     Booking ID
                   </th>
-                  <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                  <th
+                    className="pb-3 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     Parent
                   </th>
-                  <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                  <th
+                    className="pb-3 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     Child
                   </th>
-                  <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                  <th
+                    className="pb-3 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     Club
                   </th>
-                  <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                  <th
+                    className="pb-3 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     Date
                   </th>
-                  <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                  <th
+                    className="pb-3 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cloud">
+              <tbody className="divide-y" style={{ borderColor: "rgba(122, 124, 74, 0.2)" }}>
                 {recentBookings.map((booking: any) => (
-                  <tr key={booking.id} className="hover:bg-cloud/50">
-                    <td className="py-3 font-body text-sm text-bark">
+                  <tr
+                    key={booking.id}
+                    className="transition-colors hover:bg-[#f5f4ed]"
+                  >
+                    <td className="py-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                       {booking.id.slice(0, 8).toUpperCase()}
                     </td>
-                    <td className="py-3 font-body text-sm text-bark">
+                    <td className="py-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                       {booking.parent_name}
                     </td>
-                    <td className="py-3 font-body text-sm text-bark">
+                    <td className="py-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                       {booking.children?.[0]?.name || "—"}
                     </td>
-                    <td className="py-3 font-body text-sm text-bark">
+                    <td className="py-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                       {(booking.clubs as any)?.name || "—"}
                     </td>
-                    <td className="py-3 font-body text-sm text-bark">
+                    <td className="py-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                       {(booking.booking_days as any)?.[0]?.club_days?.date
                         ? formatDate((booking.booking_days as any)[0].club_days.date)
                         : "—"}
                     </td>
                     <td className="py-3">
                       <span
-                        className={`inline-flex rounded-full px-2 py-1 font-body text-xs font-medium ${
-                          booking.status === "complete"
-                            ? "bg-green-100 text-green-800"
-                            : booking.status === "paid"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-amber-100 text-amber-800"
-                        }`}
+                        className="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                        style={{
+                          backgroundColor:
+                            booking.status === "complete"
+                              ? "rgba(122, 124, 74, 0.1)"
+                              : booking.status === "paid"
+                              ? "rgba(212, 132, 62, 0.1)"
+                              : "rgba(245, 158, 11, 0.1)",
+                          color:
+                            booking.status === "complete"
+                              ? "var(--craigies-olive)"
+                              : booking.status === "paid"
+                              ? "var(--craigies-burnt-orange)"
+                              : "#d97706",
+                        }}
                       >
                         {booking.status.charAt(0).toUpperCase() +
                           booking.status.slice(1)}
@@ -274,14 +375,26 @@ export default async function AdminDashboard() {
 
       {/* Incomplete Bookings Alert Section */}
       {incompleteBookings.length > 0 && (
-        <div className="rounded-2xl border-2 border-coral/30 bg-coral/5 p-6">
+        <div
+          className="rounded-2xl border-2 p-6"
+          style={{
+            borderColor: "rgba(212, 132, 62, 0.3)",
+            backgroundColor: "rgba(212, 132, 62, 0.05)",
+          }}
+        >
           <div className="flex items-center gap-3">
-            <AlertCircle className="h-6 w-6 text-coral" />
-            <h3 className="font-display text-lg font-bold text-bark">
+            <AlertCircle className="h-6 w-6" style={{ color: "var(--craigies-burnt-orange)" }} />
+            <h3
+              className="text-lg font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Bookings Requiring Attention
             </h3>
           </div>
-          <p className="mt-2 font-body text-sm text-stone">
+          <p className="mt-2 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
             The following bookings have incomplete child information and need
             follow-up.
           </p>
@@ -289,24 +402,32 @@ export default async function AdminDashboard() {
             {incompleteBookings.map((booking) => (
               <div
                 key={booking.id}
-                className="rounded-lg bg-white p-4 shadow-[var(--shadow-sm)]"
+                className="rounded-lg bg-white p-4 shadow-sm"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <p className="font-display font-semibold text-bark">
+                    <p
+                      className="font-semibold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                    >
                       {booking.parent_name}
                     </p>
-                    <p className="font-body text-sm text-stone">
+                    <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                       {booking.parent_email}
                     </p>
                   </div>
-                  <span className="font-body text-sm text-stone">
+                  <span className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
                     {formatDate(booking.created_at)}
                   </span>
                 </div>
-                <p className="mt-2 font-body text-sm">
-                  <span className="font-medium text-coral">Missing:</span>{" "}
-                  <span className="text-bark">
+                <p className="mt-2 text-sm">
+                  <span className="font-medium" style={{ color: "var(--craigies-burnt-orange)" }}>
+                    Missing:
+                  </span>{" "}
+                  <span style={{ color: "var(--craigies-dark-olive)" }}>
                     {booking.num_children - (booking.children?.length || 0)} child record(s)
                   </span>
                 </p>

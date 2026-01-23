@@ -145,17 +145,29 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   // Already complete - show summary
   if (isAlreadyComplete) {
     return (
-      <div className="bg-cream min-h-screen py-12">
+      <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-8 text-center">
-            <CheckCircle className="mx-auto h-16 w-16 text-forest" />
-            <h1 className="mt-4 font-display text-3xl font-bold text-bark">Booking Complete</h1>
+          <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+            <CheckCircle className="mx-auto h-16 w-16" style={{ color: "var(--craigies-olive)" }} />
+            <h1
+              className="mt-4 text-3xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Booking Complete
+            </h1>
             <p className="mt-2 text-stone">
               Children information has already been submitted for this booking.
             </p>
             <Link
               href={"/confirmation/" + booking.id}
-              className="mt-6 inline-block bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
+              className="mt-6 inline-block text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               View Confirmation
             </Link>
@@ -168,11 +180,19 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   // Not paid yet
   if (booking.status !== "paid") {
     return (
-      <div className="bg-cream min-h-screen py-12">
+      <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-8 text-center">
-            <AlertCircle className="mx-auto h-16 w-16 text-amber" />
-            <h1 className="mt-4 font-display text-3xl font-bold text-bark">Payment Pending</h1>
+          <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+            <AlertCircle className="mx-auto h-16 w-16" style={{ color: "var(--craigies-burnt-orange)" }} />
+            <h1
+              className="mt-4 text-3xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Payment Pending
+            </h1>
             <p className="mt-2 text-stone">
               This booking has not been paid yet. Please complete payment first.
             </p>
@@ -182,7 +202,11 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
               <button
                 onClick={handleVerifyPayment}
                 disabled={isVerifying}
-                className="inline-flex items-center gap-2 bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-opacity disabled:opacity-50"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 <RefreshCw className={"h-5 w-5 " + (isVerifying ? "animate-spin" : "")} />
                 {isVerifying ? "Checking..." : "Check Payment Status"}
@@ -200,7 +224,8 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
             <div className="mt-6 pt-6 border-t border-stone/20">
               <Link
                 href="/clubs"
-                className="text-forest hover:text-meadow font-medium"
+                className="font-medium"
+                style={{ color: "var(--craigies-burnt-orange)" }}
               >
                 ← Back to Clubs
               </Link>
@@ -212,35 +237,49 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   }
 
   return (
-    <div className="bg-cream min-h-screen py-12">
+    <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Booking Summary */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 mb-8">
-          <h1 className="font-display text-2xl font-bold text-bark mb-4">Complete Your Booking</h1>
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+          <h1
+            className="text-2xl font-bold mb-4"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            Complete Your Booking
+          </h1>
           <p className="text-stone mb-6">
             Please provide information for each child attending. This information helps us keep your children safe.
           </p>
-          
+
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-forest" />
+              <Calendar className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Club</p>
-                <p className="font-semibold text-bark">{club.name}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {club.name}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Users className="h-5 w-5 text-forest" />
+              <Users className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Children</p>
-                <p className="font-semibold text-bark">{booking.num_children} {booking.num_children === 1 ? "child" : "children"}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {booking.num_children} {booking.num_children === 1 ? "child" : "children"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <CreditCard className="h-5 w-5 text-forest" />
+              <CreditCard className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Amount Paid</p>
-                <p className="font-semibold text-bark">{formatPrice(booking.total_amount)}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {formatPrice(booking.total_amount)}
+                </p>
               </div>
             </div>
           </div>
@@ -248,10 +287,20 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
 
         {/* Child Forms */}
         {Array.from({ length: booking.num_children }, (_, index) => (
-          <div key={index} className={"bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 mb-6 " + (validationErrors[index] ? "ring-2 ring-error" : "")}>
-            <h2 className="font-display text-xl font-bold text-bark mb-4">
+          <div key={index} className={"bg-white rounded-2xl shadow-md p-6 mb-6 " + (validationErrors[index] ? "ring-2 ring-error" : "")}>
+            <h2
+              className="text-xl font-bold mb-4"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Child {index + 1} of {booking.num_children}
-              {childrenData[index] && <span className="ml-2 text-sm text-forest font-normal">(Filled)</span>}
+              {childrenData[index] && (
+                <span className="ml-2 text-sm font-normal" style={{ color: "var(--craigies-olive)" }}>
+                  (Filled)
+                </span>
+              )}
             </h2>
             <ChildInfoForm
               formId={"child-info-form-" + index}
@@ -273,7 +322,12 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
             type="button"
             onClick={handleSubmitAll}
             disabled={isSubmitting}
-            className="bg-sunshine text-bark font-display font-semibold py-4 px-8 rounded-lg hover:bg-amber transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            className="font-semibold py-4 px-8 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            style={{
+              backgroundColor: "var(--craigies-burnt-orange)",
+              color: "white",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             {isSubmitting ? "Submitting..." : "Submit All Information"}
           </button>

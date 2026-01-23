@@ -126,10 +126,16 @@ export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
 
       {appliedPromo ? (
         // Applied promo code display
-        <div className="bg-sage/20 rounded-lg p-4">
+        <div
+          className="rounded-lg p-4"
+          style={{ backgroundColor: "var(--craigies-cream)" }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-forest flex items-center justify-center">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "var(--craigies-olive)" }}
+              >
                 <svg
                   className="w-5 h-5 text-white"
                   fill="currentColor"
@@ -144,10 +150,19 @@ export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
                 </svg>
               </div>
               <div>
-                <p className="font-display font-semibold text-bark">
+                <p
+                  className="font-semibold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
                   {appliedPromo.code}
                 </p>
-                <p className="text-sm text-forest font-medium">
+                <p
+                  className="text-sm font-medium"
+                  style={{ color: "var(--craigies-burnt-orange)" }}
+                >
                   {appliedPromo.discount_percent}% discount applied
                 </p>
               </div>
@@ -155,7 +170,12 @@ export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
             <button
               type="button"
               onClick={handleRemove}
-              className="text-sm text-stone hover:text-bark underline transition-colors"
+              className="text-sm underline transition-colors"
+              style={{ color: "#6B7280" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--craigies-dark-olive)")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6B7280")}
             >
               Remove
             </button>
@@ -175,29 +195,39 @@ export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
               }}
               onKeyDown={handleKeyDown}
               placeholder="Enter code"
-              className={`
-                flex-1 px-4 py-3 rounded-lg border bg-white font-body text-bark uppercase
-                transition-all focus:outline-none
-                ${
-                  error
-                    ? "border-error focus:border-error focus:ring-2 focus:ring-error/30"
-                    : "border-stone focus:border-forest focus:ring-2 focus:ring-sage/30"
-                }
-              `}
+              className="flex-1 px-4 py-3 rounded-lg border bg-white uppercase transition-all focus:outline-none"
+              style={{
+                borderColor: error
+                  ? "#EF4444"
+                  : "var(--craigies-dark-olive)",
+                color: "var(--craigies-dark-olive)",
+              }}
+              onFocus={(e) =>
+                (e.target.style.borderColor = error
+                  ? "#EF4444"
+                  : "var(--craigies-burnt-orange)")
+              }
+              onBlur={(e) =>
+                (e.target.style.borderColor = error
+                  ? "#EF4444"
+                  : "var(--craigies-dark-olive)")
+              }
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={handleApply}
               disabled={isLoading || !code.trim()}
-              className={`
-                px-6 py-3 rounded-lg font-display font-semibold transition-all
-                ${
+              className="px-6 py-3 rounded-lg font-semibold transition-all"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                backgroundColor:
                   isLoading || !code.trim()
-                    ? "bg-cloud text-pebble cursor-not-allowed"
-                    : "bg-forest text-white hover:bg-meadow"
-                }
-              `}
+                    ? "#F3F4F6"
+                    : "var(--craigies-burnt-orange)",
+                color: isLoading || !code.trim() ? "#9CA3AF" : "white",
+                cursor: isLoading || !code.trim() ? "not-allowed" : "pointer",
+              }}
             >
               {isLoading ? (
                 <svg

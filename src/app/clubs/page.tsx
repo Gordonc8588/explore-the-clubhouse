@@ -78,7 +78,7 @@ export default async function WhatsOnPage() {
   const upcomingClubs = await getUpcomingClubs();
 
   return (
-    <div className="bg-cream">
+    <div style={{ backgroundColor: "var(--craigies-cream)" }}>
       {/* Hero Section with Background Image */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
@@ -89,12 +89,21 @@ export default async function WhatsOnPage() {
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-bark/70 via-bark/50 to-bark/80" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(90, 92, 58, 0.85), rgba(90, 92, 58, 0.7), rgba(90, 92, 58, 0.9))",
+            }}
+          />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           <div className="text-center">
-            <h1 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl drop-shadow-lg">
+            <h1
+              className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl drop-shadow-lg"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               What&apos;s On
             </h1>
             <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-white/90 sm:text-xl">
@@ -115,7 +124,7 @@ export default async function WhatsOnPage() {
           >
             <path
               d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="var(--color-cream)"
+              fill="var(--craigies-cream)"
             />
           </svg>
         </div>
@@ -127,10 +136,19 @@ export default async function WhatsOnPage() {
           <div className="mx-auto max-w-4xl">
             {/* Intro */}
             <div className="text-center mb-12">
-              <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
+              <h2
+                className="text-3xl font-bold sm:text-4xl"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 Join us at The Clubhouse this Easter!
               </h2>
-              <p className="mt-6 font-body text-lg text-stone leading-relaxed">
+              <p
+                className="mt-6 font-body text-lg leading-relaxed"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 Where children can explore, learn, and enjoy the very best of Scotland&apos;s
                 countryside during the holidays! Our activities will vary each day (it is a
                 working farm, after all!), but here are just some of the exciting adventures
@@ -143,15 +161,24 @@ export default async function WhatsOnPage() {
               {activities.map((activity) => (
                 <div
                   key={activity.title}
-                  className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] transition-shadow hover:shadow-[var(--shadow-lg)]"
+                  className="rounded-2xl bg-white p-6 shadow-md transition-shadow hover:shadow-lg"
                 >
                   <div className="flex items-start gap-4">
                     <span className="text-3xl">{activity.emoji}</span>
                     <div>
-                      <h3 className="font-display text-lg font-semibold text-bark">
+                      <h3
+                        className="text-lg font-semibold"
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                          color: "var(--craigies-dark-olive)",
+                        }}
+                      >
                         {activity.title}
                       </h3>
-                      <p className="mt-2 font-body text-sm text-stone leading-relaxed">
+                      <p
+                        className="mt-2 font-body text-sm leading-relaxed"
+                        style={{ color: "var(--craigies-dark-olive)" }}
+                      >
                         {activity.description}
                       </p>
                     </div>
@@ -161,7 +188,13 @@ export default async function WhatsOnPage() {
             </div>
 
             {/* And so much more */}
-            <p className="mt-8 text-center font-display text-xl font-semibold text-forest">
+            <p
+              className="mt-8 text-center text-xl font-semibold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-olive)",
+              }}
+            >
               🌾 And so much more!
             </p>
           </div>
@@ -169,11 +202,17 @@ export default async function WhatsOnPage() {
       </section>
 
       {/* Important Details Section */}
-      <section className="bg-forest py-16 sm:py-24">
+      <section
+        className="py-16 sm:py-24"
+        style={{ backgroundColor: "var(--craigies-olive)" }}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
             <div className="rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
-              <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+              <h2
+                className="text-2xl font-bold text-white sm:text-3xl"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
                 👉 Important Details
               </h2>
               <div className="mt-6 space-y-4 font-body text-white/90 leading-relaxed">
@@ -182,7 +221,10 @@ export default async function WhatsOnPage() {
                   good practice guidance with low staff-to-child ratios and thorough risk assessments.
                   Spaces are limited due to the low ratios, so be sure to book early!
                 </p>
-                <p className="font-semibold text-sunshine">
+                <p
+                  className="font-semibold"
+                  style={{ color: "var(--craigies-burnt-orange)" }}
+                >
                   BOOKING PROCESS: To help us plan activities and accommodate children properly,
                   ALL attendee forms must be completed and returned within 3 days of booking.
                   If forms are not received in time, the place will be offered to another family.
@@ -191,7 +233,13 @@ export default async function WhatsOnPage() {
 
               {/* Bonus for Parents */}
               <div className="mt-8 rounded-xl bg-white/10 p-6">
-                <h3 className="font-display text-xl font-semibold text-sunshine">
+                <h3
+                  className="text-xl font-semibold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-burnt-orange)",
+                  }}
+                >
                   ☕ Bonus for Parents
                 </h3>
                 <p className="mt-3 font-body text-white/90 leading-relaxed">
@@ -209,10 +257,19 @@ export default async function WhatsOnPage() {
       <section id="upcoming-events" className="py-16 sm:py-24 scroll-mt-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
+            <h2
+              className="text-3xl font-bold sm:text-4xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Upcoming Events
             </h2>
-            <p className="mt-4 font-body text-lg text-stone">
+            <p
+              className="mt-4 font-body text-lg"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Book your spot at one of our upcoming holiday clubs.
             </p>
           </div>
@@ -224,11 +281,17 @@ export default async function WhatsOnPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl bg-white p-8 text-center shadow-[var(--shadow-md)]">
-              <p className="font-body text-lg text-stone">
+            <div className="rounded-2xl bg-white p-8 text-center shadow-md">
+              <p
+                className="font-body text-lg"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 No upcoming events at the moment. Check back soon for new dates!
               </p>
-              <p className="mt-4 font-body text-stone">
+              <p
+                className="mt-4 font-body"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 Follow us on social media or sign up to our newsletter to be the first to know
                 when new clubs are announced.
               </p>

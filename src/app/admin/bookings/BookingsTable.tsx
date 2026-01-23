@@ -41,18 +41,33 @@ function formatDate(dateString: string): string {
   });
 }
 
-function getStatusStyles(status: string): string {
+function getStatusBadgeStyles(status: string): { backgroundColor: string; color: string } {
   switch (status) {
     case "paid":
-      return "bg-green-100 text-green-800";
+      return {
+        backgroundColor: "rgba(212, 132, 62, 0.1)",
+        color: "var(--craigies-burnt-orange)",
+      };
     case "pending":
-      return "bg-amber-100 text-amber-800";
+      return {
+        backgroundColor: "#FEF3C7",
+        color: "#D97706",
+      };
     case "complete":
-      return "bg-sky/20 text-sky-700";
+      return {
+        backgroundColor: "rgba(122, 124, 74, 0.1)",
+        color: "var(--craigies-olive)",
+      };
     case "cancelled":
-      return "bg-red-100 text-red-800";
+      return {
+        backgroundColor: "#FEE2E2",
+        color: "#DC2626",
+      };
     default:
-      return "bg-cloud text-stone";
+      return {
+        backgroundColor: "#F3F4F6",
+        color: "#6B7280",
+      };
   }
 }
 
@@ -119,10 +134,18 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
   return (
     <>
       {/* Search and Filters */}
-      <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-        <div className="flex items-center gap-2 text-stone">
+      <div className="rounded-2xl bg-white p-6 shadow-md">
+        <div
+          className="flex items-center gap-2"
+          style={{ color: "var(--craigies-dark-olive)" }}
+        >
           <Filter className="h-5 w-5" />
-          <span className="font-display font-semibold">Search & Filter</span>
+          <span
+            className="font-semibold"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Search & Filter
+          </span>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -130,7 +153,8 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
           <div className="sm:col-span-2 lg:col-span-2">
             <label
               htmlFor="search"
-              className="mb-1 block font-body text-sm font-medium text-stone"
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}
             >
               Search
             </label>
@@ -145,7 +169,19 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                   setSearchQuery(e.target.value);
                   handleFilterChange();
                 }}
-                className="w-full rounded-lg border border-stone/30 bg-white py-2.5 pl-10 pr-4 font-body text-sm text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
           </div>
@@ -154,7 +190,8 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
           <div>
             <label
               htmlFor="club"
-              className="mb-1 block font-body text-sm font-medium text-stone"
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}
             >
               Club
             </label>
@@ -165,7 +202,11 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                 setSelectedClub(e.target.value);
                 handleFilterChange();
               }}
-              className="w-full rounded-lg border border-stone/30 bg-white px-3 py-2.5 font-body text-sm text-bark focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+              className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2"
+              style={{
+                borderColor: "#D1D5DB",
+                color: "var(--craigies-dark-olive)",
+              }}
             >
               {clubs.map((club) => (
                 <option key={club} value={club}>
@@ -179,7 +220,8 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
           <div>
             <label
               htmlFor="status"
-              className="mb-1 block font-body text-sm font-medium text-stone"
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}
             >
               Status
             </label>
@@ -190,7 +232,11 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                 setSelectedStatus(e.target.value as Status);
                 handleFilterChange();
               }}
-              className="w-full rounded-lg border border-stone/30 bg-white px-3 py-2.5 font-body text-sm text-bark focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+              className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2"
+              style={{
+                borderColor: "#D1D5DB",
+                color: "var(--craigies-dark-olive)",
+              }}
             >
               {statuses.map((status) => (
                 <option key={status} value={status}>
@@ -202,7 +248,8 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
 
           {/* Date Range */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <label className="mb-1 block font-body text-sm font-medium text-stone">
+            <label className="mb-1 block text-sm font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}>
               Date Range
             </label>
             <div className="flex gap-2">
@@ -213,7 +260,11 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                   setDateFrom(e.target.value);
                   handleFilterChange();
                 }}
-                className="w-full rounded-lg border border-stone/30 bg-white px-3 py-2.5 font-body text-sm text-bark focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2"
+              style={{
+                borderColor: "#D1D5DB",
+                color: "var(--craigies-dark-olive)",
+              }}
               />
               <input
                 type="date"
@@ -222,7 +273,11 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                   setDateTo(e.target.value);
                   handleFilterChange();
                 }}
-                className="w-full rounded-lg border border-stone/30 bg-white px-3 py-2.5 font-body text-sm text-bark focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2"
+              style={{
+                borderColor: "#D1D5DB",
+                color: "var(--craigies-dark-olive)",
+              }}
               />
             </div>
           </div>
@@ -230,36 +285,45 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
       </div>
 
       {/* Bookings Table */}
-      <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+      <div className="rounded-2xl bg-white p-6 shadow-md">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-cloud">
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Ref
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Parent Name
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Email
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Club
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Children
                 </th>
-                <th className="pb-3 text-right font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-right text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Amount
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Status
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Date
                 </th>
-                <th className="pb-3 text-right font-body text-sm font-semibold text-stone">
+                <th className="pb-3 text-right text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                   Actions
                 </th>
               </tr>
@@ -271,19 +335,24 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                   onClick={() => handleRowClick(booking.id)}
                   className="cursor-pointer transition-colors hover:bg-cloud/50"
                 >
-                  <td className="py-4 font-body text-sm font-medium text-bark">
+                  <td className="py-4 text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     {booking.ref}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     {booking.parentName}
                   </td>
-                  <td className="py-4 font-body text-sm text-stone">
+                  <td className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     {booking.email}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     {booking.club}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     {booking.children.length === 0 ? (
                       <span className="text-pebble">—</span>
                     ) : (
@@ -294,18 +363,21 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                       </span>
                     )}
                   </td>
-                  <td className="py-4 text-right font-body text-sm font-medium text-bark">
+                  <td className="py-4 text-right text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     £{booking.amount.toFixed(2)}
                   </td>
                   <td className="py-4">
                     <span
-                      className={`inline-flex rounded-full px-2.5 py-1 font-body text-xs font-medium ${getStatusStyles(booking.status)}`}
+                      className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                      style={getStatusBadgeStyles(booking.status)}
                     >
                       {booking.status.charAt(0).toUpperCase() +
                         booking.status.slice(1)}
                     </span>
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                     {formatDate(booking.date)}
                   </td>
                   <td className="py-4 text-right">
@@ -314,7 +386,8 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                         e.stopPropagation();
                         handleRowClick(booking.id);
                       }}
-                      className="rounded-lg bg-forest px-3 py-1.5 font-body text-xs font-medium text-white transition-colors hover:bg-meadow"
+                      className="rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+                      style={{ backgroundColor: "var(--craigies-olive)" }}
                     >
                       View
                     </button>
@@ -328,7 +401,7 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
         {/* Empty state */}
         {paginatedBookings.length === 0 && (
           <div className="py-12 text-center">
-            <p className="font-body text-stone">
+            <p style={{ color: "var(--craigies-dark-olive)" }}>
               No bookings found matching your criteria.
             </p>
           </div>
@@ -337,7 +410,10 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between border-t border-cloud pt-4">
-            <p className="font-body text-sm text-stone">
+            <p
+              className="text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
               {Math.min(currentPage * ITEMS_PER_PAGE, filteredBookings.length)}{" "}
               of {filteredBookings.length} bookings
@@ -346,7 +422,11 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone/30 text-stone transition-colors hover:bg-cloud disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -355,11 +435,14 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg font-body text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? "bg-forest text-white"
-                        : "border border-stone/30 text-stone hover:bg-cloud"
-                    }`}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor:
+                        currentPage === page ? "var(--craigies-olive)" : "transparent",
+                      color:
+                        currentPage === page ? "white" : "var(--craigies-dark-olive)",
+                      border: currentPage === page ? "none" : "1px solid #D1D5DB",
+                    }}
                   >
                     {page}
                   </button>
@@ -370,7 +453,11 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone/30 text-stone transition-colors hover:bg-cloud disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>

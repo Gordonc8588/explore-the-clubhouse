@@ -142,6 +142,24 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-meadow);
 }
 
+/* Legal pages back link hover */
+.legal-back-link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.legal-back-link:hover {
+  color: white;
+}
+
+/* Legal pages contact link hover */
+.legal-contact-link {
+  color: var(--craigies-burnt-orange);
+}
+
+.legal-contact-link:hover {
+  opacity: 0.8;
+}
+
 /* Testimonial Carousel Animation */
 @keyframes fade-in {
   from {
@@ -183,4 +201,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+/* CTA Button Secondary Hover State */
+.cta-button-secondary:hover {
+  color: var(--craigies-olive) !important;
 }

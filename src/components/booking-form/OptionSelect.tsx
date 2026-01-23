@@ -42,38 +42,48 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
         key={option.id}
         type="button"
         onClick={() => handleSelect(option)}
-        className={`
-          w-full p-6 rounded-2xl text-left transition-all
-          ${
-            isSelected
-              ? "bg-forest text-white ring-2 ring-forest ring-offset-2"
-              : "bg-white hover:shadow-[var(--shadow-lg)] shadow-[var(--shadow-md)]"
-          }
-        `}
+        className="w-full p-6 rounded-2xl text-left transition-all bg-white hover:shadow-lg shadow-md"
+        style={
+          isSelected
+            ? {
+                backgroundColor: "var(--craigies-burnt-orange)",
+                color: "white",
+                outline: "2px solid var(--craigies-burnt-orange)",
+                outlineOffset: "2px",
+              }
+            : {}
+        }
       >
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
             <h4
-              className={`font-display text-lg font-bold ${
-                isSelected ? "text-white" : "text-bark"
-              }`}
+              className="text-lg font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: isSelected ? "white" : "var(--craigies-dark-olive)",
+              }}
             >
               {option.name}
             </h4>
             {option.description && (
               <p
-                className={`mt-1 text-sm ${
-                  isSelected ? "text-white/80" : "text-stone"
-                }`}
+                className="mt-1 text-sm"
+                style={{
+                  color: isSelected ? "rgba(255, 255, 255, 0.8)" : "#6B7280",
+                }}
               >
                 {option.description}
               </p>
             )}
           </div>
           <div
-            className={`font-display text-xl font-bold whitespace-nowrap ${
-              isSelected ? "text-sunshine" : "text-forest"
-            }`}
+            className="text-xl font-bold whitespace-nowrap"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: isSelected
+                ? "white"
+                : "var(--craigies-burnt-orange)",
+            }}
           >
             {priceLabel}
           </div>
@@ -81,8 +91,8 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
         {isSelected && (
           <div className="mt-4 flex items-center gap-2 text-sm text-white/90">
             <svg
-              className="w-5 h-5 text-sunshine"
-              fill="currentColor"
+              className="w-5 h-5"
+              fill="white"
               viewBox="0 0 20 20"
               aria-hidden="true"
             >
@@ -104,7 +114,15 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
 
     return (
       <div className="space-y-3">
-        <h3 className="font-display text-lg font-semibold text-bark">{title}</h3>
+        <h3
+          className="text-lg font-semibold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
+          {title}
+        </h3>
         <div className="grid gap-3">
           {groupOptions
             .sort((a, b) => a.sort_order - b.sort_order)
@@ -117,7 +135,13 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-bark">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           Choose Your Booking Option
         </h2>
         <p className="mt-1 text-stone">

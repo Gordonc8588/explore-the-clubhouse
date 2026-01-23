@@ -62,14 +62,17 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
   };
 
   return (
-    <div className="bg-cream min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--craigies-cream)" }}>
       {/* Success Banner */}
-      <div className="bg-forest py-8 sm:py-12">
+      <div className="py-8 sm:py-12" style={{ backgroundColor: "var(--craigies-olive)" }}>
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 rounded-full mb-4">
             <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mb-2">
+          <h1
+            className="text-3xl sm:text-4xl font-bold text-white mb-2"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
             Booking Confirmed!
           </h1>
           <p className="text-white/90 text-lg">
@@ -80,13 +83,31 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
 
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Booking Reference */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 sm:p-8 mb-6">
+        <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-sm text-stone">Booking Reference</p>
-              <p className="font-display text-2xl font-bold text-bark">{bookingRef}</p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
+                {bookingRef}
+              </p>
             </div>
-            <div className={"px-3 py-1 rounded-full text-sm font-semibold " + (isComplete ? "bg-sage/30 text-forest" : "bg-amber/20 text-amber-700")}>
+            <div
+              className="px-3 py-1 rounded-full text-sm font-semibold"
+              style={{
+                backgroundColor: isComplete
+                  ? "var(--craigies-cream)"
+                  : "rgba(212, 132, 62, 0.2)",
+                color: isComplete
+                  ? "var(--craigies-olive)"
+                  : "var(--craigies-burnt-orange)",
+              }}
+            >
               {isComplete ? "Complete" : "Pending Child Info"}
             </div>
           </div>
@@ -94,49 +115,66 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
           {/* Booking Details Grid */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-forest mt-0.5" />
+              <Calendar className="w-5 h-5 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Club</p>
-                <p className="font-semibold text-bark">{club.name}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {club.name}
+                </p>
                 <p className="text-sm text-stone">{formatDateRange(club.start_date, club.end_date)}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-forest mt-0.5" />
+              <Clock className="w-5 h-5 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Session</p>
-                <p className="font-semibold text-bark">{bookingOption.name}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {bookingOption.name}
+                </p>
                 <p className="text-sm text-stone">{getSessionTimes()}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 text-forest mt-0.5" />
+              <Users className="w-5 h-5 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Children</p>
-                <p className="font-semibold text-bark">{booking.num_children} {booking.num_children === 1 ? "child" : "children"}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {booking.num_children} {booking.num_children === 1 ? "child" : "children"}
+                </p>
                 {children.length > 0 && (
                   <p className="text-sm text-stone">{children.map(c => c.name).join(", ")}</p>
                 )}
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <CreditCard className="w-5 h-5 text-forest mt-0.5" />
+              <CreditCard className="w-5 h-5 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <div>
                 <p className="text-sm text-stone">Amount Paid</p>
-                <p className="font-semibold text-bark">{formatPrice(booking.total_amount)}</p>
+                <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  {formatPrice(booking.total_amount)}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Add to Calendar */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 sm:p-8 mb-6">
-          <h2 className="font-display text-xl font-bold text-bark mb-4">Add to Calendar</h2>
+        <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 mb-6">
+          <h2
+            className="text-xl font-bold mb-4"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            Add to Calendar
+          </h2>
           <div className="flex flex-wrap gap-4">
             <a
               href={icsDownloadUrl}
               download
-              className="inline-flex items-center gap-2 px-4 py-2 bg-forest text-white rounded-lg hover:bg-meadow transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
             >
               <Download className="w-4 h-4" />
               Download ICS
@@ -145,7 +183,15 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
               href={googleCalendarUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 border border-forest text-forest rounded-lg hover:bg-sage/20 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 border-2 rounded-lg transition-colors"
+              style={{
+                borderColor: "var(--craigies-dark-olive)",
+                color: "var(--craigies-dark-olive)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "var(--craigies-cream)")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
             >
               <ExternalLink className="w-4 h-4" />
               Google Calendar
@@ -154,28 +200,34 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
         </div>
 
         {/* What Happens Next */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 sm:p-8 mb-6">
-          <h2 className="font-display text-xl font-bold text-bark mb-4">
-            <Sparkles className="inline w-5 h-5 mr-2 text-sunshine" />
+        <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 mb-6">
+          <h2
+            className="text-xl font-bold mb-4"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            <Sparkles className="inline w-5 h-5 mr-2" style={{ color: "var(--craigies-burnt-orange)" }} />
             What Happens Next
           </h2>
           <ul className="space-y-3 text-stone">
             {!isComplete && (
               <li className="flex items-start gap-3">
-                <ChevronRight className="w-5 h-5 text-forest flex-shrink-0 mt-0.5" />
+                <ChevronRight className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
                 <span>Complete child information forms (required before the club starts)</span>
               </li>
             )}
             <li className="flex items-start gap-3">
-              <ChevronRight className="w-5 h-5 text-forest flex-shrink-0 mt-0.5" />
+              <ChevronRight className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <span>Check your email for confirmation and important details</span>
             </li>
             <li className="flex items-start gap-3">
-              <ChevronRight className="w-5 h-5 text-forest flex-shrink-0 mt-0.5" />
+              <ChevronRight className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <span>Drop off your child at the farm at {formatTime(club.morning_start)}</span>
             </li>
             <li className="flex items-start gap-3">
-              <ChevronRight className="w-5 h-5 text-forest flex-shrink-0 mt-0.5" />
+              <ChevronRight className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
               <span>Bring suitable outdoor clothing and a packed lunch</span>
             </li>
           </ul>
@@ -186,14 +238,27 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
           {!isComplete && (
             <Link
               href={"/complete/" + booking.id}
-              className="inline-flex items-center justify-center gap-2 bg-sunshine text-bark font-display font-semibold py-3 px-6 rounded-lg hover:bg-amber transition-colors"
+              className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               Complete Child Information
             </Link>
           )}
           <Link
             href={"/add-days/" + booking.id}
-            className="inline-flex items-center justify-center gap-2 border border-forest text-forest font-display font-semibold py-3 px-6 rounded-lg hover:bg-sage/20 transition-colors"
+            className="inline-flex items-center justify-center gap-2 border-2 font-semibold py-3 px-6 rounded-lg transition-colors"
+            style={{
+              borderColor: "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+              fontFamily: "'Playfair Display', serif",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "var(--craigies-cream)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
             Add More Days
           </Link>

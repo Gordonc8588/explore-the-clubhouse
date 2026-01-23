@@ -372,7 +372,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 font-body text-sm text-stone transition-colors hover:text-bark"
+        className="flex items-center gap-2 text-sm transition-opacity hover:opacity-80"
+        style={{ color: "var(--craigies-dark-olive)" }}
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Clubs
@@ -380,12 +381,18 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Page Header */}
-        <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-md sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-display text-2xl font-bold text-bark">
+            <h2
+              className="text-2xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               {isNew ? "Create New Club" : "Edit Club"}
             </h2>
-            <p className="mt-1 font-body text-stone">
+            <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
               {isNew
                 ? "Set up a new holiday club session"
                 : "Update club details and settings"}
@@ -395,7 +402,12 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
             <button
               type="button"
               onClick={() => router.back()}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-stone/30 px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-cloud"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-semibold transition-opacity hover:opacity-80"
+              style={{
+                borderColor: "var(--craigies-dark-olive)",
+                color: "var(--craigies-dark-olive)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               <X className="h-5 w-5" />
               Cancel
@@ -403,7 +415,11 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               <Save className="h-5 w-5" />
               {isSaving ? "Saving..." : "Save Club"}
@@ -412,26 +428,47 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         </div>
 
         {/* Club Details Section */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-            <Calendar className="h-5 w-5 text-forest" />
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h3
+            className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            <Calendar className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             Club Details
           </h3>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             {/* Name */}
             <div className="sm:col-span-2">
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label
+                className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 Club Name *
               </label>
               <input
                 type="text"
                 {...register("name", { required: "Club name is required" })}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
                 placeholder="e.g., Easter Holiday Club 2025"
               />
               {errors.name && (
-                <p className="mt-1 font-body text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.name.message}
                 </p>
               )}
@@ -439,17 +476,32 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
 
             {/* Slug */}
             <div className="sm:col-span-2">
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label
+                className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 URL Slug *
               </label>
               <input
                 type="text"
                 {...register("slug", { required: "Slug is required" })}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
                 placeholder="e.g., easter-2025"
               />
               {errors.slug && (
-                <p className="mt-1 font-body text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.slug.message}
                 </p>
               )}
@@ -457,20 +509,38 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
 
             {/* Description */}
             <div className="sm:col-span-2">
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label
+                className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 Description
               </label>
               <textarea
                 {...register("description")}
                 rows={3}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
                 placeholder="Describe the club activities and what children can expect..."
               />
             </div>
 
             {/* Image URL */}
             <div className="sm:col-span-2">
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label
+                className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 <div className="flex items-center gap-2">
                   <ImageIcon className="h-4 w-4" />
                   Image URL
@@ -479,23 +549,50 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
               <input
                 type="url"
                 {...register("imageUrl")}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
                 placeholder="https://example.com/image.jpg"
               />
             </div>
 
             {/* Start Date */}
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label
+                className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 Start Date *
               </label>
               <input
                 type="date"
                 {...register("startDate", { required: "Start date is required" })}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
               {errors.startDate && (
-                <p className="mt-1 font-body text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.startDate.message}
                 </p>
               )}
@@ -503,16 +600,31 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
 
             {/* End Date */}
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label
+                className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 End Date *
               </label>
               <input
                 type="date"
                 {...register("endDate", { required: "End date is required" })}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
               {errors.endDate && (
-                <p className="mt-1 font-body text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.endDate.message}
                 </p>
               )}
@@ -521,66 +633,127 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         </div>
 
         {/* Session Times Section */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-            <Clock className="h-5 w-5 text-forest" />
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h3 className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}>
+            <Clock className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             Session Times
           </h3>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                 Morning Start
               </label>
               <input
                 type="time"
                 {...register("morningStart")}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                 Morning End
               </label>
               <input
                 type="time"
                 {...register("morningEnd")}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                 Afternoon Start
               </label>
               <input
                 type="time"
                 {...register("afternoonStart")}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                 Afternoon End
               </label>
               <input
                 type="time"
                 {...register("afternoonEnd")}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
           </div>
         </div>
 
         {/* Age Range Section */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-            <Users className="h-5 w-5 text-forest" />
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h3 className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}>
+            <Users className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             Age Range
           </h3>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                 Minimum Age
               </label>
               <input
@@ -588,11 +761,24 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                 min="3"
                 max="18"
                 {...register("minAge", { valueAsNumber: true })}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
             <div>
-              <label className="mb-2 block font-body text-sm font-medium text-stone">
+              <label className="mb-2 block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                 Maximum Age
               </label>
               <input
@@ -600,7 +786,19 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                 min="3"
                 max="18"
                 {...register("maxAge", { valueAsNumber: true })}
-                className="w-full rounded-lg border border-stone/30 px-4 py-3 font-body text-bark transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D1D5DB";
+                  e.target.style.boxShadow = "none";
+                }}
               />
             </div>
             <div className="flex items-end sm:col-span-2">
@@ -608,9 +806,14 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                 <input
                   type="checkbox"
                   {...register("isActive")}
-                  className="h-5 w-5 rounded border-stone/30 text-forest focus:ring-sage/30"
+                  className="h-5 w-5 rounded"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-olive)",
+                  }}
                 />
-                <span className="font-body font-medium text-bark">
+                <span className="font-medium"
+                          style={{ color: "var(--craigies-dark-olive)" }}>
                   Club is active and visible to parents
                 </span>
               </label>
@@ -619,14 +822,18 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         </div>
 
         {/* Days Section */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <button
             type="button"
             onClick={() => setShowDaysSection(!showDaysSection)}
             className="flex w-full items-center justify-between"
           >
-            <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-              <Calendar className="h-5 w-5 text-forest" />
+            <h3 className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}>
+              <Calendar className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
               Club Days ({dayFields.filter((d) => !d.isSkipped).length} active)
             </h3>
             {showDaysSection ? (
@@ -646,28 +853,39 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                 <>
                   {/* Bulk capacity controls */}
                   <div className="mt-4 flex flex-wrap items-center gap-4 rounded-lg bg-cloud/50 p-4">
-                    <span className="font-body text-sm font-medium text-bark">
+                    <span className="text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}>
                       Set all capacities:
                     </span>
                     <div className="flex items-center gap-2">
-                      <label className="font-body text-sm text-stone">Morning:</label>
+                      <label className="text-sm"
+                style={{ color: "var(--craigies-dark-olive)" }}>Morning:</label>
                       <input
                         type="number"
                         min="0"
                         defaultValue={20}
-                        className="w-20 rounded-lg border border-stone/30 px-3 py-1.5 font-body text-bark focus:border-forest focus:outline-none"
+                        className="w-20 rounded-lg border px-3 py-1.5 focus:outline-none"
+                        style={{
+                          borderColor: "#D1D5DB",
+                          color: "var(--craigies-dark-olive)",
+                        }}
                         onBlur={(e) =>
                           setAllDaysCapacity("morningCapacity", parseInt(e.target.value) || 0)
                         }
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="font-body text-sm text-stone">Afternoon:</label>
+                      <label className="text-sm"
+                style={{ color: "var(--craigies-dark-olive)" }}>Afternoon:</label>
                       <input
                         type="number"
                         min="0"
                         defaultValue={20}
-                        className="w-20 rounded-lg border border-stone/30 px-3 py-1.5 font-body text-bark focus:border-forest focus:outline-none"
+                        className="w-20 rounded-lg border px-3 py-1.5 focus:outline-none"
+                        style={{
+                          borderColor: "#D1D5DB",
+                          color: "var(--craigies-dark-olive)",
+                        }}
                         onBlur={(e) =>
                           setAllDaysCapacity("afternoonCapacity", parseInt(e.target.value) || 0)
                         }
@@ -676,7 +894,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    <div className="hidden items-center gap-4 border-b border-cloud pb-2 font-body text-sm font-medium text-stone sm:flex">
+                    <div className="hidden items-center gap-4 border-b border-cloud pb-2 text-sm font-medium sm:flex"
+                      style={{ color: "var(--craigies-dark-olive)" }}>
                       <div className="w-8"></div>
                       <div className="w-28">Day</div>
                       <div className="flex-1">Date</div>
@@ -702,7 +921,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                         <div className="w-28 font-body font-medium text-bark">
                           {field.dayName}
                         </div>
-                        <div className="flex-1 font-body text-stone">
+                        <div className="flex-1"
+                          style={{ color: "var(--craigies-dark-olive)" }}>
                           {new Date(field.date).toLocaleDateString("en-GB", {
                             day: "numeric",
                             month: "short",
@@ -710,7 +930,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                           })}
                         </div>
                         <div className="flex w-full items-center gap-2 sm:w-28 sm:justify-center">
-                          <span className="font-body text-xs text-stone sm:hidden">
+                          <span className="text-xs sm:hidden"
+                          style={{ color: "var(--craigies-dark-olive)" }}>
                             AM:
                           </span>
                           <input
@@ -720,11 +941,16 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                               valueAsNumber: true,
                             })}
                             disabled={field.isSkipped}
-                            className="w-16 rounded-lg border border-stone/30 px-2 py-1.5 text-center font-body text-bark disabled:bg-cloud disabled:text-stone focus:border-forest focus:outline-none"
+                            className="w-16 rounded-lg border px-2 py-1.5 text-center disabled:bg-cloud focus:outline-none"
+                            style={{
+                              borderColor: "#D1D5DB",
+                              color: "var(--craigies-dark-olive)",
+                            }}
                           />
                         </div>
                         <div className="flex w-full items-center gap-2 sm:w-28 sm:justify-center">
-                          <span className="font-body text-xs text-stone sm:hidden">
+                          <span className="text-xs sm:hidden"
+                          style={{ color: "var(--craigies-dark-olive)" }}>
                             PM:
                           </span>
                           <input
@@ -734,14 +960,19 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                               valueAsNumber: true,
                             })}
                             disabled={field.isSkipped}
-                            className="w-16 rounded-lg border border-stone/30 px-2 py-1.5 text-center font-body text-bark disabled:bg-cloud disabled:text-stone focus:border-forest focus:outline-none"
+                            className="w-16 rounded-lg border px-2 py-1.5 text-center disabled:bg-cloud focus:outline-none"
+                            style={{
+                              borderColor: "#D1D5DB",
+                              color: "var(--craigies-dark-olive)",
+                            }}
                           />
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <p className="mt-4 font-body text-sm text-stone">
+                  <p className="mt-4 text-sm"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
                     Check the box to skip specific days (e.g., weekends or bank holidays).
                     Weekends are skipped by default.
                   </p>
@@ -752,14 +983,18 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         </div>
 
         {/* Booking Options Section */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <button
             type="button"
             onClick={() => setShowOptionsSection(!showOptionsSection)}
             className="flex w-full items-center justify-between"
           >
-            <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-              <Users className="h-5 w-5 text-forest" />
+            <h3 className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}>
+              <Users className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
               Booking Options ({optionFields.length})
             </h3>
             {showOptionsSection ? (
@@ -868,12 +1103,18 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                             <input
                               type="checkbox"
                               {...register(`bookingOptions.${index}.isActive`)}
-                              className="h-4 w-4 rounded border-stone/30 text-forest focus:ring-sage/30"
+                              className="h-4 w-4 rounded"
+                              style={{
+                                borderColor: "#D1D5DB",
+                                color: "var(--craigies-olive)",
+                              }}
                             />
-                            <span className="font-body text-sm text-bark">Active</span>
+                            <span className="text-sm"
+                            style={{ color: "var(--craigies-dark-olive)" }}>Active</span>
                           </label>
                           <div className="flex items-center gap-2">
-                            <label className="font-body text-sm text-stone">
+                            <label className="text-sm"
+                style={{ color: "var(--craigies-dark-olive)" }}>
                               Sort Order:
                             </label>
                             <input
@@ -905,7 +1146,12 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
               <button
                 type="button"
                 onClick={addBookingOption}
-                className="mt-4 flex items-center gap-2 rounded-lg border-2 border-dashed border-sage/50 px-4 py-3 font-display font-semibold text-forest transition-colors hover:border-forest hover:bg-sage/10"
+                className="mt-4 flex items-center gap-2 rounded-lg border-2 border-dashed px-4 py-3 font-semibold transition-opacity hover:opacity-80"
+                style={{
+                  borderColor: "rgba(122, 124, 74, 0.5)",
+                  color: "var(--craigies-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 <Plus className="h-5 w-5" />
                 Add Booking Option
@@ -915,11 +1161,16 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         </div>
 
         {/* Bottom Save Bar */}
-        <div className="flex justify-end gap-3 rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="flex justify-end gap-3 rounded-2xl bg-white p-6 shadow-md">
           <button
             type="button"
             onClick={() => router.back()}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-stone/30 px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-cloud"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-semibold transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             <X className="h-5 w-5" />
             Cancel
@@ -927,7 +1178,11 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            style={{
+              backgroundColor: "var(--craigies-burnt-orange)",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             <Save className="h-5 w-5" />
             {isSaving ? "Saving..." : "Save Club"}

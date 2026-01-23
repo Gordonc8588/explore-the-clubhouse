@@ -9,15 +9,24 @@ export const metadata = {
 
 export default function GalleryPage() {
   return (
-    <div className="bg-cream">
+    <div style={{ backgroundColor: "var(--craigies-cream)" }}>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sage/30 to-cream">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section
+        className="relative overflow-hidden py-16 sm:py-24"
+        style={{ backgroundColor: "var(--craigies-olive)" }}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="font-display text-4xl font-extrabold tracking-tight text-bark sm:text-5xl">
+            <h1
+              className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "white",
+              }}
+            >
               Gallery
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-stone sm:text-xl">
+            <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-white/90 sm:text-xl">
               Take a peek at the wonderful adventures and magical moments that
               happen every day at The Clubhouse. From farm animals to
               forest fun, see what your children could be enjoying!
@@ -36,11 +45,17 @@ export default function GalleryPage() {
       {/* CTA Section */}
       <section className="pb-16 sm:pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl bg-gradient-to-r from-meadow to-forest p-8 text-center sm:p-12">
-            <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
+          <div
+            className="rounded-2xl p-8 text-center sm:p-12"
+            style={{ backgroundColor: "var(--craigies-olive)" }}
+          >
+            <h2
+              className="text-3xl font-bold text-white sm:text-4xl"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               Want to See More?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl font-body text-lg text-sage">
+            <p className="mx-auto mt-4 max-w-xl font-body text-lg text-white/90">
               Follow us on social media for daily updates, or book a visit to
               see the Clubhouse in person. Your children could be making these
               memories too!
@@ -48,13 +63,18 @@ export default function GalleryPage() {
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <a
                 href="/clubs"
-                className="inline-block rounded-lg bg-sunshine px-8 py-3 font-display text-lg font-semibold text-bark transition-colors hover:bg-amber focus:outline-none focus:ring-2 focus:ring-sunshine focus:ring-offset-2 focus:ring-offset-forest"
+                className="inline-block rounded-lg px-8 py-3 text-lg font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 Book a Place
               </a>
               <a
                 href="/contact"
-                className="inline-block rounded-lg border-2 border-white px-8 py-3 font-display text-lg font-semibold text-white transition-colors hover:bg-white hover:text-forest focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-forest"
+                className="cta-button-secondary inline-block rounded-lg border-2 border-white px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+                style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Arrange a Visit
               </a>

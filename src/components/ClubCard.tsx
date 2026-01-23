@@ -34,9 +34,12 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
   const ageRange = formatAgeRange(club.min_age, club.max_age);
 
   return (
-    <article className="bg-white rounded-2xl shadow-[var(--shadow-md)] overflow-hidden transition-shadow hover:shadow-[var(--shadow-lg)]">
+    <article className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow hover:shadow-lg">
       {/* Image */}
-      <div className="relative aspect-[4/3] bg-cloud">
+      <div
+        className="relative aspect-[4/3]"
+        style={{ backgroundColor: "var(--craigies-cream)" }}
+      >
         {club.image_url ? (
           <Image
             src={club.image_url}
@@ -46,9 +49,13 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-sage/20">
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ backgroundColor: "rgba(122, 124, 74, 0.2)" }}
+          >
             <svg
-              className="w-16 h-16 text-sage"
+              className="w-16 h-16"
+              style={{ color: "var(--craigies-olive)" }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -66,7 +73,13 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
 
         {/* Sold Out Badge */}
         {isSoldOut && (
-          <div className="absolute top-3 right-3 bg-coral text-white font-display text-xs font-bold px-3 py-1 rounded-full">
+          <div
+            className="absolute top-3 right-3 text-white text-xs font-bold px-3 py-1 rounded-full"
+            style={{
+              backgroundColor: "#E07A5F",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             Sold Out
           </div>
         )}
@@ -74,12 +87,21 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="font-display text-xl font-bold text-bark mb-2">
+        <h3
+          className="text-xl font-bold mb-2"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           {club.name}
         </h3>
 
         <div className="space-y-1 mb-4">
-          <p className="text-stone text-sm flex items-center gap-2">
+          <p
+            className="text-sm flex items-center gap-2"
+            style={{ color: "var(--craigies-dark-olive)" }}
+          >
             <svg
               className="w-4 h-4"
               fill="none"
@@ -96,7 +118,10 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
             </svg>
             {dateRange}
           </p>
-          <p className="text-stone text-sm flex items-center gap-2">
+          <p
+            className="text-sm flex items-center gap-2"
+            style={{ color: "var(--craigies-dark-olive)" }}
+          >
             <svg
               className="w-4 h-4"
               fill="none"
@@ -118,11 +143,14 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
         {/* CTA Button */}
         <Link
           href={`/book/${club.slug}`}
-          className={`block w-full text-center font-display font-semibold py-3 px-6 rounded-lg transition-colors ${
-            isSoldOut
-              ? "bg-forest text-white hover:bg-meadow"
-              : "bg-sunshine text-bark hover:bg-amber"
-          }`}
+          className="block w-full text-center font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+          style={{
+            backgroundColor: isSoldOut
+              ? "var(--craigies-olive)"
+              : "var(--craigies-burnt-orange)",
+            color: "white",
+            fontFamily: "'Playfair Display', serif",
+          }}
         >
           {isSoldOut ? "Join Waitlist" : "Book Now"}
         </Link>

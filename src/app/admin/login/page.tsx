@@ -50,27 +50,39 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-4 py-12">
+    <div
+      className="flex min-h-screen items-center justify-center px-4 py-12"
+      style={{ backgroundColor: "var(--craigies-cream)" }}
+    >
       <div className="w-full max-w-md">
         {/* Logo/Title Area */}
         <div className="mb-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-forest">
+          <div
+            className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+            style={{ backgroundColor: "var(--craigies-olive)" }}
+          >
             <Lock className="h-8 w-8 text-white" />
           </div>
-          <h1 className="mt-6 font-display text-3xl font-bold text-bark">
+          <h1
+            className="mt-6 text-3xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             Admin Login
           </h1>
-          <p className="mt-2 font-body text-stone">
+          <p className="mt-2" style={{ color: "var(--craigies-dark-olive)" }}>
             Sign in to access the admin dashboard
           </p>
         </div>
 
         {/* Login Form Card */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:p-8">
+        <div className="rounded-2xl bg-white p-6 shadow-md sm:p-8">
           {/* Error Message */}
           {error && (
             <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
-              <p className="font-body text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
@@ -79,27 +91,44 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block font-body text-sm font-medium text-stone"
+                className="block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
               >
                 Email address
               </label>
               <div className="relative mt-2">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                  <Mail className="h-5 w-5 text-pebble" />
+                  <Mail className="h-5 w-5 text-stone" />
                 </div>
                 <input
                   type="email"
                   id="email"
                   autoComplete="email"
                   {...register("email")}
-                  className={`block w-full rounded-lg border bg-white py-3 pl-12 pr-4 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
+                  className={`block w-full rounded-lg border bg-white py-3 pl-12 pr-4 placeholder:text-stone/50 focus:outline-none focus:ring-2 ${
                     errors.email ? "border-red-500" : "border-stone/30"
                   }`}
+                  style={{
+                    color: "var(--craigies-dark-olive)",
+                    borderColor: errors.email ? "#EF4444" : undefined,
+                  }}
+                  onFocus={(e) => {
+                    if (!errors.email) {
+                      e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                      e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (!errors.email) {
+                      e.target.style.borderColor = "rgba(107, 114, 128, 0.3)";
+                      e.target.style.boxShadow = "none";
+                    }
+                  }}
                   placeholder="you@example.com"
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 font-body text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.email.message}
                 </p>
               )}
@@ -109,27 +138,44 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block font-body text-sm font-medium text-stone"
+                className="block text-sm font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
               >
                 Password
               </label>
               <div className="relative mt-2">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                  <Lock className="h-5 w-5 text-pebble" />
+                  <Lock className="h-5 w-5 text-stone" />
                 </div>
                 <input
                   type="password"
                   id="password"
                   autoComplete="current-password"
                   {...register("password")}
-                  className={`block w-full rounded-lg border bg-white py-3 pl-12 pr-4 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
+                  className={`block w-full rounded-lg border bg-white py-3 pl-12 pr-4 placeholder:text-stone/50 focus:outline-none focus:ring-2 ${
                     errors.password ? "border-red-500" : "border-stone/30"
                   }`}
+                  style={{
+                    color: "var(--craigies-dark-olive)",
+                    borderColor: errors.password ? "#EF4444" : undefined,
+                  }}
+                  onFocus={(e) => {
+                    if (!errors.password) {
+                      e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                      e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (!errors.password) {
+                      e.target.style.borderColor = "rgba(107, 114, 128, 0.3)";
+                      e.target.style.boxShadow = "none";
+                    }
+                  }}
                   placeholder="Enter your password"
                 />
               </div>
               {errors.password && (
-                <p className="mt-1 font-body text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.password.message}
                 </p>
               )}
@@ -139,7 +185,13 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-forest px-6 py-3 font-display font-semibold text-white transition-colors hover:bg-meadow focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
+              onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.opacity = "0.9")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
               {isSubmitting ? (
                 <>
@@ -157,10 +209,13 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Footer Link */}
-        <p className="mt-6 text-center font-body text-sm text-stone">
+        <p className="mt-6 text-center text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
           <a
             href="/"
-            className="font-medium text-forest transition-colors hover:text-meadow"
+            className="font-medium transition-opacity"
+            style={{ color: "var(--craigies-burnt-orange)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
             Back to main site
           </a>

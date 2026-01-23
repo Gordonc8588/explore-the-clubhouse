@@ -309,21 +309,31 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
   // Booking not found
   if (!bookingData) {
     return (
-      <div className="bg-cream min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "var(--craigies-cream)" }}>
+        <div className="bg-white rounded-2xl shadow-md p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }}>
             <AlertCircle className="w-8 h-8 text-error" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-bark mb-2">
+          <h1
+            className="text-2xl font-bold mb-2"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             Booking Not Found
           </h1>
-          <p className="font-body text-stone mb-6">
+          <p className="text-stone mb-6">
             We couldn&apos;t find this booking. Please check your email for the
             correct link.
           </p>
           <Link
             href="/clubs"
-            className="inline-block bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
+            className="inline-block text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor: "var(--craigies-burnt-orange)",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             View Clubs
           </Link>
@@ -512,13 +522,14 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
   // No additional days available
   if (availableDays.length === 0) {
     return (
-      <div className="bg-cream min-h-screen">
+      <div className="min-h-screen" style={{ backgroundColor: "var(--craigies-cream)" }}>
         {/* Header */}
-        <header className="bg-forest">
+        <header style={{ backgroundColor: "var(--craigies-olive)" }}>
           <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
             <Link
               href="/"
-              className="font-display text-lg font-bold text-white hover:text-sage transition-colors"
+              className="text-lg font-bold text-white transition-opacity hover:opacity-80"
+              style={{ fontFamily: "'Playfair Display', serif" }}
             >
               The Clubhouse
             </Link>
@@ -526,31 +537,54 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
         </header>
 
         <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-8 text-center">
-            <div className="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Info className="w-8 h-8 text-forest" />
+          <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: "var(--craigies-cream)" }}>
+              <Info className="w-8 h-8" style={{ color: "var(--craigies-olive)" }} />
             </div>
-            <h1 className="font-display text-2xl font-bold text-bark mb-2">
+            <h1
+              className="text-2xl font-bold mb-2"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               No Additional Days Available
             </h1>
-            <p className="font-body text-stone mb-4">
+            <p className="text-stone mb-4">
               You&apos;ve already booked all available days for {club.name}.
             </p>
-            <p className="font-body text-sm text-stone mb-6">
-              Booking Reference: <span className="font-semibold text-forest">{bookingRef}</span>
+            <p className="text-sm text-stone mb-6">
+              Booking Reference: <span className="font-semibold" style={{ color: "var(--craigies-olive)" }}>{bookingRef}</span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href={`/confirmation/${booking.id}`}
-                className="inline-flex items-center justify-center gap-2 bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back to Booking
               </Link>
               <Link
                 href="/clubs"
-                className="inline-flex items-center justify-center gap-2 border-2 border-forest text-forest font-display font-semibold py-3 px-6 rounded-lg hover:bg-forest hover:text-white transition-colors"
+                className="inline-flex items-center justify-center gap-2 border-2 font-semibold py-3 px-6 rounded-lg transition-colors"
+                style={{
+                  borderColor: "var(--craigies-dark-olive)",
+                  color: "var(--craigies-dark-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--craigies-olive)";
+                  e.currentTarget.style.color = "white";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "var(--craigies-dark-olive)";
+                }}
               >
                 Browse Other Clubs
               </Link>
@@ -562,13 +596,14 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
   }
 
   return (
-    <div className="bg-cream min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--craigies-cream)" }}>
       {/* Header */}
-      <header className="bg-forest">
+      <header style={{ backgroundColor: "var(--craigies-olive)" }}>
         <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="font-display text-lg font-bold text-white hover:text-sage transition-colors"
+            className="text-lg font-bold text-white transition-opacity hover:opacity-80"
+            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             The Clubhouse
           </Link>
@@ -580,47 +615,68 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
         <div className="mb-6">
           <Link
             href={`/confirmation/${booking.id}`}
-            className="inline-flex items-center gap-1 text-forest font-body text-sm hover:underline mb-2"
+            className="inline-flex items-center gap-1 text-sm hover:underline mb-2"
+            style={{ color: "var(--craigies-burnt-orange)" }}
           >
             <ChevronLeft className="w-4 h-4" />
             Back to Booking
           </Link>
-          <h1 className="font-display text-3xl font-bold text-bark">
+          <h1
+            className="text-3xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             Add More Days
           </h1>
-          <p className="font-body text-stone mt-1">
+          <p className="text-stone mt-1">
             Extend your booking with additional days at {club.name}
           </p>
         </div>
 
         {/* Existing Booking Summary */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 mb-6">
-          <h2 className="font-display text-lg font-bold text-bark mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-forest" />
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+          <h2
+            className="text-lg font-bold mb-4 flex items-center gap-2"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            <Calendar className="w-5 h-5" style={{ color: "var(--craigies-burnt-orange)" }} />
             Current Booking Summary
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Club & Reference */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-sage/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-5 h-5 text-forest" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--craigies-cream)" }}>
+                <MapPin className="w-5 h-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Club</p>
-                <p className="font-display font-semibold text-bark">{club.name}</p>
-                <p className="font-body text-xs text-pebble">Ref: {bookingRef}</p>
+                <p className="text-sm text-stone">Club</p>
+                <p className="font-semibold" style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}>
+                  {club.name}
+                </p>
+                <p className="text-xs text-pebble">Ref: {bookingRef}</p>
               </div>
             </div>
 
             {/* Time Slot */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-sage/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Clock className="w-5 h-5 text-forest" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--craigies-cream)" }}>
+                <Clock className="w-5 h-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Time</p>
-                <p className="font-display font-semibold text-bark">
+                <p className="text-sm text-stone">Time</p>
+                <p className="font-semibold" style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}>
                   {formatTimeSlot(bookingOption.time_slot)}
                 </p>
               </div>
@@ -628,16 +684,21 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
 
             {/* Children */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-sage/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-forest" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--craigies-cream)" }}>
+                <Users className="w-5 h-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Children</p>
+                <p className="text-sm text-stone">Children</p>
                 <div className="flex flex-wrap gap-1 mt-0.5">
                   {children.map((child) => (
                     <span
                       key={child.id}
-                      className="inline-block bg-sage/20 text-forest font-display font-medium px-2 py-0.5 rounded-full text-xs"
+                      className="inline-block font-medium px-2 py-0.5 rounded-full text-xs"
+                      style={{
+                        backgroundColor: "var(--craigies-cream)",
+                        color: "var(--craigies-olive)",
+                        fontFamily: "'Playfair Display', serif",
+                      }}
                     >
                       {child.name}
                     </span>
@@ -648,16 +709,20 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
 
             {/* Already Booked Days */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-sage/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Check className="w-5 h-5 text-forest" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--craigies-cream)" }}>
+                <Check className="w-5 h-5" style={{ color: "var(--craigies-burnt-orange)" }} />
               </div>
               <div>
-                <p className="font-body text-sm text-stone">Days Booked</p>
+                <p className="text-sm text-stone">Days Booked</p>
                 <div className="flex flex-wrap gap-1 mt-0.5">
                   {formatBookedDays().map((dateLabel, idx) => (
                     <span
                       key={idx}
-                      className="inline-block bg-forest/10 text-forest font-body text-xs px-2 py-0.5 rounded-full"
+                      className="inline-block text-xs px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: "rgba(122, 124, 74, 0.1)",
+                        color: "var(--craigies-olive)",
+                      }}
                     >
                       {dateLabel}
                     </span>
@@ -669,12 +734,18 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
         </div>
 
         {/* Date Selection Calendar */}
-        <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 mb-6">
-          <h2 className="font-display text-lg font-bold text-bark mb-4 flex items-center gap-2">
-            <CalendarPlus className="w-5 h-5 text-forest" />
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+          <h2
+            className="text-lg font-bold mb-4 flex items-center gap-2"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            <CalendarPlus className="w-5 h-5" style={{ color: "var(--craigies-burnt-orange)" }} />
             Select Additional Days
           </h2>
-          <p className="font-body text-sm text-stone mb-4">
+          <p className="text-sm text-stone mb-4">
             Choose the extra days you&apos;d like to add to your booking.
           </p>
 
@@ -687,10 +758,16 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
               className="p-2 rounded-lg hover:bg-cloud disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous month"
             >
-              <ChevronLeft className="w-5 h-5 text-bark" />
+              <ChevronLeft className="w-5 h-5" style={{ color: "var(--craigies-dark-olive)" }} />
             </button>
 
-            <h3 className="font-display text-xl font-bold text-bark">
+            <h3
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               {monthLabel}
             </h3>
 
@@ -701,7 +778,7 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
               className="p-2 rounded-lg hover:bg-cloud disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Next month"
             >
-              <ChevronRight className="w-5 h-5 text-bark" />
+              <ChevronRight className="w-5 h-5" style={{ color: "var(--craigies-dark-olive)" }} />
             </button>
           </div>
 
@@ -739,12 +816,27 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
                   disabled={!isClickable}
                   className={`
                     aspect-square p-1 rounded-lg flex flex-col items-center justify-center transition-all relative
-                    ${isClickable ? "hover:bg-sage/20 cursor-pointer" : "cursor-default"}
-                    ${isSelected ? "bg-sunshine text-bark ring-2 ring-amber" : ""}
-                    ${isBooked ? "bg-forest/10" : ""}
+                    ${isClickable ? "cursor-pointer" : "cursor-default"}
                     ${!inRange ? "opacity-30" : ""}
                     ${inRange && !isAvailable && !isBooked ? "opacity-50" : ""}
                   `}
+                  style={{
+                    backgroundColor: isSelected
+                      ? "var(--craigies-burnt-orange)"
+                      : isBooked
+                      ? "rgba(122, 124, 74, 0.1)"
+                      : "transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isClickable && !isSelected) {
+                      e.currentTarget.style.backgroundColor = "rgba(122, 124, 74, 0.1)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isClickable && !isSelected) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
                   aria-label={`${date.toLocaleDateString("en-GB", {
                     weekday: "long",
                     day: "numeric",
@@ -752,14 +844,19 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
                   })}${isSelected ? " (selected)" : ""}${isBooked ? " (already booked)" : ""}`}
                 >
                   <span
-                    className={`text-sm font-semibold ${
-                      isSelected ? "text-bark" : isBooked ? "text-forest" : "text-bark"
-                    }`}
+                    className="text-sm font-semibold"
+                    style={{
+                      color: isSelected
+                        ? "white"
+                        : isBooked
+                        ? "var(--craigies-olive)"
+                        : "var(--craigies-dark-olive)",
+                    }}
                   >
                     {date.getDate()}
                   </span>
                   {isBooked && (
-                    <Check className="w-3 h-3 text-forest absolute bottom-1" />
+                    <Check className="w-3 h-3 absolute bottom-1" style={{ color: "var(--craigies-olive)" }} />
                   )}
                 </button>
               );
@@ -770,12 +867,12 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
           <div className="mt-6 pt-4 border-t border-cloud">
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-stone">
               <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-lg bg-sunshine ring-2 ring-amber" />
+                <div className="w-6 h-6 rounded-lg" style={{ backgroundColor: "var(--craigies-burnt-orange)" }} />
                 <span>Selected</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-lg bg-forest/10 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-forest" />
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}>
+                  <Check className="w-3 h-3" style={{ color: "var(--craigies-olive)" }} />
                 </div>
                 <span>Already Booked</span>
               </div>
@@ -793,8 +890,14 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
 
         {/* Selected Days Summary & Price */}
         {selectedDates.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 mb-6">
-            <h2 className="font-display text-lg font-bold text-bark mb-4">
+          <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+            <h2
+              className="text-lg font-bold mb-4"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Your Additional Days
             </h2>
 
@@ -803,7 +906,12 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
               {formatSelectedDates().map((dateLabel, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center bg-sunshine/20 text-bark font-display font-medium px-3 py-1.5 rounded-full text-sm"
+                  className="inline-flex items-center font-medium px-3 py-1.5 rounded-full text-sm"
+                  style={{
+                    backgroundColor: "rgba(212, 132, 62, 0.2)",
+                    color: "var(--craigies-dark-olive)",
+                    fontFamily: "'Playfair Display', serif",
+                  }}
                 >
                   {dateLabel}
                 </span>
@@ -812,12 +920,12 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
 
             {/* Price Calculation */}
             <div className="bg-cloud rounded-xl p-4">
-              <div className="space-y-2 font-body text-sm">
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-stone">
                     {formatPrice(pricePerDayPerChild)} x {selectedDates.length} day{selectedDates.length !== 1 ? "s" : ""} x {numChildren} {numChildren === 1 ? "child" : "children"}
                   </span>
-                  <span className="text-bark font-medium">
+                  <span className="font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
                     {formatPrice(totalPrice)}
                   </span>
                 </div>
@@ -825,8 +933,22 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
 
               <div className="border-t border-pebble/30 mt-3 pt-3">
                 <div className="flex justify-between items-center">
-                  <span className="font-display font-bold text-bark">Total</span>
-                  <span className="font-display text-2xl font-bold text-forest">
+                  <span
+                    className="font-bold"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      color: "var(--craigies-dark-olive)",
+                    }}
+                  >
+                    Total
+                  </span>
+                  <span
+                    className="text-2xl font-bold"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      color: "var(--craigies-burnt-orange)",
+                    }}
+                  >
                     {formatPrice(totalPrice)}
                   </span>
                 </div>
@@ -840,14 +962,20 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
           <button
             onClick={handlePayment}
             disabled={selectedDates.length === 0 || isLoading}
-            className={`
-              w-full flex items-center justify-center gap-2 font-display font-semibold py-4 px-6 rounded-lg transition-colors
-              ${
+            className="w-full flex items-center justify-center gap-2 font-semibold py-4 px-6 rounded-lg transition-opacity"
+            style={{
+              backgroundColor:
                 selectedDates.length > 0 && !isLoading
-                  ? "bg-sunshine text-bark hover:bg-amber cursor-pointer"
-                  : "bg-pebble text-stone cursor-not-allowed"
-              }
-            `}
+                  ? "var(--craigies-burnt-orange)"
+                  : "#9CA3AF",
+              color:
+                selectedDates.length > 0 && !isLoading ? "white" : "#6B7280",
+              cursor:
+                selectedDates.length > 0 && !isLoading
+                  ? "pointer"
+                  : "not-allowed",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             {isLoading ? (
               <>
@@ -885,7 +1013,22 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
 
           <Link
             href={`/confirmation/${booking.id}`}
-            className="w-full flex items-center justify-center gap-2 border-2 border-forest text-forest font-display font-semibold py-3 px-6 rounded-lg hover:bg-forest hover:text-white transition-colors"
+            className="w-full flex items-center justify-center gap-2 border-2 font-semibold py-3 px-6 rounded-lg transition-colors"
+            style={{
+              borderColor: "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+              fontFamily: "'Playfair Display', serif",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--craigies-olive)";
+              e.currentTarget.style.borderColor = "var(--craigies-olive)";
+              e.currentTarget.style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.borderColor = "var(--craigies-dark-olive)";
+              e.currentTarget.style.color = "var(--craigies-dark-olive)";
+            }}
           >
             <ChevronLeft className="w-4 h-4" />
             Cancel
@@ -895,7 +1038,11 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
         {/* Help Text */}
         <p className="text-center text-sm text-stone mt-6">
           Questions?{" "}
-          <Link href="/contact" className="text-forest font-medium hover:underline">
+          <Link
+            href="/contact"
+            className="font-medium hover:underline"
+            style={{ color: "var(--craigies-burnt-orange)" }}
+          >
             Contact us
           </Link>
         </p>

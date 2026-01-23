@@ -30,15 +30,19 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-forest text-white">
+    <footer style={{ backgroundColor: "var(--craigies-olive)" }} className="text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand & About */}
           <div>
-            <Link href="/" className="font-display text-xl font-bold">
+            <Link
+              href="/"
+              className="text-xl font-bold"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               The Clubhouse
             </Link>
-            <p className="mt-4 font-body text-sm text-sage">
+            <p className="mt-4 font-body text-sm text-white/80">
               A children&apos;s holiday club offering outdoor, farm-based
               activities during school holidays. Where adventure meets nature!
             </p>
@@ -46,13 +50,18 @@ export function Footer() {
 
           {/* Navigation Links */}
           <div>
-            <h3 className="font-display text-lg font-semibold">Quick Links</h3>
+            <h3
+              className="text-lg font-semibold"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Quick Links
+            </h3>
             <ul className="mt-4 space-y-2">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="font-body text-sm text-sage transition-colors hover:text-sunshine"
+                    className="font-body text-sm text-white/80 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -63,30 +72,44 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-display text-lg font-semibold">Contact Us</h3>
+            <h3
+              className="text-lg font-semibold"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Contact Us
+            </h3>
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-sunshine" />
-                <span className="font-body text-sm text-sage">
+                <MapPin
+                  className="mt-0.5 h-4 w-4 flex-shrink-0"
+                  style={{ color: "var(--craigies-burnt-orange)" }}
+                />
+                <span className="font-body text-sm text-white/80">
                   West Craigie Farm
                   <br />
                   South Queensferry EH30 9AR
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 flex-shrink-0 text-sunshine" />
+                <Phone
+                  className="h-4 w-4 flex-shrink-0"
+                  style={{ color: "var(--craigies-burnt-orange)" }}
+                />
                 <a
                   href="tel:+447907879303"
-                  className="font-body text-sm text-sage transition-colors hover:text-sunshine"
+                  className="font-body text-sm text-white/80 transition-colors hover:text-white"
                 >
                   07907 879303
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 flex-shrink-0 text-sunshine" />
+                <Mail
+                  className="h-4 w-4 flex-shrink-0"
+                  style={{ color: "var(--craigies-burnt-orange)" }}
+                />
                 <a
                   href="mailto:hello@exploretheclubhouse.co.uk"
-                  className="font-body text-sm text-sage transition-colors hover:text-sunshine"
+                  className="font-body text-sm text-white/80 transition-colors hover:text-white"
                 >
                   hello@exploretheclubhouse.co.uk
                 </a>
@@ -95,14 +118,20 @@ export function Footer() {
 
             {/* Social Links */}
             <div className="mt-6">
-              <h4 className="font-display text-sm font-semibold">Follow Us</h4>
+              <h4
+                className="text-sm font-semibold"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Follow Us
+              </h4>
               <div className="mt-2 flex gap-4">
                 <a
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
-                  className="rounded-full bg-meadow p-2 transition-colors hover:bg-sunshine hover:text-bark"
+                  className="rounded-full p-2 transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
                 >
                   <Facebook className="h-5 w-5" />
                 </a>
@@ -111,7 +140,8 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className="rounded-full bg-meadow p-2 transition-colors hover:bg-sunshine hover:text-bark"
+                  className="rounded-full p-2 transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
                 >
                   <Instagram className="h-5 w-5" />
                 </a>
@@ -121,12 +151,20 @@ export function Footer() {
 
           {/* Newsletter Signup */}
           <div>
-            <h3 className="font-display text-lg font-semibold">Newsletter</h3>
-            <p className="mt-4 font-body text-sm text-sage">
+            <h3
+              className="text-lg font-semibold"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Newsletter
+            </h3>
+            <p className="mt-4 font-body text-sm text-white/80">
               Stay updated with our latest activities and holiday club dates.
             </p>
             {subscribed ? (
-              <p className="mt-4 font-body text-sm text-sunshine">
+              <p
+                className="mt-4 font-body text-sm font-semibold"
+                style={{ color: "var(--craigies-burnt-orange)" }}
+              >
                 Thanks for subscribing!
               </p>
             ) : (
@@ -143,11 +181,24 @@ export function Footer() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
                     required
-                    className="flex-1 rounded-lg border border-meadow bg-white/10 px-4 py-2 font-body text-sm text-white placeholder:text-pebble focus:border-sunshine focus:outline-none focus:ring-2 focus:ring-sunshine/30"
+                    className="flex-1 rounded-lg border px-4 py-2 font-body text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 bg-white/10"
+                    style={{
+                      borderColor: "var(--craigies-dark-olive)",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "var(--craigies-dark-olive)";
+                    }}
                   />
                   <button
                     type="submit"
-                    className="rounded-lg bg-sunshine px-4 py-2 font-display text-sm font-semibold text-bark transition-colors hover:bg-amber"
+                    className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor: "var(--craigies-burnt-orange)",
+                      fontFamily: "'Playfair Display', serif",
+                    }}
                   >
                     Subscribe
                   </button>
@@ -158,7 +209,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 border-t border-meadow pt-8">
+        <div className="mt-12 border-t pt-8" style={{ borderColor: "var(--craigies-dark-olive)" }}>
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             {/* Legal Links */}
             <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
@@ -166,7 +217,7 @@ export function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="font-body text-xs text-sage transition-colors hover:text-sunshine"
+                  className="font-body text-xs text-white/80 transition-colors hover:text-white"
                 >
                   {link.label}
                 </Link>
@@ -174,7 +225,7 @@ export function Footer() {
             </nav>
 
             {/* Copyright */}
-            <p className="font-body text-xs text-sage">
+            <p className="font-body text-xs text-white/80">
               &copy; {new Date().getFullYear()} The Clubhouse. All
               rights reserved.
             </p>

@@ -41,15 +41,24 @@ const teamMembers = [
 
 export default function AboutPage() {
   return (
-    <div className="bg-cream">
+    <div style={{ backgroundColor: "var(--craigies-cream)" }}>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sage/30 to-cream">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section
+        className="relative overflow-hidden py-16 sm:py-24"
+        style={{ backgroundColor: "var(--craigies-olive)" }}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="font-display text-4xl font-extrabold tracking-tight text-bark sm:text-5xl">
+            <h1
+              className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "white",
+              }}
+            >
               About Us
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-stone sm:text-xl">
+            <p className="mx-auto mt-6 max-w-2xl font-body text-lg text-white/90 sm:text-xl">
               Discover the heart behind The Clubhouse and the passionate
               team dedicated to creating unforgettable outdoor adventures for
               your children.
@@ -74,15 +83,27 @@ export default function AboutPage() {
                 />
               </div>
               {/* Decorative element */}
-              <div className="absolute -bottom-4 -right-4 -z-10 h-full w-full rounded-2xl bg-sunshine/20" />
+              <div
+                className="absolute -bottom-4 -right-4 -z-10 h-full w-full rounded-2xl opacity-20"
+                style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
+              />
             </div>
 
             {/* Story Content */}
             <div>
-              <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
+              <h2
+                className="text-3xl font-bold sm:text-4xl"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 Our Story
               </h2>
-              <div className="mt-6 space-y-4 font-body text-lg text-stone leading-relaxed">
+              <div
+                className="mt-6 space-y-4 font-body text-lg leading-relaxed"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 <p>
                   At The Clubhouse at Craigies, we believe learning should feel like
                   an adventure – full of curiosity, creativity and fun. Our approach
@@ -94,17 +115,35 @@ export default function AboutPage() {
                   by connecting with nature, developing real-world skills, and getting
                   involved in the day to day activities of a working farm.
                 </p>
-                <p className="font-display text-xl font-semibold text-forest">
+                <p
+                  className="text-xl font-semibold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-olive)",
+                  }}
+                >
                   Join us in creating unforgettable memories!
                 </p>
               </div>
 
               {/* Mission Statement */}
-              <div className="mt-8 rounded-xl border-l-4 border-forest bg-white p-6 shadow-[var(--shadow-md)]">
-                <p className="font-display text-sm font-semibold uppercase tracking-wide text-meadow">
+              <div
+                className="mt-8 rounded-xl border-l-4 bg-white p-6 shadow-md"
+                style={{ borderColor: "var(--craigies-burnt-orange)" }}
+              >
+                <p
+                  className="text-sm font-semibold uppercase tracking-wide"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-burnt-orange)",
+                  }}
+                >
                   Our Mission
                 </p>
-                <p className="mt-2 font-body text-lg text-bark">
+                <p
+                  className="mt-2 font-body text-lg"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   To inspire a love of nature and outdoor learning in every child,
                   creating joyful memories and building confidence through hands-on
                   farm adventures.
@@ -119,10 +158,19 @@ export default function AboutPage() {
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
+            <h2
+              className="text-3xl font-bold sm:text-4xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Meet Our Team
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl font-body text-lg text-stone">
+            <p
+              className="mx-auto mt-4 max-w-2xl font-body text-lg"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Our dedicated team brings together expertise in childcare, outdoor
               education, and animal husbandry to create the perfect holiday
               experience.
@@ -133,7 +181,7 @@ export default function AboutPage() {
             {teamMembers.map((member) => (
               <div
                 key={member.name}
-                className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] transition-shadow hover:shadow-[var(--shadow-lg)]"
+                className="rounded-2xl bg-white p-6 shadow-md transition-shadow hover:shadow-lg"
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Photo */}
@@ -147,13 +195,25 @@ export default function AboutPage() {
                     />
                   </div>
                   <div className="text-center sm:text-left">
-                    <h3 className="font-display text-xl font-semibold text-bark">
+                    <h3
+                      className="text-xl font-semibold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                    >
                       {member.name}
                     </h3>
-                    <p className="font-body text-sm font-medium text-meadow">
+                    <p
+                      className="font-body text-sm font-medium"
+                      style={{ color: "var(--craigies-burnt-orange)" }}
+                    >
                       {member.role}
                     </p>
-                    <p className="mt-3 font-body text-sm text-stone leading-relaxed">
+                    <p
+                      className="mt-3 font-body text-sm leading-relaxed"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       {member.bio}
                     </p>
                   </div>
@@ -167,25 +227,36 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="pb-16 sm:pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl bg-gradient-to-r from-meadow to-forest p-8 text-center sm:p-12">
-            <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
+          <div
+            className="rounded-2xl p-8 text-center sm:p-12"
+            style={{ backgroundColor: "var(--craigies-olive)" }}
+          >
+            <h2
+              className="text-3xl font-bold text-white sm:text-4xl"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               Come and Visit Us
             </h2>
-            <p className="mx-auto mt-4 max-w-xl font-body text-lg text-sage">
+            <p className="mx-auto mt-4 max-w-xl font-body text-lg text-white/90">
               We&apos;d love to show you around our farm and answer any questions
               you have. Get in touch to arrange a visit or book your
               child&apos;s place.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               <a
-                href="/book"
-                className="inline-block rounded-lg bg-sunshine px-8 py-3 font-display text-lg font-semibold text-bark transition-colors hover:bg-amber focus:outline-none focus:ring-2 focus:ring-sunshine focus:ring-offset-2 focus:ring-offset-forest"
+                href="/clubs"
+                className="inline-block rounded-lg px-8 py-3 text-lg font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 Book Now
               </a>
               <a
                 href="/contact"
-                className="inline-block rounded-lg border-2 border-white px-8 py-3 font-display text-lg font-semibold text-white transition-colors hover:bg-white hover:text-forest focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-forest"
+                className="cta-button-secondary inline-block rounded-lg border-2 border-white px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+                style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Contact Us
               </a>

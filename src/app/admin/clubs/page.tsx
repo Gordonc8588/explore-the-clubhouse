@@ -70,16 +70,28 @@ export default async function ClubsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-md sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-bark">Clubs</h2>
-          <p className="mt-1 font-body text-stone">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            Clubs
+          </h2>
+          <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
             Manage your holiday club sessions
           </p>
         </div>
         <Link
           href="/admin/clubs/new"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber"
+          className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+          style={{
+            backgroundColor: "var(--craigies-burnt-orange)",
+            fontFamily: "'Playfair Display', serif",
+          }}
         >
           <Plus className="h-5 w-5" />
           Create New Club
@@ -91,11 +103,15 @@ export default async function ClubsPage() {
 
       {/* Empty State */}
       {clubs.length === 0 && (
-        <div className="rounded-2xl bg-white p-12 text-center shadow-[var(--shadow-md)]">
-          <p className="font-body text-stone">No clubs found.</p>
+        <div className="rounded-2xl bg-white p-12 text-center shadow-md">
+          <p style={{ color: "var(--craigies-dark-olive)" }}>No clubs found.</p>
           <Link
             href="/admin/clubs/new"
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor: "var(--craigies-burnt-orange)",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             <Plus className="h-5 w-5" />
             Create Your First Club

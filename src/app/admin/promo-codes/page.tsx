@@ -60,12 +60,18 @@ export default async function PromoCodesPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-md sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-bark">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
             Promo Codes
           </h2>
-          <p className="mt-1 font-body text-stone">
+          <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
             Manage discount codes for bookings
           </p>
         </div>
@@ -73,40 +79,70 @@ export default async function PromoCodesPage() {
 
       {/* Summary Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-forest/10 p-3">
-              <Tag className="h-6 w-6 text-forest" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+            >
+              <Tag className="h-6 w-6" style={{ color: "var(--craigies-olive)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Total Codes</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Total Codes
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {totalCodes}
               </p>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-green-100 p-3">
               <Tag className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Active Codes</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Active Codes
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {activeCodes}
               </p>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-sunshine/10 p-3">
-              <Tag className="h-6 w-6 text-amber" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+            >
+              <Tag className="h-6 w-6" style={{ color: "var(--craigies-burnt-orange)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Total Redemptions</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Total Redemptions
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {totalRedemptions}
               </p>
             </div>

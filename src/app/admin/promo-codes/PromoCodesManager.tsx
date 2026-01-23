@@ -159,7 +159,11 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
       <div className="flex justify-end">
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber"
+          className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+          style={{
+            backgroundColor: "var(--craigies-burnt-orange)",
+            fontFamily: "'Playfair Display', serif",
+          }}
         >
           <Plus className="h-5 w-5" />
           Create New Code
@@ -172,31 +176,58 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
           <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-cloud">
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Code
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Discount
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Valid From
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Valid Until
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Max Uses
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Times Used
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Club
                 </th>
-                <th className="pb-3 text-left font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-left text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Status
                 </th>
-                <th className="pb-3 text-right font-body text-sm font-semibold text-stone">
+                <th
+                  className="pb-3 text-right text-sm font-semibold"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Actions
                 </th>
               </tr>
@@ -204,24 +235,45 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
             <tbody className="divide-y divide-cloud">
               {paginatedCodes.map((promoCode) => (
                 <tr key={promoCode.id} className="hover:bg-cloud/50">
-                  <td className="py-4 font-body text-sm font-medium text-bark">
-                    <span className="rounded bg-forest/10 px-2 py-1 font-mono text-forest">
+                  <td className="py-4 text-sm font-medium">
+                    <span
+                      className="rounded px-2 py-1 font-mono"
+                      style={{
+                        backgroundColor: "rgba(122, 124, 74, 0.1)",
+                        color: "var(--craigies-olive)",
+                      }}
+                    >
                       {promoCode.code}
                     </span>
                   </td>
-                  <td className="py-4 font-body text-sm font-medium text-bark">
+                  <td
+                    className="py-4 text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     {promoCode.discountPercent}%
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td
+                    className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     {formatDate(promoCode.validFrom)}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td
+                    className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     {formatDate(promoCode.validUntil)}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td
+                    className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     {promoCode.maxUses !== null ? promoCode.maxUses : "Unlimited"}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td
+                    className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     {promoCode.timesUsed}
                     {promoCode.maxUses !== null && (
                       <span className="text-stone">
@@ -230,7 +282,10 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                       </span>
                     )}
                   </td>
-                  <td className="py-4 font-body text-sm text-bark">
+                  <td
+                    className="py-4 text-sm"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
                     {promoCode.clubName || "All Clubs"}
                   </td>
                   <td className="py-4">
@@ -248,7 +303,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEditModal(promoCode)}
-                        className="rounded-lg bg-forest p-2 text-white transition-colors hover:bg-meadow"
+                        className="rounded-lg p-2 text-white transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
                         aria-label="Edit promo code"
                       >
                         <Pencil className="h-4 w-4" />
@@ -271,10 +327,14 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
         {/* Empty state */}
         {promoCodes.length === 0 && (
           <div className="py-12 text-center">
-            <p className="font-body text-stone">No promo codes found.</p>
+            <p className="text-stone">No promo codes found.</p>
             <button
               onClick={openCreateModal}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               <Plus className="h-5 w-5" />
               Create Your First Code
@@ -285,7 +345,7 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between border-t border-cloud pt-4">
-            <p className="font-body text-sm text-stone">
+            <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
               Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
               {Math.min(currentPage * ITEMS_PER_PAGE, promoCodes.length)} of{" "}
               {promoCodes.length} codes
@@ -294,7 +354,11 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone/30 text-stone transition-colors hover:bg-cloud disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -303,11 +367,14 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg font-body text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? "bg-forest text-white"
-                        : "border border-stone/30 text-stone hover:bg-cloud"
-                    }`}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor:
+                        currentPage === page ? "var(--craigies-olive)" : "transparent",
+                      color:
+                        currentPage === page ? "white" : "var(--craigies-dark-olive)",
+                      border: currentPage === page ? "none" : "1px solid #D1D5DB",
+                    }}
                   >
                     {page}
                   </button>
@@ -318,7 +385,11 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone/30 text-stone transition-colors hover:bg-cloud disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                }}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -329,10 +400,16 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bark/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-[var(--shadow-lg)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg">
             <div className="flex items-center justify-between">
-              <h3 className="font-display text-xl font-bold text-bark">
+              <h3
+                className="text-xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {editingCode ? "Edit Promo Code" : "Create New Promo Code"}
               </h3>
               <button
@@ -349,7 +426,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
               <div>
                 <label
                   htmlFor="code"
-                  className="mb-1 block font-body text-sm font-medium text-stone"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
                 >
                   Code
                 </label>
@@ -365,7 +443,19 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   }
                   placeholder="e.g., SUMMER25"
                   required
-                  className="w-full rounded-lg border border-stone/30 bg-white px-4 py-2.5 font-mono text-bark uppercase placeholder:text-pebble placeholder:normal-case focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                  className="w-full rounded-lg border px-4 py-2.5 font-mono uppercase placeholder:text-pebble placeholder:normal-case transition-colors focus:outline-none focus:ring-2"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "#D1D5DB";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
               </div>
 
@@ -373,7 +463,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
               <div>
                 <label
                   htmlFor="discountPercent"
-                  className="mb-1 block font-body text-sm font-medium text-stone"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
                 >
                   Discount Percentage
                 </label>
@@ -388,7 +479,19 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   min="1"
                   max="100"
                   required
-                  className="w-full rounded-lg border border-stone/30 bg-white px-4 py-2.5 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                  className="w-full rounded-lg border px-4 py-2.5 placeholder:text-pebble transition-colors focus:outline-none focus:ring-2"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "#D1D5DB";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
               </div>
 
@@ -397,7 +500,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                 <div>
                   <label
                     htmlFor="validFrom"
-                    className="mb-1 block font-body text-sm font-medium text-stone"
+                    className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
                   >
                     Valid From
                   </label>
@@ -415,7 +519,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                 <div>
                   <label
                     htmlFor="validUntil"
-                    className="mb-1 block font-body text-sm font-medium text-stone"
+                    className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
                   >
                     Valid Until
                   </label>
@@ -436,7 +541,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
               <div>
                 <label
                   htmlFor="maxUses"
-                  className="mb-1 block font-body text-sm font-medium text-stone"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
                 >
                   Max Uses{" "}
                   <span className="font-normal text-pebble">
@@ -452,7 +558,19 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   }
                   placeholder="Unlimited"
                   min="1"
-                  className="w-full rounded-lg border border-stone/30 bg-white px-4 py-2.5 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                  className="w-full rounded-lg border px-4 py-2.5 placeholder:text-pebble transition-colors focus:outline-none focus:ring-2"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "#D1D5DB";
+                    e.target.style.boxShadow = "none";
+                  }}
                 />
               </div>
 
@@ -460,7 +578,8 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
               <div>
                 <label
                   htmlFor="clubId"
-                  className="mb-1 block font-body text-sm font-medium text-stone"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
                 >
                   Applies To
                 </label>
@@ -470,7 +589,19 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   onChange={(e) =>
                     setFormData({ ...formData, clubId: e.target.value })
                   }
-                  className="w-full rounded-lg border border-stone/30 bg-white px-4 py-2.5 font-body text-bark focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+                  className="w-full rounded-lg border px-4 py-2.5 transition-colors focus:outline-none focus:ring-2"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                    e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "#D1D5DB";
+                    e.target.style.boxShadow = "none";
+                  }}
                 >
                   <option value="">All Clubs</option>
                   {clubs.map((club) => (
@@ -488,9 +619,12 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                   onClick={() =>
                     setFormData({ ...formData, isActive: !formData.isActive })
                   }
-                  className={`relative h-6 w-11 rounded-full transition-colors ${
-                    formData.isActive ? "bg-forest" : "bg-pebble"
-                  }`}
+                  className="relative h-6 w-11 rounded-full transition-colors"
+                  style={{
+                    backgroundColor: formData.isActive
+                      ? "var(--craigies-olive)"
+                      : "#D1D5DB",
+                  }}
                   role="switch"
                   aria-checked={formData.isActive}
                 >
@@ -500,7 +634,10 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                     }`}
                   />
                 </button>
-                <label className="font-body text-sm font-medium text-bark">
+                <label
+                  className="text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   {formData.isActive ? "Active" : "Inactive"}
                 </label>
               </div>
@@ -510,13 +647,22 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-lg border border-stone/30 px-4 py-2.5 font-display font-semibold text-stone transition-colors hover:bg-cloud"
+                  className="rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                  style={{
+                    borderColor: "var(--craigies-dark-olive)",
+                    color: "var(--craigies-dark-olive)",
+                    fontFamily: "'Playfair Display', serif",
+                  }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-sunshine px-6 py-2.5 font-display font-semibold text-bark transition-colors hover:bg-amber"
+                  className="rounded-lg px-6 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{
+                    backgroundColor: "var(--craigies-burnt-orange)",
+                    fontFamily: "'Playfair Display', serif",
+                  }}
                 >
                   {editingCode ? "Save Changes" : "Create Code"}
                 </button>
@@ -528,25 +674,37 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bark/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-[var(--shadow-lg)]">
-            <h3 className="font-display text-xl font-bold text-bark">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
+            <h3
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Delete Promo Code
             </h3>
-            <p className="mt-2 font-body text-stone">
+            <p className="mt-2 text-stone">
               Are you sure you want to delete this promo code? This action cannot
               be undone.
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirmId(null)}
-                className="rounded-lg border border-stone/30 px-4 py-2.5 font-display font-semibold text-stone transition-colors hover:bg-cloud"
+                className="rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                style={{
+                  borderColor: "var(--craigies-dark-olive)",
+                  color: "var(--craigies-dark-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirmId)}
-                className="rounded-lg bg-red-500 px-6 py-2.5 font-display font-semibold text-white transition-colors hover:bg-red-600"
+                className="rounded-lg bg-red-500 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-red-600"
+                style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Delete
               </button>

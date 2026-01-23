@@ -43,11 +43,11 @@ function formatDateRange(startDate: string, endDate: string): string {
 }
 
 function getCapacityColor(bookings: number, capacity: number): string {
-  if (capacity === 0) return "bg-pebble";
+  if (capacity === 0) return "#D1D5DB"; // Gray for no capacity
   const percentage = (bookings / capacity) * 100;
-  if (percentage >= 90) return "bg-coral";
-  if (percentage >= 70) return "bg-amber";
-  return "bg-meadow";
+  if (percentage >= 90) return "#E07A5F"; // Coral (near full)
+  if (percentage >= 70) return "#d4843e"; // Burnt orange (getting full)
+  return "#7a7c4a"; // Olive (good availability)
 }
 
 export function ClubsGrid({ clubs: initialClubs }: ClubsGridProps) {
@@ -83,39 +83,58 @@ export function ClubsGrid({ clubs: initialClubs }: ClubsGridProps) {
         >
           {/* Club Header */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-display text-lg font-bold text-bark">
+            <h3
+              className="text-lg font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               {club.name}
             </h3>
             <span
-              className={`inline-flex shrink-0 rounded-full px-2.5 py-1 font-body text-xs font-medium ${
-                club.isActive
-                  ? "bg-green-100 text-green-800"
-                  : "bg-cloud text-stone"
-              }`}
+              className="inline-flex shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
+              style={{
+                backgroundColor: club.isActive
+                  ? "rgba(122, 124, 74, 0.1)"
+                  : "#F3F4F6",
+                color: club.isActive
+                  ? "var(--craigies-olive)"
+                  : "#6B7280",
+              }}
             >
               {club.isActive ? "Active" : "Inactive"}
             </span>
           </div>
 
           {/* Description */}
-          <p className="mt-2 line-clamp-2 font-body text-sm text-stone">
+          <p
+            className="mt-2 line-clamp-2 text-sm"
+            style={{ color: "var(--craigies-dark-olive)" }}
+          >
             {club.description || "No description"}
           </p>
 
           {/* Club Details */}
           <div className="mt-4 space-y-3">
             {/* Dates */}
-            <div className="flex items-center gap-2 text-stone">
+            <div
+              className="flex items-center gap-2"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               <Calendar className="h-4 w-4" />
-              <span className="font-body text-sm">
+              <span className="text-sm">
                 {formatDateRange(club.startDate, club.endDate)}
               </span>
             </div>
 
             {/* Age Range */}
-            <div className="flex items-center gap-2 text-stone">
+            <div
+              className="flex items-center gap-2"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               <Users className="h-4 w-4" />
-              <span className="font-body text-sm">
+              <span className="text-sm">
                 Ages {club.ageMin} - {club.ageMax} years
               </span>
             </div>
@@ -123,10 +142,16 @@ export function ClubsGrid({ clubs: initialClubs }: ClubsGridProps) {
             {/* Capacity Usage */}
             <div>
               <div className="flex items-center justify-between">
-                <span className="font-body text-sm text-stone">
+                <span
+                  className="text-sm"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   Bookings: {club.bookings}/{club.capacity}
                 </span>
-                <span className="font-body text-sm font-medium text-bark">
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
                   {club.capacity > 0
                     ? Math.round((club.bookings / club.capacity) * 100)
                     : 0}%
@@ -134,9 +159,10 @@ export function ClubsGrid({ clubs: initialClubs }: ClubsGridProps) {
               </div>
               <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-cloud">
                 <div
-                  className={`h-full rounded-full ${getCapacityColor(club.bookings, club.capacity)}`}
+                  className="h-full rounded-full"
                   style={{
                     width: `${club.capacity > 0 ? Math.min((club.bookings / club.capacity) * 100, 100) : 0}%`,
+                    backgroundColor: getCapacityColor(club.bookings, club.capacity),
                   }}
                 />
               </div>
@@ -145,14 +171,23 @@ export function ClubsGrid({ clubs: initialClubs }: ClubsGridProps) {
 
           {/* Toggle Active Status */}
           <div className="mt-4 flex items-center justify-between border-t border-cloud pt-4">
-            <span className="font-body text-sm text-stone">Status</span>
+            <span
+              className="text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
+              Status
+            </span>
             <button
               onClick={(e) => handleToggleActive(club.id, e)}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-body text-sm font-medium transition-colors ${
-                club.isActive
-                  ? "bg-green-100 text-green-800 hover:bg-green-200"
-                  : "bg-cloud text-stone hover:bg-pebble/20"
-              }`}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
+              style={{
+                backgroundColor: club.isActive
+                  ? "rgba(122, 124, 74, 0.1)"
+                  : "#F3F4F6",
+                color: club.isActive
+                  ? "var(--craigies-olive)"
+                  : "#6B7280",
+              }}
               aria-label={club.isActive ? "Deactivate club" : "Activate club"}
             >
               {club.isActive ? (

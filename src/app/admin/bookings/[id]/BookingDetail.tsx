@@ -86,18 +86,33 @@ function formatDateTime(dateString: string): string {
   });
 }
 
-function getStatusStyles(status: string): string {
+function getStatusBadgeStyles(status: string): { backgroundColor: string; color: string } {
   switch (status) {
     case "paid":
-      return "bg-green-100 text-green-800";
+      return {
+        backgroundColor: "rgba(212, 132, 62, 0.1)",
+        color: "var(--craigies-burnt-orange)",
+      };
     case "pending":
-      return "bg-amber-100 text-amber-800";
+      return {
+        backgroundColor: "#FEF3C7",
+        color: "#D97706",
+      };
     case "complete":
-      return "bg-sky/20 text-sky-700";
+      return {
+        backgroundColor: "rgba(122, 124, 74, 0.1)",
+        color: "var(--craigies-olive)",
+      };
     case "cancelled":
-      return "bg-red-100 text-red-800";
+      return {
+        backgroundColor: "#FEE2E2",
+        color: "#DC2626",
+      };
     default:
-      return "bg-cloud text-stone";
+      return {
+        backgroundColor: "#F3F4F6",
+        color: "#6B7280",
+      };
   }
 }
 
@@ -140,33 +155,52 @@ export function BookingDetail({ booking }: BookingDetailProps) {
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 font-body text-sm text-stone transition-colors hover:text-bark"
+        className="flex items-center gap-2 text-sm transition-opacity hover:opacity-80"
+        style={{ color: "var(--craigies-dark-olive)" }}
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Bookings
       </button>
 
       {/* Booking Summary Card */}
-      <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+      <div className="rounded-2xl bg-white p-6 shadow-md">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="font-display text-2xl font-bold text-bark">
+              <h2
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {booking.ref}
               </h2>
               <span
-                className={`inline-flex rounded-full px-3 py-1 font-body text-sm font-medium ${getStatusStyles(booking.status)}`}
+                className="inline-flex rounded-full px-3 py-1 text-sm font-medium"
+                style={getStatusBadgeStyles(booking.status)}
               >
                 {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
               </span>
             </div>
-            <p className="mt-1 font-body text-sm text-stone">
+            <p
+              className="mt-1 text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Created {formatDateTime(booking.createdAt)}
             </p>
           </div>
           <div className="text-right">
-            <p className="font-body text-sm text-stone">Total Amount</p>
-            <p className="font-display text-2xl font-bold text-bark">
+            <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+              Total Amount
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               £{booking.totalAmount.toFixed(2)}
             </p>
           </div>
@@ -174,21 +208,39 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-forest/10 p-2">
-              <Users className="h-5 w-5 text-forest" />
+            <div
+              className="rounded-full p-2"
+              style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+            >
+              <Users className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             </div>
             <div>
-              <p className="font-body text-xs text-stone">Club</p>
-              <p className="font-body font-medium text-bark">{booking.club}</p>
+              <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                Club
+              </p>
+              <p
+                className="font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                {booking.club}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-sunshine/10 p-2">
-              <Calendar className="h-5 w-5 text-amber" />
+            <div
+              className="rounded-full p-2"
+              style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+            >
+              <Calendar className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
             </div>
             <div>
-              <p className="font-body text-xs text-stone">Dates</p>
-              <p className="font-body font-medium text-bark">
+              <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                Dates
+              </p>
+              <p
+                className="font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 {formatDate(booking.startDate)}
                 {booking.startDate !== booking.endDate && (
                   <> - {formatDate(booking.endDate)}</>
@@ -197,21 +249,39 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-meadow/10 p-2">
-              <Clock className="h-5 w-5 text-meadow" />
+            <div
+              className="rounded-full p-2"
+              style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+            >
+              <Clock className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             </div>
             <div>
-              <p className="font-body text-xs text-stone">Option</p>
-              <p className="font-body font-medium text-bark">{booking.option}</p>
+              <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                Option
+              </p>
+              <p
+                className="font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                {booking.option}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-sage/20 p-2">
-              <PoundSterling className="h-5 w-5 text-forest" />
+            <div
+              className="rounded-full p-2"
+              style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+            >
+              <PoundSterling className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
             </div>
             <div>
-              <p className="font-body text-xs text-stone">Children</p>
-              <p className="font-body font-medium text-bark">
+              <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                Children
+              </p>
+              <p
+                className="font-medium"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 {booking.children.length} child{booking.children.length !== 1 && "ren"}
               </p>
             </div>
@@ -224,7 +294,12 @@ export function BookingDetail({ booking }: BookingDetailProps) {
         {booking.status !== "cancelled" && booking.status !== "complete" && (
           <button
             onClick={() => setShowCancelModal(true)}
-            className="flex items-center gap-2 rounded-lg border-2 border-red-500 px-4 py-2.5 font-display font-semibold text-red-500 transition-colors hover:bg-red-50"
+            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "#EF4444",
+              color: "#EF4444",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             <XCircle className="h-5 w-5" />
             Cancel Booking
@@ -233,7 +308,12 @@ export function BookingDetail({ booking }: BookingDetailProps) {
         {booking.status === "paid" && (
           <button
             onClick={() => setShowRefundModal(true)}
-            className="flex items-center gap-2 rounded-lg border-2 border-amber px-4 py-2.5 font-display font-semibold text-amber transition-colors hover:bg-amber/10"
+            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "#D97706",
+              color: "#D97706",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             <RefreshCw className="h-5 w-5" />
             Refund
@@ -243,7 +323,11 @@ export function BookingDetail({ booking }: BookingDetailProps) {
           <button
             onClick={handleSendReminder}
             disabled={isProcessing}
-            className="flex items-center gap-2 rounded-lg bg-forest px-4 py-2.5 font-display font-semibold text-white transition-colors hover:bg-meadow disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            style={{
+              backgroundColor: "var(--craigies-olive)",
+              fontFamily: "'Playfair Display', serif",
+            }}
           >
             <Bell className="h-5 w-5" />
             {isProcessing ? "Sending..." : "Send Reminder"}
@@ -253,21 +337,28 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Parent Details Card */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-            <User className="h-5 w-5 text-forest" />
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h3 className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}>
+            <User className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             Parent Details
           </h3>
           <div className="mt-4 space-y-3">
             <div>
-              <p className="font-body text-xs text-stone">Name</p>
-              <p className="font-body font-medium text-bark">{booking.parent.name}</p>
+              <p className="text-xs"
+              style={{ color: "var(--craigies-dark-olive)" }}>Name</p>
+              <p className="font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}>{booking.parent.name}</p>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-stone" />
               <a
                 href={`mailto:${booking.parent.email}`}
-                className="font-body text-forest hover:underline"
+                className="hover:underline"
+                style={{ color: "var(--craigies-olive)" }}
               >
                 {booking.parent.email}
               </a>
@@ -277,7 +368,8 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                 <Phone className="h-4 w-4 text-stone" />
                 <a
                   href={`tel:${booking.parent.phone}`}
-                  className="font-body text-forest hover:underline"
+                  className="hover:underline"
+                style={{ color: "var(--craigies-olive)" }}
                 >
                   {booking.parent.phone}
                 </a>
@@ -287,22 +379,29 @@ export function BookingDetail({ booking }: BookingDetailProps) {
         </div>
 
         {/* Booked Days */}
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-          <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-bark">
-            <Calendar className="h-5 w-5 text-forest" />
+        <div className="rounded-2xl bg-white p-6 shadow-md">
+          <h3 className="flex items-center gap-2 text-lg font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}>
+            <Calendar className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
             Booked Days
           </h3>
           <div className="mt-4 space-y-2">
             {booking.bookedDays.length === 0 ? (
-              <p className="font-body text-sm text-stone">No days booked</p>
+              <p className="text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}>No days booked</p>
             ) : (
               booking.bookedDays.map((day) => (
                 <div
                   key={day.date}
                   className="flex items-center justify-between rounded-lg bg-cloud/50 px-4 py-2"
                 >
-                  <span className="font-body font-medium text-bark">{day.dayName}</span>
-                  <span className="font-body text-sm text-stone">
+                  <span className="font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}>{day.dayName}</span>
+                  <span className="text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}>
                     {formatDate(day.date)}
                   </span>
                 </div>
@@ -314,12 +413,16 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
       {/* Children Details Section */}
       <div>
-        <h3 className="mb-4 flex items-center gap-2 font-display text-xl font-semibold text-bark">
+        <h3 className="mb-4 flex items-center gap-2 text-xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}>
           <Users className="h-6 w-6 text-forest" />
           Children ({booking.children.length})
         </h3>
         {booking.children.length === 0 ? (
-          <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+          <div className="rounded-2xl bg-white p-6 shadow-md">
             <p className="font-body text-stone">No children registered for this booking yet.</p>
           </div>
         ) : (
@@ -327,14 +430,19 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             {booking.children.map((child) => (
               <div
                 key={child.id}
-                className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]"
+                className="rounded-2xl bg-white p-6 shadow-md"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h4 className="font-display text-lg font-semibold text-bark">
+                    <h4 className="text-lg font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>
                       {child.name}
                     </h4>
-                    <p className="font-body text-sm text-stone">
+                    <p className="text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}>
                       Age {child.age} • DOB: {formatDate(child.dateOfBirth)}
                     </p>
                   </div>
@@ -355,7 +463,11 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                           child.allergies.length > 0 ? "text-coral" : "text-stone"
                         }`}
                       />
-                      <h5 className="font-display font-semibold text-bark">Allergies</h5>
+                      <h5 className="font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>Allergies</h5>
                     </div>
                     {child.allergies.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -378,8 +490,12 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                   {/* Medical Notes */}
                   <div className="rounded-xl bg-cloud/50 p-4">
                     <div className="flex items-center gap-2">
-                      <Heart className="h-5 w-5 text-forest" />
-                      <h5 className="font-display font-semibold text-bark">
+                      <Heart className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+                      <h5 className="font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>
                         Medical Notes
                       </h5>
                     </div>
@@ -391,15 +507,20 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                   {/* Emergency Contact */}
                   <div className="rounded-xl bg-cloud/50 p-4">
                     <div className="flex items-center gap-2">
-                      <Phone className="h-5 w-5 text-forest" />
-                      <h5 className="font-display font-semibold text-bark">
+                      <Phone className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+                      <h5 className="font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>
                         Emergency Contact
                       </h5>
                     </div>
                     <div className="mt-2">
                       {child.emergencyContact.name ? (
                         <>
-                          <p className="font-body font-medium text-bark">
+                          <p className="font-medium"
+              style={{ color: "var(--craigies-dark-olive)" }}>
                             {child.emergencyContact.name}
                           </p>
                           {child.emergencyContact.phone && (
@@ -412,7 +533,8 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                           )}
                         </>
                       ) : (
-                        <p className="font-body text-sm text-stone">Not provided</p>
+                        <p className="text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}>Not provided</p>
                       )}
                     </div>
                   </div>
@@ -420,8 +542,12 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                   {/* Consents */}
                   <div className="rounded-xl bg-cloud/50 p-4">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-5 w-5 text-forest" />
-                      <h5 className="font-display font-semibold text-bark">Consents</h5>
+                      <ShieldCheck className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+                      <h5 className="font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>Consents</h5>
                     </div>
                     <div className="mt-2 grid grid-cols-2 gap-2">
                       <div className="flex items-center gap-2">
@@ -430,7 +556,8 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                             child.consents.photoConsent ? "bg-green-500" : "bg-red-500"
                           }`}
                         />
-                        <span className="font-body text-sm text-bark">Photo</span>
+                        <span className="text-sm"
+                      style={{ color: "var(--craigies-dark-olive)" }}>Photo</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span
@@ -438,7 +565,8 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                             child.consents.medicalConsent ? "bg-green-500" : "bg-red-500"
                           }`}
                         />
-                        <span className="font-body text-sm text-bark">Medical</span>
+                        <span className="text-sm"
+                      style={{ color: "var(--craigies-dark-olive)" }}>Medical</span>
                       </div>
                     </div>
                   </div>
@@ -451,26 +579,44 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
       {/* Cancel Booking Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bark/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
-            <h3 className="font-display text-xl font-bold text-bark">
+            <h3
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Cancel Booking?
             </h3>
-            <p className="mt-2 font-body text-stone">
+            <p
+              className="mt-2"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Are you sure you want to cancel booking <strong>{booking.ref}</strong>?
               This action cannot be undone.
             </p>
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setShowCancelModal(false)}
-                className="flex-1 rounded-lg border-2 border-stone/30 px-4 py-2.5 font-display font-semibold text-bark transition-colors hover:bg-cloud"
+                className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 Keep Booking
               </button>
               <button
                 onClick={handleCancelBooking}
                 disabled={isProcessing}
-                className="flex-1 rounded-lg bg-red-500 px-4 py-2.5 font-display font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                style={{
+                  backgroundColor: "#EF4444",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 {isProcessing ? "Cancelling..." : "Yes, Cancel"}
               </button>
@@ -481,12 +627,21 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
       {/* Refund Modal */}
       {showRefundModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bark/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
-            <h3 className="font-display text-xl font-bold text-bark">
+            <h3
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Process Refund?
             </h3>
-            <p className="mt-2 font-body text-stone">
+            <p
+              className="mt-2"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Are you sure you want to refund{" "}
               <strong>£{booking.totalAmount.toFixed(2)}</strong> for booking{" "}
               <strong>{booking.ref}</strong>?
@@ -494,14 +649,23 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setShowRefundModal(false)}
-                className="flex-1 rounded-lg border-2 border-stone/30 px-4 py-2.5 font-display font-semibold text-bark transition-colors hover:bg-cloud"
+                className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleRefund}
                 disabled={isProcessing}
-                className="flex-1 rounded-lg bg-amber px-4 py-2.5 font-display font-semibold text-bark transition-colors hover:bg-sunshine disabled:opacity-50"
+                className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                style={{
+                  backgroundColor: "#D97706",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 {isProcessing ? "Processing..." : "Confirm Refund"}
               </button>

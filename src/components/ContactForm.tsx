@@ -118,16 +118,29 @@ export function ContactForm() {
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="mt-6 font-display text-2xl font-bold text-bark">
+        <h3
+          className="mt-6 text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           Message Sent!
         </h3>
-        <p className="mt-3 max-w-sm font-body text-stone">
+        <p
+          className="mt-3 max-w-sm font-body"
+          style={{ color: "var(--craigies-dark-olive)" }}
+        >
           Thank you for getting in touch. We&apos;ll respond to your message as
           soon as possible, usually within 24 hours.
         </p>
         <button
           onClick={() => setIsSubmitted(false)}
-          className="mt-6 font-display font-semibold text-forest transition-colors hover:text-meadow"
+          className="mt-6 font-semibold transition-opacity hover:opacity-80"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-burnt-orange)",
+          }}
         >
           Send another message
         </button>
@@ -146,10 +159,19 @@ export function ContactForm() {
         />
       )}
 
-      <h2 className="font-display text-2xl font-bold text-bark sm:text-3xl">
+      <h2
+        className="text-2xl font-bold sm:text-3xl"
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          color: "var(--craigies-dark-olive)",
+        }}
+      >
         Send Us a Message
       </h2>
-      <p className="mt-2 font-body text-stone">
+      <p
+        className="mt-2 font-body"
+        style={{ color: "var(--craigies-dark-olive)" }}
+      >
         Fill out the form below and we&apos;ll get back to you soon.
       </p>
 
@@ -165,7 +187,8 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="name"
-            className="block font-body text-sm font-medium text-stone"
+            className="block font-body text-sm font-medium"
+            style={{ color: "var(--craigies-dark-olive)" }}
           >
             Name <span className="text-red-500">*</span>
           </label>
@@ -173,9 +196,21 @@ export function ContactForm() {
             type="text"
             id="name"
             {...register("name")}
-            className={`mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
-              errors.name ? "border-red-500" : "border-stone/30"
-            }`}
+            style={{
+              borderColor: errors.name
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            className={`mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body placeholder:text-gray-400 focus:outline-none focus:ring-2`}
+            onFocus={(e) => {
+              if (!errors.name)
+                e.currentTarget.style.borderColor = "var(--craigies-burnt-orange)";
+            }}
+            onBlur={(e) => {
+              if (!errors.name)
+                e.currentTarget.style.borderColor = "var(--craigies-dark-olive)";
+            }}
             placeholder="Your name"
           />
           {errors.name && (
@@ -189,7 +224,8 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="email"
-            className="block font-body text-sm font-medium text-stone"
+            className="block font-body text-sm font-medium"
+            style={{ color: "var(--craigies-dark-olive)" }}
           >
             Email <span className="text-red-500">*</span>
           </label>
@@ -197,9 +233,21 @@ export function ContactForm() {
             type="email"
             id="email"
             {...register("email")}
-            className={`mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
-              errors.email ? "border-red-500" : "border-stone/30"
-            }`}
+            style={{
+              borderColor: errors.email
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            className={`mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body placeholder:text-gray-400 focus:outline-none focus:ring-2`}
+            onFocus={(e) => {
+              if (!errors.email)
+                e.currentTarget.style.borderColor = "var(--craigies-burnt-orange)";
+            }}
+            onBlur={(e) => {
+              if (!errors.email)
+                e.currentTarget.style.borderColor = "var(--craigies-dark-olive)";
+            }}
             placeholder="you@example.com"
           />
           {errors.email && (
@@ -213,15 +261,26 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="phone"
-            className="block font-body text-sm font-medium text-stone"
+            className="block font-body text-sm font-medium"
+            style={{ color: "var(--craigies-dark-olive)" }}
           >
-            Phone <span className="font-normal text-pebble">(optional)</span>
+            Phone <span className="font-normal text-gray-400">(optional)</span>
           </label>
           <input
             type="tel"
             id="phone"
             {...register("phone")}
-            className="mt-2 block w-full rounded-lg border border-stone/30 bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30"
+            style={{
+              borderColor: "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            className="mt-2 block w-full rounded-lg border bg-white px-4 py-3 font-body placeholder:text-gray-400 focus:outline-none focus:ring-2"
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--craigies-burnt-orange)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--craigies-dark-olive)";
+            }}
             placeholder="Your phone number"
           />
         </div>
@@ -230,7 +289,8 @@ export function ContactForm() {
         <div>
           <label
             htmlFor="message"
-            className="block font-body text-sm font-medium text-stone"
+            className="block font-body text-sm font-medium"
+            style={{ color: "var(--craigies-dark-olive)" }}
           >
             Message <span className="text-red-500">*</span>
           </label>
@@ -238,9 +298,21 @@ export function ContactForm() {
             id="message"
             rows={5}
             {...register("message")}
-            className={`mt-2 block w-full resize-none rounded-lg border bg-white px-4 py-3 font-body text-bark placeholder:text-pebble focus:border-forest focus:outline-none focus:ring-2 focus:ring-sage/30 ${
-              errors.message ? "border-red-500" : "border-stone/30"
-            }`}
+            style={{
+              borderColor: errors.message
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            className={`mt-2 block w-full resize-none rounded-lg border bg-white px-4 py-3 font-body placeholder:text-gray-400 focus:outline-none focus:ring-2`}
+            onFocus={(e) => {
+              if (!errors.message)
+                e.currentTarget.style.borderColor = "var(--craigies-burnt-orange)";
+            }}
+            onBlur={(e) => {
+              if (!errors.message)
+                e.currentTarget.style.borderColor = "var(--craigies-dark-olive)";
+            }}
             placeholder="How can we help you?"
           />
           {errors.message && (
@@ -279,11 +351,18 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-sunshine px-6 py-3 font-display font-semibold text-bark transition-colors hover:bg-amber focus:outline-none focus:ring-2 focus:ring-sunshine focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          style={{
+            backgroundColor: "var(--craigies-burnt-orange)",
+            fontFamily: "'Playfair Display', serif",
+          }}
         >
           {isSubmitting ? (
             <>
-              <span className="h-5 w-5 animate-spin rounded-full border-2 border-bark border-t-transparent" />
+              <span
+                className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
+                style={{ borderColor: "white" }}
+              />
               Sending...
             </>
           ) : (

@@ -57,7 +57,13 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-bark">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
           Your Details
         </h2>
         <p className="mt-1 text-stone">
@@ -78,15 +84,23 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
             id="parentName"
             type="text"
             {...register("parentName")}
-            className={`
-              w-full px-4 py-3 rounded-lg border bg-white font-body text-bark
-              transition-all focus:outline-none
-              ${
-                errors.parentName
-                  ? "border-error focus:border-error focus:ring-2 focus:ring-error/30"
-                  : "border-stone focus:border-forest focus:ring-2 focus:ring-sage/30"
-              }
-            `}
+            className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none"
+            style={{
+              borderColor: errors.parentName
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            onFocus={(e) =>
+              (e.target.style.borderColor = errors.parentName
+                ? "#EF4444"
+                : "var(--craigies-burnt-orange)")
+            }
+            onBlur={(e) =>
+              (e.target.style.borderColor = errors.parentName
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)")
+            }
             placeholder="Enter your full name"
           />
           {errors.parentName && (
@@ -108,15 +122,23 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
             id="parentEmail"
             type="email"
             {...register("parentEmail")}
-            className={`
-              w-full px-4 py-3 rounded-lg border bg-white font-body text-bark
-              transition-all focus:outline-none
-              ${
-                errors.parentEmail
-                  ? "border-error focus:border-error focus:ring-2 focus:ring-error/30"
-                  : "border-stone focus:border-forest focus:ring-2 focus:ring-sage/30"
-              }
-            `}
+            className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none"
+            style={{
+              borderColor: errors.parentEmail
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            onFocus={(e) =>
+              (e.target.style.borderColor = errors.parentEmail
+                ? "#EF4444"
+                : "var(--craigies-burnt-orange)")
+            }
+            onBlur={(e) =>
+              (e.target.style.borderColor = errors.parentEmail
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)")
+            }
             placeholder="you@example.com"
           />
           {errors.parentEmail && (
@@ -138,15 +160,23 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
             id="parentPhone"
             type="tel"
             {...register("parentPhone")}
-            className={`
-              w-full px-4 py-3 rounded-lg border bg-white font-body text-bark
-              transition-all focus:outline-none
-              ${
-                errors.parentPhone
-                  ? "border-error focus:border-error focus:ring-2 focus:ring-error/30"
-                  : "border-stone focus:border-forest focus:ring-2 focus:ring-sage/30"
-              }
-            `}
+            className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none"
+            style={{
+              borderColor: errors.parentPhone
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)",
+              color: "var(--craigies-dark-olive)",
+            }}
+            onFocus={(e) =>
+              (e.target.style.borderColor = errors.parentPhone
+                ? "#EF4444"
+                : "var(--craigies-burnt-orange)")
+            }
+            onBlur={(e) =>
+              (e.target.style.borderColor = errors.parentPhone
+                ? "#EF4444"
+                : "var(--craigies-dark-olive)")
+            }
             placeholder="07123 456789"
           />
           {errors.parentPhone && (

@@ -184,13 +184,19 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
   const afternoonTime = `${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}`;
 
   return (
-    <div className="bg-cream min-h-screen">
+    <div style={{ backgroundColor: "var(--craigies-cream)" }} className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-sage/30 to-cream">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <section
+        className="relative overflow-hidden py-12 sm:py-16 lg:py-20"
+        style={{ backgroundColor: "var(--craigies-cream)" }}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
             {/* Image */}
-            <div className="relative aspect-[4/3] bg-cloud rounded-2xl overflow-hidden shadow-[var(--shadow-lg)]">
+            <div
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg"
+              style={{ backgroundColor: "var(--craigies-cream)" }}
+            >
               {club.image_url ? (
                 <Image
                   src={club.image_url}
@@ -201,9 +207,13 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                   priority
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-sage/20">
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ backgroundColor: "rgba(122, 124, 74, 0.2)" }}
+                >
                   <svg
-                    className="w-24 h-24 text-sage"
+                    className="w-24 h-24"
+                    style={{ color: "var(--craigies-olive)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -224,7 +234,8 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
             <div>
               <Link
                 href="/clubs"
-                className="inline-flex items-center gap-1 text-stone hover:text-forest transition-colors mb-4 font-body text-sm"
+                className="inline-flex items-center gap-1 transition-opacity hover:opacity-80 mb-4 font-body text-sm"
+                style={{ color: "var(--craigies-dark-olive)" }}
               >
                 <svg
                   className="w-4 h-4"
@@ -243,21 +254,37 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                 Back to All Clubs
               </Link>
 
-              <h1 className="font-display text-4xl font-extrabold tracking-tight text-bark sm:text-5xl mb-4">
+              <h1
+                className="text-4xl font-bold tracking-tight sm:text-5xl mb-4"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {club.name}
               </h1>
 
-              <p className="font-body text-lg text-stone mb-6">
+              <p
+                className="font-body text-lg mb-6"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
                 {club.description}
               </p>
 
               {/* Key Details */}
               <div className="space-y-3 mb-8">
                 {/* Dates */}
-                <div className="flex items-center gap-3 text-bark">
-                  <div className="flex-shrink-0 w-10 h-10 bg-forest/10 rounded-lg flex items-center justify-center">
+                <div
+                  className="flex items-center gap-3"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  <div
+                    className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+                  >
                     <svg
-                      className="w-5 h-5 text-forest"
+                      className="w-5 h-5"
+                      style={{ color: "var(--craigies-burnt-orange)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -272,15 +299,27 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-display font-semibold">{dateRange}</p>
+                    <p
+                      className="font-semibold"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {dateRange}
+                    </p>
                   </div>
                 </div>
 
                 {/* Times */}
-                <div className="flex items-center gap-3 text-bark">
-                  <div className="flex-shrink-0 w-10 h-10 bg-forest/10 rounded-lg flex items-center justify-center">
+                <div
+                  className="flex items-center gap-3"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  <div
+                    className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+                  >
                     <svg
-                      className="w-5 h-5 text-forest"
+                      className="w-5 h-5"
+                      style={{ color: "var(--craigies-burnt-orange)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -295,20 +334,33 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-display font-semibold">
+                    <p
+                      className="font-semibold"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
                       Morning: {morningTime}
                     </p>
-                    <p className="font-display font-semibold">
+                    <p
+                      className="font-semibold"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
                       Afternoon: {afternoonTime}
                     </p>
                   </div>
                 </div>
 
                 {/* Age Range */}
-                <div className="flex items-center gap-3 text-bark">
-                  <div className="flex-shrink-0 w-10 h-10 bg-forest/10 rounded-lg flex items-center justify-center">
+                <div
+                  className="flex items-center gap-3"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  <div
+                    className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+                  >
                     <svg
-                      className="w-5 h-5 text-forest"
+                      className="w-5 h-5"
+                      style={{ color: "var(--craigies-burnt-orange)" }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -323,7 +375,10 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-display font-semibold">
+                    <p
+                      className="font-semibold"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
                       Ages {club.min_age} - {club.max_age} years
                     </p>
                   </div>
@@ -333,7 +388,11 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
               {/* CTA Button */}
               <Link
                 href={`/book/${club.slug}`}
-                className="inline-block bg-sunshine text-bark font-display font-semibold py-4 px-8 rounded-lg hover:bg-amber transition-colors text-lg shadow-[var(--shadow-md)]"
+                className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
               >
                 Start Booking
               </Link>
@@ -341,31 +400,25 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
           </div>
         </div>
 
-        {/* Decorative wave */}
-        <div className="absolute -bottom-1 left-0 right-0">
-          <svg
-            viewBox="0 0 1440 120"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="var(--color-cream)"
-            />
-          </svg>
-        </div>
       </section>
 
       {/* Booking Options Section */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
-            <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
+            <h2
+              className="text-3xl font-bold sm:text-4xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Booking Options
             </h2>
-            <p className="mt-4 font-body text-lg text-stone">
+            <p
+              className="mt-4 font-body text-lg"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Choose the option that works best for your family.
             </p>
           </div>
@@ -377,34 +430,64 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
               .map((option) => (
                 <article
                   key={option.id}
-                  className="bg-white rounded-2xl shadow-[var(--shadow-md)] p-6 hover:shadow-[var(--shadow-lg)] transition-shadow"
+                  className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-display text-xl font-bold text-bark">
+                      <h3
+                        className="text-xl font-bold"
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                          color: "var(--craigies-dark-olive)",
+                        }}
+                      >
                         {option.name}
                       </h3>
-                      <span className="inline-block mt-1 text-xs font-semibold text-forest bg-sage/30 px-2 py-0.5 rounded-full">
+                      <span
+                        className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full"
+                        style={{
+                          color: "var(--craigies-olive)",
+                          backgroundColor: "rgba(122, 124, 74, 0.2)",
+                        }}
+                      >
                         {getTimeSlotLabel(option.time_slot)}
                       </span>
                     </div>
                     <div className="text-right">
-                      <p className="font-display text-2xl font-bold text-forest">
+                      <p
+                        className="text-2xl font-bold"
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                          color: "var(--craigies-burnt-orange)",
+                        }}
+                      >
                         {formatPrice(option.price_per_child)}
                       </p>
-                      <p className="text-xs text-stone">per child</p>
+                      <p
+                        className="text-xs"
+                        style={{ color: "var(--craigies-dark-olive)" }}
+                      >
+                        per child
+                      </p>
                     </div>
                   </div>
 
                   {option.description && (
-                    <p className="font-body text-stone text-sm mb-4">
+                    <p
+                      className="font-body text-sm mb-4"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
                       {option.description}
                     </p>
                   )}
 
                   <Link
                     href={`/book/${club.slug}?option=${option.id}`}
-                    className="block w-full text-center bg-forest text-white font-display font-semibold py-3 px-6 rounded-lg hover:bg-meadow transition-colors"
+                    className="block w-full text-center text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor: "var(--craigies-olive)",
+                      fontFamily: "'Playfair Display', serif",
+                    }}
                   >
                     Select
                   </Link>
@@ -415,13 +498,25 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
       </section>
 
       {/* Availability Calendar Section */}
-      <section className="bg-cloud py-16 sm:py-24">
+      <section
+        className="py-16 sm:py-24"
+        style={{ backgroundColor: "#F3F4F6" }}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
-            <h2 className="font-display text-3xl font-bold text-bark sm:text-4xl">
+            <h2
+              className="text-3xl font-bold sm:text-4xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
               Availability
             </h2>
-            <p className="mt-4 font-body text-lg text-stone">
+            <p
+              className="mt-4 font-body text-lg"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
               Check which days have spaces available. Morning and afternoon
               sessions are shown separately.
             </p>
@@ -440,8 +535,14 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
       {/* Final CTA Section */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="bg-forest rounded-2xl p-8 sm:p-12 text-center">
-            <h2 className="font-display text-3xl font-bold text-white sm:text-4xl mb-4">
+          <div
+            className="rounded-2xl p-8 sm:p-12 text-center"
+            style={{ backgroundColor: "var(--craigies-olive)" }}
+          >
+            <h2
+              className="text-3xl font-bold text-white sm:text-4xl mb-4"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               Ready to Book?
             </h2>
             <p className="font-body text-lg text-white/90 mb-8 max-w-2xl mx-auto">
@@ -450,7 +551,11 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
             </p>
             <Link
               href={`/book/${club.slug}`}
-              className="inline-block bg-sunshine text-bark font-display font-semibold py-4 px-8 rounded-lg hover:bg-amber transition-colors text-lg shadow-[var(--shadow-md)]"
+              className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
             >
               Start Booking
             </Link>

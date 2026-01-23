@@ -83,36 +83,66 @@ export default async function BookingsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
-        <h2 className="font-display text-2xl font-bold text-bark">Bookings</h2>
-        <p className="mt-1 font-body text-stone">
+      <div className="rounded-2xl bg-white p-6 shadow-md">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
+          Bookings
+        </h2>
+        <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
           Manage and view all booking records
         </p>
       </div>
 
       {/* Summary Stats */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-forest/10 p-3">
-              <BookOpen className="h-6 w-6 text-forest" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(122, 124, 74, 0.1)" }}
+            >
+              <BookOpen className="h-6 w-6" style={{ color: "var(--craigies-olive)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Total Bookings</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Total Bookings
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 {totalBookings}
               </p>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-[var(--shadow-md)]">
+        <div className="rounded-2xl bg-white p-6 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-sunshine/10 p-3">
-              <PoundSterling className="h-6 w-6 text-amber" />
+            <div
+              className="rounded-full p-3"
+              style={{ backgroundColor: "rgba(212, 132, 62, 0.1)" }}
+            >
+              <PoundSterling className="h-6 w-6" style={{ color: "var(--craigies-burnt-orange)" }} />
             </div>
             <div>
-              <p className="font-body text-sm text-stone">Total Revenue</p>
-              <p className="font-display text-2xl font-bold text-bark">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Total Revenue
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: "var(--craigies-dark-olive)",
+                }}
+              >
                 £{totalRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
               </p>
             </div>
