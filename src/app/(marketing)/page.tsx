@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
@@ -150,6 +152,83 @@ Whether it's cuddling a fluffy chick or watching lambs take their first steps, e
 
       {/* Testimonials Section */}
       <TestimonialsCarousel testimonials={testimonials} />
+
+      {/* Gallery Preview Section */}
+      <section className="py-16 sm:py-24" style={{ backgroundColor: 'var(--craigies-cream)' }}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2
+              className="text-3xl font-bold sm:text-4xl"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: 'var(--craigies-dark-olive)'
+              }}
+            >
+              See the Magic in Action
+            </h2>
+            <p
+              className="mt-4 font-body text-lg"
+              style={{ color: 'var(--craigies-dark-olive)' }}
+            >
+              Take a peek at the wonderful adventures happening every day at The Clubhouse
+            </p>
+          </div>
+
+          {/* Photo Grid */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 mb-8">
+            <div className="aspect-square overflow-hidden rounded-xl shadow-md">
+              <Image
+                src="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/IMG_8406_ejjgwy.jpg"
+                alt="Children with farm animals"
+                width={400}
+                height={400}
+                className="h-full w-full object-cover transition-transform hover:scale-105"
+              />
+            </div>
+            <div className="aspect-square overflow-hidden rounded-xl shadow-md">
+              <Image
+                src="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/d12ad9e7-690c-4cb0-8761-efb841ffbade_jgrvaf.jpg"
+                alt="Forest exploration"
+                width={400}
+                height={400}
+                className="h-full w-full object-cover transition-transform hover:scale-105"
+              />
+            </div>
+            <div className="aspect-square overflow-hidden rounded-xl shadow-md">
+              <Image
+                src="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/IMG_1176-scaled_pemded.jpg"
+                alt="Farm activities"
+                width={400}
+                height={400}
+                className="h-full w-full object-cover transition-transform hover:scale-105"
+              />
+            </div>
+            <div className="aspect-square overflow-hidden rounded-xl shadow-md">
+              <Image
+                src="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/043917ba-162f-4160-8072-97e389e93b92-2_aswr8s.jpg"
+                alt="Children in the forest"
+                width={400}
+                height={400}
+                className="h-full w-full object-cover transition-transform hover:scale-105"
+              />
+            </div>
+          </div>
+
+          {/* View Gallery Button */}
+          <div className="text-center">
+            <Link
+              href="/gallery"
+              className="inline-block rounded-lg px-8 py-3 text-lg font-semibold text-white transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: 'var(--craigies-burnt-orange)',
+                fontFamily: "'Playfair Display', serif"
+              }}
+            >
+              View Full Gallery
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <CTASection />
