@@ -35,6 +35,18 @@ const mockPromoCodes: PromoCodeType[] = [
     is_active: true,
     created_at: "2025-01-01T00:00:00Z",
   },
+  {
+    id: "promo-3",
+    code: "EASTER10",
+    discount_percent: 10,
+    valid_from: "2026-01-01T00:00:00Z",
+    valid_until: "2026-04-30T23:59:59Z",
+    max_uses: 100,
+    times_used: 0,
+    club_id: null, // Valid for all clubs
+    is_active: true,
+    created_at: "2026-01-01T00:00:00Z",
+  },
 ];
 
 export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
