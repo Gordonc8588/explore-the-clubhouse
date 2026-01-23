@@ -41,8 +41,9 @@ export function DateSelect({
     return map;
   }, [clubDays]);
 
-  const clubStartDate = new Date(startDate);
-  const clubEndDate = new Date(endDate);
+  // Normalize dates to YYYY-MM-DD for comparison (avoid timezone issues)
+  const clubStartDate = startDate;
+  const clubEndDate = endDate;
 
   // Generate calendar days for the current month
   const calendarDays = useMemo(() => {
@@ -84,7 +85,8 @@ export function DateSelect({
       prevMonth.getMonth() + 1,
       0
     );
-    return lastDayPrevMonth >= clubStartDate;
+    const lastDayStr = lastDayPrevMonth.toISOString().split("T")[0];
+    return lastDayStr >= clubStartDate;
   }, [currentMonth, clubStartDate]);
 
   const canGoForward = useMemo(() => {
@@ -93,7 +95,8 @@ export function DateSelect({
       currentMonth.getMonth() + 1,
       1
     );
-    return nextMonth <= clubEndDate;
+    const nextMonthStr = nextMonth.toISOString().split("T")[0];
+    return nextMonthStr <= clubEndDate;
   }, [currentMonth, clubEndDate]);
 
   const goToPrevMonth = () => {
@@ -135,7 +138,9 @@ export function DateSelect({
   };
 
   const isDateInRange = (date: Date): boolean => {
-    return date >= clubStartDate && date <= clubEndDate;
+    // Compare date strings to avoid timezone issues
+    const dateStr = date.toISOString().split("T")[0];
+    return dateStr >= clubStartDate && dateStr <= clubEndDate;
   };
 
   const formatDateKey = (date: Date): string => {
