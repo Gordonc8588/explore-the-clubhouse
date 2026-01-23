@@ -64,11 +64,6 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
     (c) => c.session === "PM" || c.session === "Full"
   ).length;
 
-  // Get children with allergies
-  const childrenWithAllergies = attendance.filter(
-    (c) => c.allergies.length > 0
-  );
-
   // Handle date change
   const handleDateChange = (newDate: string) => {
     router.push(`/admin/day/${newDate}`);
@@ -298,51 +293,6 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
             </div>
           </div>
         </div>
-
-        {/* Allergy Alert Section */}
-        {childrenWithAllergies.length > 0 && (
-          <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-6">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-              <h3
-                className="text-lg font-bold text-red-800"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Allergy Alert - {childrenWithAllergies.length} Child
-                {childrenWithAllergies.length !== 1 ? "ren" : ""} with Allergies
-              </h3>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {childrenWithAllergies.map((child) => (
-                <div
-                  key={child.id}
-                  className="flex items-start gap-3 rounded-lg bg-white p-4 shadow-sm"
-                >
-                  <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
-                  <div>
-                    <p
-                      className="font-semibold"
-                      style={{
-                        fontFamily: "'Playfair Display', serif",
-                        color: "var(--craigies-dark-olive)",
-                      }}
-                    >
-                      {child.name}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-red-700">
-                      {child.allergies.join(", ")}
-                    </p>
-                    {child.medicalNotes && (
-                      <p className="mt-1 text-sm text-stone">
-                        {child.medicalNotes}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Attendance Table */}
         <div className="rounded-2xl bg-white p-6 shadow-md">

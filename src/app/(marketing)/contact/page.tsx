@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -245,32 +246,9 @@ export default function ContactPage() {
             <p className="mx-auto mt-4 max-w-xl font-body text-lg text-white/90">
               Stay updated with our latest activities, holiday club dates, and farm news. Join our mailing list today!
             </p>
-            <form className="mx-auto mt-8 max-w-md">
-              <label htmlFor="contact-newsletter-email" className="sr-only">
-                Email address
-              </label>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <input
-                  type="email"
-                  id="contact-newsletter-email"
-                  name="email"
-                  placeholder="your@email.com"
-                  required
-                  className="flex-1 rounded-lg border px-5 py-3 font-body text-white placeholder:text-white/50 focus:outline-none focus:ring-2 bg-white/10 focus:ring-white"
-                  style={{ borderColor: "rgba(255, 255, 255, 0.3)" }}
-                />
-                <button
-                  type="submit"
-                  className="rounded-lg px-8 py-3 font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 whitespace-nowrap"
-                  style={{
-                    backgroundColor: "var(--craigies-burnt-orange)",
-                    fontFamily: "'Playfair Display', serif",
-                  }}
-                >
-                  Subscribe
-                </button>
-              </div>
-            </form>
+            <div className="mt-8">
+              <NewsletterSignup source="contact-page" variant="standalone" />
+            </div>
           </div>
         </div>
       </section>
