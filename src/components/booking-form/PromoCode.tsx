@@ -9,85 +9,10 @@ interface PromoCodeProps {
   appliedPromo: PromoCodeType | null;
 }
 
-// Mock promo codes for development
-const mockPromoCodes: PromoCodeType[] = [
-  {
-    id: "promo-1",
-    code: "EARLYBIRD",
-    discount_percent: 10,
-    valid_from: "2025-01-01T00:00:00Z",
-    valid_until: "2025-12-31T23:59:59Z",
-    max_uses: 100,
-    times_used: 25,
-    club_id: null, // Valid for all clubs
-    is_active: true,
-    created_at: "2025-01-01T00:00:00Z",
-  },
-  {
-    id: "promo-2",
-    code: "SUMMER20",
-    discount_percent: 20,
-    valid_from: "2025-06-01T00:00:00Z",
-    valid_until: "2025-08-31T23:59:59Z",
-    max_uses: 50,
-    times_used: 10,
-    club_id: null,
-    is_active: true,
-    created_at: "2025-01-01T00:00:00Z",
-  },
-  {
-    id: "promo-3",
-    code: "EASTER10",
-    discount_percent: 10,
-    valid_from: "2026-01-01T00:00:00Z",
-    valid_until: "2026-04-30T23:59:59Z",
-    max_uses: 100,
-    times_used: 0,
-    club_id: null, // Valid for all clubs
-    is_active: true,
-    created_at: "2026-01-01T00:00:00Z",
-  },
-];
-
 export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const validatePromoCode = (
-    inputCode: string
-  ): PromoCodeType | { error: string } => {
-    const normalizedCode = inputCode.trim().toUpperCase();
-    const promo = mockPromoCodes.find(
-      (p) => p.code.toUpperCase() === normalizedCode
-    );
-
-    if (!promo) {
-      return { error: "Invalid promo code" };
-    }
-
-    if (!promo.is_active) {
-      return { error: "This promo code is no longer active" };
-    }
-
-    const now = new Date();
-    const validFrom = new Date(promo.valid_from);
-    const validUntil = new Date(promo.valid_until);
-
-    if (now < validFrom || now > validUntil) {
-      return { error: "This promo code has expired" };
-    }
-
-    if (promo.max_uses !== null && promo.times_used >= promo.max_uses) {
-      return { error: "This promo code has reached its usage limit" };
-    }
-
-    if (promo.club_id !== null && promo.club_id !== clubId) {
-      return { error: "This promo code is not valid for this club" };
-    }
-
-    return promo;
-  };
 
   const handleApply = async () => {
     if (!code.trim()) {
@@ -98,20 +23,29 @@ export function PromoCode({ clubId, onApply, appliedPromo }: PromoCodeProps) {
     setIsLoading(true);
     setError(null);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      const response = await fetch("/api/promo-code/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code.trim(), clubId }),
+      });
 
-    const result = validatePromoCode(code);
+      const data = await response.json();
 
-    if ("error" in result) {
-      setError(result.error);
+      if (!response.ok) {
+        setError(data.error || "Invalid promo code");
+        onApply(null);
+      } else {
+        onApply(data);
+        setError(null);
+      }
+    } catch (err) {
+      console.error("Error validating promo code:", err);
+      setError("Failed to validate promo code. Please try again.");
       onApply(null);
-    } else {
-      onApply(result);
-      setError(null);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleRemove = () => {
