@@ -12,40 +12,17 @@ async function getBookingData(bookingId: string) {
   const { data: booking, error } = await supabase
     .from("bookings")
     .select(`
-      id,
-      parent_name,
-      parent_email,
-      parent_phone,
-      total_amount,
-      status,
-      created_at,
-      clubs(id, name),
-      children(
-        id,
-        name,
-        date_of_birth,
-        allergies,
-        medical_notes,
-        emergency_contact_name,
-        emergency_contact_phone,
-        emergency_contact_relationship,
-        photo_consent,
-        medical_consent
-      ),
-      booking_days(
-        id,
-        club_days(id, date, session_type)
-      ),
-      booking_options(
-        id,
-        name,
-        price
-      )
+      *,
+      clubs (*),
+      booking_options (*),
+      children (*),
+      booking_days(*, club_days(*))
     `)
     .eq("id", bookingId)
     .single();
 
   if (error || !booking) {
+    console.error('Booking fetch error:', error);
     return null;
   }
 
@@ -76,36 +53,41 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     date: bd.club_days?.date,
     dayName: new Date(bd.club_days?.date).toLocaleDateString("en-GB", { weekday: "long" }),
     sessionType: bd.club_days?.session_type,
-  })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) || [];
+  })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()) || [];
 
-  const children = booking.children?.map((child: {
-    id: string;
-    name: string;
-    date_of_birth: string;
-    allergies: string[] | null;
-    medical_notes: string | null;
-    emergency_contact_name: string | null;
-    emergency_contact_phone: string | null;
-    emergency_contact_relationship: string | null;
-    photo_consent: boolean | null;
-    medical_consent: boolean | null;
-  }) => ({
-    id: child.id,
-    name: child.name,
-    dateOfBirth: child.date_of_birth,
-    age: calculateAge(child.date_of_birth),
-    allergies: child.allergies || [],
-    medicalNotes: child.medical_notes || "",
-    emergencyContact: {
-      name: child.emergency_contact_name || "",
-      phone: child.emergency_contact_phone || "",
-      relationship: child.emergency_contact_relationship || "",
-    },
-    consents: {
-      photoConsent: child.photo_consent ?? false,
-      medicalConsent: child.medical_consent ?? false,
-    },
-  })) || [];
+  const children = booking.children?.map((child: any) => {
+    // Convert allergies text to array
+    const allergiesText = child.allergies || "";
+    const allergiesLower = allergiesText.trim().toLowerCase();
+
+    // Check if allergies is empty or contains common "none" variations
+    const isNoAllergies = allergiesLower === "" ||
+                          allergiesLower === "none" ||
+                          allergiesLower === "n/a" ||
+                          allergiesLower === "no";
+
+    const allergiesArray = isNoAllergies
+      ? []
+      : allergiesText.split(',').map((a: string) => a.trim()).filter((a: string) => a);
+
+    return {
+      id: child.id,
+      name: child.name,
+      dateOfBirth: child.date_of_birth,
+      age: calculateAge(child.date_of_birth),
+      allergies: allergiesArray,
+      medicalNotes: child.medical_notes || "",
+      emergencyContact: {
+        name: child.emergency_contact_name || "",
+        phone: child.emergency_contact_phone || "",
+        relationship: child.emergency_contact_relationship || "",
+      },
+      consents: {
+        photoConsent: child.photo_consent ?? false,
+        medicalConsent: child.medical_consent ?? false,
+      },
+    };
+  }) || [];
 
   const transformedBooking = {
     id: booking.id,

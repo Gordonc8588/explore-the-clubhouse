@@ -21,7 +21,9 @@ const childInfoSchema = z.object({
     }, "Date of birth must be in the past"),
 
   // Health & Dietary
+  hasAllergies: z.boolean(),
   allergies: z.string().max(1000, "Allergies text is too long").optional(),
+  hasMedicalConditions: z.boolean(),
   medicalNotes: z.string().max(1000, "Medical notes text is too long").optional(),
 
   // Emergency Contact
@@ -46,6 +48,24 @@ const childInfoSchema = z.object({
   medicalConsent: z.boolean().refine((val) => val === true, {
     message: "Medical consent is required to attend the club",
   }),
+}).refine((data) => {
+  // If hasAllergies is true, allergies must be provided
+  if (data.hasAllergies && (!data.allergies || data.allergies.trim() === "")) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please provide details about the allergies",
+  path: ["allergies"],
+}).refine((data) => {
+  // If hasMedicalConditions is true, medicalNotes must be provided
+  if (data.hasMedicalConditions && (!data.medicalNotes || data.medicalNotes.trim() === "")) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please provide details about the medical conditions",
+  path: ["medicalNotes"],
 });
 
 export type ChildInfoFormValues = z.infer<typeof childInfoSchema>;
@@ -64,13 +84,16 @@ export function ChildInfoForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ChildInfoFormValues>({
     resolver: zodResolver(childInfoSchema),
     defaultValues: {
       childName: "",
       dateOfBirth: "",
+      hasAllergies: false,
       allergies: "",
+      hasMedicalConditions: false,
       medicalNotes: "",
       emergencyContactName: "",
       emergencyContactPhone: "",
@@ -80,6 +103,10 @@ export function ChildInfoForm({
       ...defaultValues,
     },
   });
+
+  // Watch the boolean fields to show/hide textareas
+  const hasAllergies = watch("hasAllergies");
+  const hasMedicalConditions = watch("hasMedicalConditions");
 
   const inputClassName = (hasError: boolean) => `
     w-full px-4 py-3 rounded-lg border bg-white font-body text-bark
@@ -172,49 +199,115 @@ export function ChildInfoForm({
           </h3>
         </div>
 
-        {/* Allergies */}
+        {/* Allergies Question */}
         <div>
-          <label
-            htmlFor="allergies"
-            className="block text-sm font-medium text-stone mb-1.5"
-          >
-            Allergies & Dietary Requirements
+          <label className="block text-sm font-medium text-stone mb-3">
+            Does your child have any allergies or dietary requirements?
           </label>
-          <textarea
-            id="allergies"
-            {...register("allergies")}
-            className={textareaClassName(!!errors.allergies)}
-            placeholder="Please list any allergies, food intolerances, or dietary requirements (e.g., nut allergy, vegetarian, gluten-free)"
-            rows={3}
-          />
-          {errors.allergies && (
-            <p className="mt-1.5 text-sm text-error">
-              {errors.allergies.message}
-            </p>
-          )}
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                {...register("hasAllergies", {
+                  setValueAs: (v) => v === "true",
+                })}
+                value="false"
+                className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
+              />
+              <span className="text-bark">No</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                {...register("hasAllergies", {
+                  setValueAs: (v) => v === "true",
+                })}
+                value="true"
+                className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
+              />
+              <span className="text-bark">Yes</span>
+            </label>
+          </div>
         </div>
 
-        {/* Medical Notes */}
+        {/* Allergies Details (conditional) */}
+        {hasAllergies && (
+          <div>
+            <label
+              htmlFor="allergies"
+              className="block text-sm font-medium text-stone mb-1.5"
+            >
+              Please provide details <span className="text-error">*</span>
+            </label>
+            <textarea
+              id="allergies"
+              {...register("allergies")}
+              className={textareaClassName(!!errors.allergies)}
+              placeholder="e.g., Nuts, Dairy, Gluten, Vegetarian, Vegan"
+              rows={3}
+            />
+            {errors.allergies && (
+              <p className="mt-1.5 text-sm text-error">
+                {errors.allergies.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Medical Conditions Question */}
         <div>
-          <label
-            htmlFor="medicalNotes"
-            className="block text-sm font-medium text-stone mb-1.5"
-          >
-            Medical Notes
+          <label className="block text-sm font-medium text-stone mb-3">
+            Does your child have any medical conditions we should be aware of?
           </label>
-          <textarea
-            id="medicalNotes"
-            {...register("medicalNotes")}
-            className={textareaClassName(!!errors.medicalNotes)}
-            placeholder="Please share any medical conditions, medications, or special needs we should be aware of (e.g., asthma, ADHD, epilepsy)"
-            rows={3}
-          />
-          {errors.medicalNotes && (
-            <p className="mt-1.5 text-sm text-error">
-              {errors.medicalNotes.message}
-            </p>
-          )}
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                {...register("hasMedicalConditions", {
+                  setValueAs: (v) => v === "true",
+                })}
+                value="false"
+                className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
+              />
+              <span className="text-bark">No</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                {...register("hasMedicalConditions", {
+                  setValueAs: (v) => v === "true",
+                })}
+                value="true"
+                className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
+              />
+              <span className="text-bark">Yes</span>
+            </label>
+          </div>
         </div>
+
+        {/* Medical Notes Details (conditional) */}
+        {hasMedicalConditions && (
+          <div>
+            <label
+              htmlFor="medicalNotes"
+              className="block text-sm font-medium text-stone mb-1.5"
+            >
+              Please provide details <span className="text-error">*</span>
+            </label>
+            <textarea
+              id="medicalNotes"
+              {...register("medicalNotes")}
+              className={textareaClassName(!!errors.medicalNotes)}
+              placeholder="e.g., Asthma, Diabetes, EpiPen required, ADHD"
+              rows={3}
+            />
+            {errors.medicalNotes && (
+              <p className="mt-1.5 text-sm text-error">
+                {errors.medicalNotes.message}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Emergency Contact Section */}

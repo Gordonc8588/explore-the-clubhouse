@@ -10,14 +10,14 @@ async function getAttendanceData(date: string) {
   const supabase = await createClient();
 
   // Get all booking_days for this date with related data
-  const { data: bookingDays } = await supabase
+  const { data: bookingDays, error } = await supabase
     .from("booking_days")
     .select(`
       id,
+      time_slot,
       club_days!inner(
         id,
-        date,
-        session_type
+        date
       ),
       bookings!inner(
         id,
@@ -31,15 +31,14 @@ async function getAttendanceData(date: string) {
           allergies,
           medical_notes,
           emergency_contact_name,
-          emergency_contact_phone,
-          emergency_contact_relationship
+          emergency_contact_phone
         )
       )
     `)
     .eq("club_days.date", date)
     .in("bookings.status", ["paid", "complete"]);
 
-  if (!bookingDays) {
+  if (error || !bookingDays) {
     return [];
   }
 
@@ -61,15 +60,29 @@ async function getAttendanceData(date: string) {
 
   for (const bd of bookingDays) {
     const booking = (bd as any).bookings;
-    const clubDay = (bd as any).club_days;
+    const timeSlot = (bd as any).time_slot;
 
     if (!booking || !booking.children) continue;
 
     for (const child of booking.children) {
-      // Map session_type to display format
+      // Map time_slot to display format
       let session: "AM" | "PM" | "Full" = "Full";
-      if (clubDay?.session_type === "morning") session = "AM";
-      else if (clubDay?.session_type === "afternoon") session = "PM";
+      if (timeSlot === "morning") session = "AM";
+      else if (timeSlot === "afternoon") session = "PM";
+
+      // Convert allergies text to array
+      const allergiesText = child.allergies || "";
+      const allergiesLower = allergiesText.trim().toLowerCase();
+
+      // Check if allergies is empty or contains common "none" variations
+      const isNoAllergies = allergiesLower === "" ||
+                            allergiesLower === "none" ||
+                            allergiesLower === "n/a" ||
+                            allergiesLower === "no";
+
+      const allergiesArray = isNoAllergies
+        ? []
+        : allergiesText.split(',').map((a: string) => a.trim()).filter((a: string) => a);
 
       attendance.push({
         id: child.id,
@@ -77,12 +90,12 @@ async function getAttendanceData(date: string) {
         parentName: booking.parent_name,
         parentPhone: booking.parent_phone || "",
         session,
-        allergies: child.allergies || [],
+        allergies: allergiesArray,
         medicalNotes: child.medical_notes || "",
         emergencyContact: {
           name: child.emergency_contact_name || "",
           phone: child.emergency_contact_phone || "",
-          relationship: child.emergency_contact_relationship || "",
+          relationship: "", // Not stored in database
         },
       });
     }
