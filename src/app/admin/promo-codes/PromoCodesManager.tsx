@@ -116,40 +116,95 @@ export function PromoCodesManager({ promoCodes: initialPromoCodes, clubs }: Prom
 
     const clubInfo = clubs.find((c) => c.id === formData.clubId);
 
-    const newPromoCode: PromoCode = {
-      id: editingCode?.id || crypto.randomUUID(),
-      code: formData.code.toUpperCase(),
-      discountPercent: parseInt(formData.discountPercent, 10),
-      validFrom: formData.validFrom,
-      validUntil: formData.validUntil,
-      maxUses: formData.maxUses ? parseInt(formData.maxUses, 10) : null,
-      timesUsed: editingCode?.timesUsed || 0,
-      clubId: formData.clubId || null,
-      clubName: clubInfo?.name || null,
-      isActive: formData.isActive,
-    };
+    try {
+      const payload = {
+        code: formData.code.toUpperCase(),
+        discount_percent: parseInt(formData.discountPercent, 10),
+        valid_from: formData.validFrom,
+        valid_until: formData.validUntil,
+        max_uses: formData.maxUses ? parseInt(formData.maxUses, 10) : null,
+        club_id: formData.clubId || null,
+        is_active: formData.isActive,
+      };
 
-    // TODO: Call API to save promo code
-    if (editingCode) {
-      setPromoCodes((prev) =>
-        prev.map((pc) => (pc.id === editingCode.id ? newPromoCode : pc))
-      );
-    } else {
-      setPromoCodes((prev) => [newPromoCode, ...prev]);
+      let response;
+      if (editingCode) {
+        // Update existing promo code
+        response = await fetch("/api/admin/promo-codes", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, id: editingCode.id }),
+        });
+      } else {
+        // Create new promo code
+        response = await fetch("/api/admin/promo-codes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to save promo code"}`);
+        return;
+      }
+
+      const savedPromoCode = await response.json();
+
+      // Update local state with saved data
+      const newPromoCode: PromoCode = {
+        id: savedPromoCode.id,
+        code: savedPromoCode.code,
+        discountPercent: savedPromoCode.discount_percent,
+        validFrom: savedPromoCode.valid_from,
+        validUntil: savedPromoCode.valid_until,
+        maxUses: savedPromoCode.max_uses,
+        timesUsed: savedPromoCode.times_used,
+        clubId: savedPromoCode.club_id,
+        clubName: clubInfo?.name || null,
+        isActive: savedPromoCode.is_active,
+      };
+
+      if (editingCode) {
+        setPromoCodes((prev) =>
+          prev.map((pc) => (pc.id === editingCode.id ? newPromoCode : pc))
+        );
+      } else {
+        setPromoCodes((prev) => [newPromoCode, ...prev]);
+      }
+
+      closeModal();
+    } catch (error) {
+      console.error("Error saving promo code:", error);
+      alert("Failed to save promo code. Please try again.");
     }
-
-    closeModal();
   };
 
   const handleDelete = async (id: string) => {
-    // TODO: Call API to delete promo code
-    setPromoCodes((prev) => prev.filter((pc) => pc.id !== id));
-    setDeleteConfirmId(null);
-    // Adjust page if needed
-    const newTotal = promoCodes.length - 1;
-    const newTotalPages = Math.ceil(newTotal / ITEMS_PER_PAGE);
-    if (currentPage > newTotalPages && newTotalPages > 0) {
-      setCurrentPage(newTotalPages);
+    try {
+      const response = await fetch(`/api/admin/promo-codes?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to delete promo code"}`);
+        return;
+      }
+
+      setPromoCodes((prev) => prev.filter((pc) => pc.id !== id));
+      setDeleteConfirmId(null);
+
+      // Adjust page if needed
+      const newTotal = promoCodes.length - 1;
+      const newTotalPages = Math.ceil(newTotal / ITEMS_PER_PAGE);
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      }
+    } catch (error) {
+      console.error("Error deleting promo code:", error);
+      alert("Failed to delete promo code. Please try again.");
     }
   };
 
