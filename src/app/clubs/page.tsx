@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { ClubCard } from "@/components/ClubCard";
 import { createClient } from "@/lib/supabase/server";
 import type { Club } from "@/types/database";
-import { getCloudinaryUrl } from "@/lib/cloudinary";
 
 export const metadata: Metadata = {
   title: "What's On",
@@ -79,29 +77,12 @@ export default async function WhatsOnPage() {
 
   return (
     <div style={{ backgroundColor: "var(--craigies-cream)" }}>
-      {/* Hero Section with Background Image */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src={getCloudinaryUrl("IMG_8408_cktueb", { width: 1920, height: 1080, crop: "fill", quality: "auto" })}
-            alt="Children enjoying activities at The Clubhouse"
-            fill
-            priority
-            className="object-cover"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to bottom, rgba(90, 92, 58, 0.85), rgba(90, 92, 58, 0.7), rgba(90, 92, 58, 0.9))",
-            }}
-          />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+      {/* Hero Section */}
+      <section style={{ backgroundColor: "var(--craigies-olive)" }}>
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           <div className="text-center">
             <h1
-              className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl drop-shadow-lg"
+              className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               What&apos;s On
@@ -111,22 +92,6 @@ export default async function WhatsOnPage() {
               unforgettable adventure at Craigies Farm.
             </p>
           </div>
-        </div>
-
-        {/* Decorative wave */}
-        <div className="absolute -bottom-1 left-0 right-0">
-          <svg
-            viewBox="0 0 1440 120"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="var(--craigies-cream)"
-            />
-          </svg>
         </div>
       </section>
 

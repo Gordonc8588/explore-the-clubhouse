@@ -235,30 +235,21 @@ export default function AboutPage() {
               className="text-3xl font-bold text-white sm:text-4xl"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Come and Visit Us
+              Ready to Book Your Child&apos;s Adventure?
             </h2>
             <p className="mx-auto mt-4 max-w-xl font-body text-lg text-white/90">
-              We&apos;d love to show you around our farm and answer any questions
-              you have. Get in touch to arrange a visit or book your
-              child&apos;s place.
+              Join us for an unforgettable holiday club experience filled with farm activities, forest exploration, and hands-on learning. Spaces are limited – secure your child&apos;s spot today!
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="mt-8">
               <a
-                href="/clubs"
-                className="inline-block rounded-lg px-8 py-3 text-lg font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                href="/clubs#upcoming-events"
+                className="inline-block rounded-lg px-10 py-4 text-lg font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
                 style={{
                   backgroundColor: "var(--craigies-burnt-orange)",
                   fontFamily: "'Playfair Display', serif",
                 }}
               >
-                Book Now
-              </a>
-              <a
-                href="/contact"
-                className="cta-button-secondary inline-block rounded-lg border-2 border-white px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Contact Us
+                Book Your Spot Now
               </a>
             </div>
           </div>
