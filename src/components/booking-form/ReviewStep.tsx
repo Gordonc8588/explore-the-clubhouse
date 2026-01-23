@@ -21,8 +21,7 @@ export function ReviewStep({
   onProceedToPayment,
   isLoading = false,
 }: ReviewStepProps) {
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [cancellationAccepted, setCancellationAccepted] = useState(false);
+  const [agreementsAccepted, setAgreementsAccepted] = useState(false);
 
   const { selectedOption, selectedDates, parentName, parentEmail, parentPhone, childrenCount } =
     formData;
@@ -112,7 +111,7 @@ export function ReviewStep({
     }
   };
 
-  const canProceed = termsAccepted && cancellationAccepted && !isLoading;
+  const canProceed = agreementsAccepted && !isLoading;
 
   return (
     <div className="space-y-6">
@@ -339,113 +338,67 @@ export function ReviewStep({
       </div>
 
       {/* Agreements */}
-      <div className="space-y-4">
-        {/* Terms & Conditions */}
-        <label className="flex items-start gap-3 cursor-pointer group">
-          <div className="relative flex-shrink-0 mt-0.5">
-            <input
-              type="checkbox"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div
-              className="w-5 h-5 rounded border-2 transition-all"
-              style={{
-                backgroundColor: termsAccepted
-                  ? "var(--craigies-burnt-orange)"
-                  : "white",
-                borderColor: termsAccepted
-                  ? "var(--craigies-burnt-orange)"
-                  : "#6B7280",
-              }}
-            >
-              {termsAccepted && (
-                <svg
-                  className="w-full h-full text-white p-0.5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </div>
-          </div>
-          <span
-            className="text-sm"
-            style={{ color: "var(--craigies-dark-olive)" }}
+      <label className="flex items-start gap-3 cursor-pointer group">
+        <div className="relative flex-shrink-0 mt-0.5">
+          <input
+            type="checkbox"
+            checked={agreementsAccepted}
+            onChange={(e) => setAgreementsAccepted(e.target.checked)}
+            className="sr-only peer"
+          />
+          <div
+            className="w-5 h-5 rounded border-2 transition-all"
+            style={{
+              backgroundColor: agreementsAccepted
+                ? "var(--craigies-burnt-orange)"
+                : "white",
+              borderColor: agreementsAccepted
+                ? "var(--craigies-burnt-orange)"
+                : "#6B7280",
+            }}
           >
-            I agree to the{" "}
-            <a
-              href="/terms"
-              className="underline"
-              style={{ color: "var(--craigies-burnt-orange)" }}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Terms & Conditions
-            </a>
-          </span>
-        </label>
-
-        {/* Cancellation Policy */}
-        <label className="flex items-start gap-3 cursor-pointer group">
-          <div className="relative flex-shrink-0 mt-0.5">
-            <input
-              type="checkbox"
-              checked={cancellationAccepted}
-              onChange={(e) => setCancellationAccepted(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div
-              className="w-5 h-5 rounded border-2 transition-all"
-              style={{
-                backgroundColor: cancellationAccepted
-                  ? "var(--craigies-burnt-orange)"
-                  : "white",
-                borderColor: cancellationAccepted
-                  ? "var(--craigies-burnt-orange)"
-                  : "#6B7280",
-              }}
-            >
-              {cancellationAccepted && (
-                <svg
-                  className="w-full h-full text-white p-0.5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </div>
+            {agreementsAccepted && (
+              <svg
+                className="w-full h-full text-white p-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
           </div>
-          <span
-            className="text-sm"
-            style={{ color: "var(--craigies-dark-olive)" }}
+        </div>
+        <span
+          className="text-sm"
+          style={{ color: "var(--craigies-dark-olive)" }}
+        >
+          I agree to the{" "}
+          <a
+            href="/terms"
+            className="underline"
+            style={{ color: "var(--craigies-burnt-orange)" }}
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            I have read and accept the{" "}
-            <a
-              href="/cancellation-policy"
-              className="underline"
-              style={{ color: "var(--craigies-burnt-orange)" }}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Cancellation Policy
-            </a>
-          </span>
-        </label>
-      </div>
+            Terms & Conditions
+          </a>
+          {" "}and have read the{" "}
+          <a
+            href="/terms"
+            className="underline"
+            style={{ color: "var(--craigies-burnt-orange)" }}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Cancellation Policy
+          </a>
+        </span>
+      </label>
 
       {/* Proceed to Payment Button */}
       <button
