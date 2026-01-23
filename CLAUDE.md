@@ -112,11 +112,29 @@ When making schema changes:
 - Expanding admin dashboard features
 - Marketing/SEO improvements
 
-## Brand Colors (CSS Variables in globals.css)
+## Design System (Figma - Craigies Palette)
 
-- Primary: Forest (#2D5A3D), Meadow (#4A7C59), Sage (#87A878)
-- Accent: Sunshine (#F5A623), Amber (#E8912D), Coral (#E07A5F)
-- Neutrals: Bark (#3D3D3D), Stone (#6B7280), Cloud (#F3F4F6), Cream (#FEFDF8)
+### Brand Colors (CSS Variables in globals.css)
+
+**Current Design (Craigies):**
+- Primary: Olive (#7A7C4A), Cream (#F5F4ED), Burnt Orange (#D4843E), Dark Olive (#5A5C3A)
+- Typography: Playfair Display (serif) for all headings, Nunito Sans for body text
+- Design Source: Figma design system implemented site-wide
+
+**Legacy Colors (Phased Out):**
+- Old Primary: Forest (#2D5A3D), Meadow (#4A7C59), Sage (#87A878)
+- Old Accent: Sunshine (#F5A623), Amber (#E8912D), Coral (#E07A5F)
+- Neutrals: Bark (#3D3D3D), Stone (#6B7280), Cloud (#F3F4F6), Pebble (#9CA3AF)
+
+**Semantic Colors (Retained):**
+- Success: #22C55E, Warning: #F59E0B, Error: #EF4444
+
+### Component Patterns
+- **Buttons**: Primary CTA uses burnt orange background with white text
+- **Forms**: Burnt orange focus states, dark olive labels
+- **Cards**: White on cream backgrounds with subtle shadows
+- **Status Badges**: Olive for complete/active, burnt orange for paid/pending
+- **Typography**: All headings use Playfair Display serif font
 
 ## Environment Variables
 
