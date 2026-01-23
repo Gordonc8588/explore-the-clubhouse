@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
+import { NewsletterSignup } from "./NewsletterSignup";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -19,16 +19,6 @@ const legalLinks = [
 ];
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement newsletter signup
-    setSubscribed(true);
-    setEmail("");
-  };
-
   return (
     <footer style={{ backgroundColor: "var(--craigies-olive)" }} className="text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -126,7 +116,7 @@ export function Footer() {
               </h4>
               <div className="mt-2 flex gap-4">
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/share/17at55cMo3/?mibextid=wwXIfr"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -136,7 +126,7 @@ export function Footer() {
                   <Facebook className="h-5 w-5" />
                 </a>
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/exploretheclubhouse?igsh=cGY0ZXhpOTRjNHFw&utm_source=qr"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -160,51 +150,9 @@ export function Footer() {
             <p className="mt-4 font-body text-sm text-white/80">
               Stay updated with our latest activities and holiday club dates.
             </p>
-            {subscribed ? (
-              <p
-                className="mt-4 font-body text-sm font-semibold"
-                style={{ color: "var(--craigies-burnt-orange)" }}
-              >
-                Thanks for subscribing!
-              </p>
-            ) : (
-              <form onSubmit={handleNewsletterSubmit} className="mt-4">
-                <label htmlFor="newsletter-email" className="sr-only">
-                  Email address
-                </label>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    type="email"
-                    id="newsletter-email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                    className="flex-1 rounded-lg border px-4 py-2 font-body text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 bg-white/10"
-                    style={{
-                      borderColor: "var(--craigies-dark-olive)",
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "var(--craigies-burnt-orange)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "var(--craigies-dark-olive)";
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{
-                      backgroundColor: "var(--craigies-burnt-orange)",
-                      fontFamily: "'Playfair Display', serif",
-                    }}
-                  >
-                    Subscribe
-                  </button>
-                </div>
-              </form>
-            )}
+            <div className="mt-4">
+              <NewsletterSignup source="footer" variant="footer" />
+            </div>
           </div>
         </div>
 
