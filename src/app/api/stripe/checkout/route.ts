@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
     storeBooking(pendingBooking);
 
     // Build success and cancel URLs
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const successUrl = `${baseUrl}/book/${club.slug}/success?session_id={CHECKOUT_SESSION_ID}&booking_id=${bookingId}`;
     const cancelUrl = `${baseUrl}/book/${club.slug}?cancelled=true&booking_id=${bookingId}`;
 
