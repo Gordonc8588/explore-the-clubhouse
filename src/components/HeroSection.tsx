@@ -21,7 +21,7 @@ export default function HeroSection() {
 
             {/* CTA Button */}
             <Link
-              href="/clubs"
+              href="/clubs#upcoming-events"
               className="inline-block px-8 py-4 rounded-lg text-white font-semibold text-lg hover:opacity-90 transition-opacity"
               style={{ backgroundColor: 'var(--craigies-burnt-orange)' }}
             >
