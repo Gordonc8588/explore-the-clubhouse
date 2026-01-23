@@ -38,37 +38,37 @@ const activities = [
     emoji: "🐐",
     title: "Animal Care & Feeding",
     description:
-      "From collecting eggs, preparing food and treats for the goats, bunnies and horses – animal lovers will be in their element! Our Animal Specialists will share fascinating new facts and expertly guide the children in caring for our animals.",
+      "This is such a special season to spend with the animals as the farm gets their NEW ARRIVALS - last year was our young chickens and the opportunity to get the little lambs onto bottles. Then of course collecting eggs, and learning about the chickens to preparing food and treats for our goats, bunnies, and horses, animal lovers will be in their element. Our Animal Specialists will share fascinating facts and expertly guide children in caring for the animals.",
   },
   {
-    emoji: "🎃",
+    emoji: "🌱",
     title: "Growing & Gardening",
     description:
-      "Autumn on the farm means harvesting the last of the summer crops AND the pumpkins they planted in the Spring (for those who were with us then). They'll get to help with the apple picking (and cooking!), gathering veggies and how to protect the plants for the colder months!",
+      "Spring on the farm is all about planting and getting it all growing again! Children will help prepare beds, sow seeds, plant vegetables and flowers, and learn how we care for them as they grow through the season.",
   },
   {
     emoji: "🌾",
     title: "Out in the Fields",
     description:
-      "Out in the main farm fields, children will take tours, learn about the machinery, irrigation systems and get into some hands-on soil testing to choose where the plants might grow best!",
+      "In the main farm fields, children will enjoy guided tours, learn about farm machinery and irrigation systems, and take part in hands-on science — such as testing soil, understanding weather patterns, and discovering where crops grow best.",
   },
   {
     emoji: "🛠",
     title: "Traditional Skills & Woodworking",
     description:
-      "From building raised beds to crafting birdhouses for the woods, working on our coop or even little woodworking projects to bring home – children will learn useful hands-on skills, along with enjoying arts and crafts.",
+      "From building raised beds and crafting birdhouses for nesting season to helping with the coop or creating small woodworking projects to take home, children will develop practical skills alongside creative arts and crafts.",
   },
   {
     emoji: "🍽",
     title: "Cookery & Farm-to-Table Food Prep",
     description:
-      "Children will be part of cooking or preparing their own meals and snacks, even harvesting fresh veg or fruits from the farm to use in our cookery courses—nothing beats food you've grown yourself!",
+      "Children will learn the basics of baking & cooking, using seasonal produce from the farm wherever possible, and collecting their own eggs — learning about where food comes from and how it changes throughout the year.",
   },
   {
     emoji: "🌳",
     title: "Forest Exploration & Bushcraft",
     description:
-      "Guided by our in-house forest ranger, kids will identify mini-beasts, learn about woodland animals, play fun group games, and build their very own dens!",
+      "Led by our in-house Forest Ranger, children will explore the woods as they come alive in spring, identify mini-beasts, learn about woodland animals, play team games, and build their very own dens.",
   },
 ];
 
@@ -108,16 +108,22 @@ export default async function WhatsOnPage() {
                   color: "var(--craigies-dark-olive)",
                 }}
               >
-                Join us at The Clubhouse this Easter!
+                🌱 Farm Activity Club – Spring 2025 🌱
               </h2>
+              <p
+                className="mt-2 font-body text-lg font-semibold"
+                style={{ color: "var(--craigies-burnt-orange)" }}
+              >
+                (13-17 April)
+              </p>
               <p
                 className="mt-6 font-body text-lg leading-relaxed"
                 style={{ color: "var(--craigies-dark-olive)" }}
               >
-                Where children can explore, learn, and enjoy the very best of Scotland&apos;s
-                countryside during the holidays! Our activities will vary each day (it is a
-                working farm, after all!), but here are just some of the exciting adventures
-                we have planned:
+                Join us at The Clubhouse this spring, where children can explore, learn, and
+                enjoy the very best of Scotland&apos;s countryside during the school break.
+                As a working farm, activities will vary each day — but here are just some of
+                the exciting adventures we have planned:
               </p>
             </div>
 
@@ -178,21 +184,15 @@ export default async function WhatsOnPage() {
                 className="text-2xl font-bold text-white sm:text-3xl"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                👉 Important Details
+                👉 Important Information
               </h2>
               <div className="mt-6 space-y-4 font-body text-white/90 leading-relaxed">
                 <p>
                   All staff are PVG checked and newly First Aid trained or retrained. We follow
-                  good practice guidance with low staff-to-child ratios and thorough risk assessments.
-                  Spaces are limited due to the low ratios, so be sure to book early!
+                  best-practice guidance with low staff-to-child ratios and thorough risk assessments.
                 </p>
-                <p
-                  className="font-semibold"
-                  style={{ color: "var(--craigies-burnt-orange)" }}
-                >
-                  BOOKING PROCESS: To help us plan activities and accommodate children properly,
-                  ALL attendee forms must be completed and returned within 3 days of booking.
-                  If forms are not received in time, the place will be offered to another family.
+                <p>
+                  Spaces are limited, so early booking is recommended.
                 </p>
               </div>
 

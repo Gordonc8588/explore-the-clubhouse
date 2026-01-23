@@ -22,7 +22,7 @@ const teamMembers = [
   {
     name: "Chris Hardie",
     role: "Activities Lead",
-    bio: "Chris joined us this past Spring; he is an animal biologist who spent six years as a local forest ranger and the last five as an animal encounters zookeeper. He leads the children in a wide range of activities, from forest skills, survival skills, and exploration to interacting with and caring for the friendly animals around the farm.",
+    bio: "Chris is an animal biologist who spent six years as a local forest ranger and the last five as an animal encounters zookeeper. He leads the children in a wide range of activities, from forest skills, survival skills, and exploration to interacting with and caring for the friendly animals around the farm.",
     image: "https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924049/9a27d5e0-f273-4833-8022-13d8f768d058_mlspf0.jpg",
   },
   {
@@ -105,24 +105,17 @@ export default function AboutPage() {
                 style={{ color: "var(--craigies-dark-olive)" }}
               >
                 <p>
-                  At The Clubhouse at Craigies, we believe learning should feel like
-                  an adventure – full of curiosity, creativity and fun. Our approach
+                  At The Clubhouse at Craigies, we believe learning is often best when done
+                  &quot;on the job&quot; – keeping it relevant, interesting and fun. Our approach
                   is all about hands-on experiences that spark imagination and build
                   a lifelong love of learning.
                 </p>
                 <p>
-                  We&apos;ve created a nurturing environment where children can thrive
-                  by connecting with nature, developing real-world skills, and getting
-                  involved in the day to day activities of a working farm.
-                </p>
-                <p
-                  className="text-xl font-semibold"
-                  style={{
-                    fontFamily: "'Playfair Display', serif",
-                    color: "var(--craigies-olive)",
-                  }}
-                >
-                  Join us in creating unforgettable memories!
+                  We&apos;ve created an environment where children can enjoy their time out of
+                  school by connecting with nature, developing real-world skills, and getting
+                  involved in the day to day activities of a working farm. Farms are unique as
+                  children of all ages can find themselves useful, and so much can be learned
+                  at any stage.
                 </p>
               </div>
 
@@ -144,9 +137,8 @@ export default function AboutPage() {
                   className="mt-2 font-body text-lg"
                   style={{ color: "var(--craigies-dark-olive)" }}
                 >
-                  To inspire a love of nature and outdoor learning in every child,
-                  creating joyful memories and building confidence through hands-on
-                  farm adventures.
+                  To inspire a love of learning in every child, and building confidence
+                  through hands-on adventures.
                 </p>
               </div>
             </div>
@@ -171,7 +163,7 @@ export default function AboutPage() {
               className="mx-auto mt-4 max-w-2xl font-body text-lg"
               style={{ color: "var(--craigies-dark-olive)" }}
             >
-              Our dedicated team brings together expertise in childcare, outdoor
+              Our dedicated team brings together knowledge of childcare, outdoor
               education, and animal husbandry to create the perfect holiday
               experience.
             </p>
