@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
 @import "tailwindcss";
 
 /* ============================================
@@ -22,6 +23,12 @@
   --color-pebble: #9CA3AF;
   --color-cloud: #F3F4F6;
   --color-cream: #FEFDF8;
+
+  /* Craigies Farm Color Palette (for new home page design) */
+  --craigies-olive: #7a7c4a;
+  --craigies-cream: #f5f4ed;
+  --craigies-burnt-orange: #d4843e;
+  --craigies-dark-olive: #5a5c3a;
 
   /* Supporting Colors */
   --color-sky: #7DD3FC;

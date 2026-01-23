@@ -6,10 +6,9 @@ import { useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "About Us" },
   { href: "/clubs", label: "What's On" },
-  { href: "/about", label: "About" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/contact", label: "Contact" },
+  { href: "/contact", label: "Contact Us" },
 ];
 
 export function Navigation() {
@@ -17,13 +16,13 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-white shadow-[var(--shadow-sm)]">
+    <nav style={{ backgroundColor: 'var(--craigies-olive)' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="font-display text-xl font-bold text-forest"
+            className="font-display text-xl font-bold text-white"
           >
             The Clubhouse
           </Link>
@@ -38,8 +37,8 @@ export function Navigation() {
                   href={link.href}
                   className={`font-display text-base font-semibold transition-colors ${
                     isActive
-                      ? "text-forest border-b-2 border-sage"
-                      : "text-bark hover:text-meadow"
+                      ? "text-white border-b-2 border-white"
+                      : "text-white/80 hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -51,7 +50,7 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="md:hidden p-2 text-bark hover:text-meadow"
+            className="md:hidden p-2 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
@@ -84,7 +83,7 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-cream">
+        <div className="md:hidden" style={{ backgroundColor: 'var(--craigies-cream)' }}>
           <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -95,9 +94,13 @@ export function Navigation() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block px-4 py-3 rounded-lg font-display text-base font-semibold transition-colors ${
                     isActive
-                      ? "text-forest bg-sage/20"
-                      : "text-bark hover:text-meadow hover:bg-cloud"
+                      ? "text-white"
+                      : "hover:opacity-80"
                   }`}
+                  style={{
+                    backgroundColor: isActive ? 'var(--craigies-olive)' : 'transparent',
+                    color: isActive ? 'white' : 'var(--craigies-dark-olive)'
+                  }}
                 >
                   {link.label}
                 </Link>
