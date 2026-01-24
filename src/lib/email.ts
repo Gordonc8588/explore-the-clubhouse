@@ -1,10 +1,10 @@
 /**
  * Email service using Resend for transactional emails
- * Brand colors: Forest (#2D5A3D), Meadow (#4A7C59), Sunshine (#F5A623)
+ * Brand colors: Olive (#7A7C4A), Burnt Orange (#D4843E), Dark Olive (#5A5C3A), Cream (#F5F4ED)
  */
 
 import { Resend } from 'resend';
-import type { Booking, Club, Child } from '@/types/database';
+import type { Booking, Club, Child, Newsletter, PromoCode } from '@/types/database';
 
 // Lazy initialize Resend client to avoid errors when API key is not set
 let resendClient: Resend | null = null;
@@ -71,22 +71,22 @@ function emailTemplate(content: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Clubhouse</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #FEFDF8; color: #3D3D3D;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #FEFDF8;">
+<body style="margin: 0; padding: 0; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F5F4ED; color: #3D3D3D;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F5F4ED;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width: 600px; width: 100%;">
           <!-- Header -->
           <tr>
             <td align="center" style="padding-bottom: 32px;">
-              <h1 style="margin: 0; font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 700; color: #2D5A3D;">
+              <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; color: #7A7C4A;">
                 The Clubhouse
               </h1>
             </td>
           </tr>
           <!-- Content Card -->
           <tr>
-            <td style="background-color: #FFFFFF; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px rgba(45, 90, 61, 0.1);">
+            <td style="background-color: #FFFFFF; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px rgba(122, 124, 74, 0.1);">
               ${content}
             </td>
           </tr>
@@ -94,11 +94,11 @@ function emailTemplate(content: string): string {
           <tr>
             <td align="center" style="padding-top: 32px;">
               <p style="margin: 0 0 8px; font-size: 14px; color: #6B7280;">
-                The Clubhouse | Outdoor adventures for children aged 5-11
+                The Clubhouse | Fun-filled farm experiences for children aged 5-11
               </p>
               <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
                 If you have any questions, please contact us at<br>
-                <a href="mailto:hello@exploretheclubhouse.co.uk" style="color: #4A7C59;">hello@exploretheclubhouse.co.uk</a>
+                <a href="mailto:hello@exploretheclubhouse.co.uk" style="color: #7A7C4A;">hello@exploretheclubhouse.co.uk</a>
               </p>
             </td>
           </tr>
@@ -118,8 +118,8 @@ function ctaButton(text: string, url: string): string {
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
       <tr>
-        <td align="center" style="background-color: #F5A623; border-radius: 8px;">
-          <a href="${url}" style="display: inline-block; padding: 14px 28px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; color: #3D3D3D; text-decoration: none;">
+        <td align="center" style="background-color: #D4843E; border-radius: 8px;">
+          <a href="${url}" style="display: inline-block; padding: 14px 28px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #FFFFFF; text-decoration: none;">
             ${text}
           </a>
         </td>
@@ -133,8 +133,8 @@ function ctaButton(text: string, url: string): string {
  */
 function infoBox(title: string, content: string): string {
   return `
-    <div style="background-color: #F3F4F6; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #2D5A3D;">
-      <h3 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; color: #2D5A3D;">${title}</h3>
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #7A7C4A;">
+      <h3 style="margin: 0 0 8px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #5A5C3A;">${title}</h3>
       <p style="margin: 0; font-size: 14px; color: #3D3D3D; line-height: 1.6;">${content}</p>
     </div>
   `;
@@ -161,20 +161,20 @@ export async function sendBookingConfirmation(
   const childInfoUrl = `${siteUrl}/booking/${booking.id}/children`;
 
   const content = `
-    <h2 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #2D5A3D;">
-      Booking Confirmed! 🎉
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Booking Confirmed!
     </h2>
     <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
       Thank you for your booking, ${booking.parent_name.split(' ')[0]}!
     </p>
 
     <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6;">
-      We're thrilled to confirm your booking for <strong>${club.name}</strong>. Your children are going to have an amazing time exploring, playing, and making memories!
+      We're excited to welcome your child(ren) for <strong>${club.name}</strong> at The Clubhouse! Get ready for a fun-filled farm experience.
     </p>
 
     <!-- Booking Summary -->
-    <div style="background-color: #F3F4F6; border-radius: 12px; padding: 20px; margin: 24px 0;">
-      <h3 style="margin: 0 0 16px; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 600; color: #2D5A3D;">Booking Summary</h3>
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Booking Summary</h3>
       <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 140px;">Club</td>
@@ -190,7 +190,7 @@ export async function sendBookingConfirmation(
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Total Paid</td>
-          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #2D5A3D;">${formatPrice(booking.total_amount)}</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #7A7C4A;">${formatPrice(booking.total_amount)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Booking Reference</td>
@@ -200,21 +200,33 @@ export async function sendBookingConfirmation(
     </div>
 
     <!-- Next Steps -->
-    <div style="background-color: #FEF3C7; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #F5A623;">
-      <h3 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; color: #3D3D3D;">⚡ Important: Complete Your Booking</h3>
+    <div style="background-color: #FDF6EE; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #D4843E;">
+      <h3 style="margin: 0 0 8px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #3D3D3D;">Important: Complete Your Booking</h3>
       <p style="margin: 0; font-size: 14px; color: #3D3D3D; line-height: 1.6;">
-        Please complete the child information form so we can ensure your children have the best experience. We need details like medical information and emergency contacts.
+        Please fill in the child information form at the earliest opportunity so we can have time to prepare for your child(ren) at the farm. We need details like medical information and emergency contacts.
       </p>
     </div>
 
     ${ctaButton('Complete Child Information', childInfoUrl)}
 
-    ${infoBox('📍 Club Times', `
+    <!-- Terms & Conditions -->
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #7A7C4A;">
+      <h3 style="margin: 0 0 12px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #5A5C3A;">Key Points to Note</h3>
+      <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #3D3D3D; line-height: 1.8;">
+        <li><strong>The Clubhouse is not a childcare service.</strong> Our activities are designed as supervised experiences rather than dedicated child care.</li>
+        <li><strong>Support for children with additional needs:</strong> While we strive to create an inclusive environment, we are unable to provide one-on-one support. However, we have a limited number of spaces available for parents or guardians to attend alongside children who require additional assistance. If your child would benefit from this, please <a href="mailto:hello@exploretheclubhouse.co.uk" style="color: #D4843E;">contact us</a> directly to check availability.</li>
+      </ul>
+      <p style="margin: 12px 0 0; font-size: 14px; color: #3D3D3D;">
+        Please review our full <a href="https://exploretheclubhouse.co.uk/terms" style="color: #D4843E; font-weight: 500;">Terms & Conditions</a>.
+      </p>
+    </div>
+
+    ${infoBox('Club Times', `
       <strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}<br>
       <strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
     `)}
 
-    ${infoBox('🎒 What to Bring', `
+    ${infoBox('What to Bring', `
       • Packed lunch and water bottle<br>
       • Weather-appropriate clothing (layers recommended)<br>
       • Wellies or sturdy outdoor shoes<br>
@@ -224,12 +236,12 @@ export async function sendBookingConfirmation(
     `)}
 
     <p style="margin: 24px 0 0; font-size: 14px; color: #6B7280; line-height: 1.6;">
-      If you have any questions before the club starts, don't hesitate to get in touch. We can't wait to meet your children!
+      If you have any questions, feel free to reach out. We look forward to hosting your child(ren) on the farm soon!
     </p>
 
     <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
-      Warm regards,<br>
-      <strong style="color: #2D5A3D;">The The Clubhouse Team</strong>
+      Best,<br>
+      <strong style="color: #7A7C4A;">The Clubhouse Team</strong>
     </p>
   `;
 
@@ -242,6 +254,7 @@ export async function sendBookingConfirmation(
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
+      replyTo: fromEmail,
       subject: `Booking Confirmed - ${club.name}`,
       html: emailTemplate(content),
     });
@@ -281,20 +294,20 @@ export async function sendBookingComplete(
     .join('');
 
   const content = `
-    <h2 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #2D5A3D;">
-      You're All Set! ✅
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      You're All Set!
     </h2>
     <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
       Thank you for completing your booking, ${booking.parent_name.split(' ')[0]}!
     </p>
 
     <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6;">
-      We've received all the information we need. Your booking for <strong>${club.name}</strong> is now complete. We're looking forward to welcoming ${children.length === 1 ? children[0].name : 'your children'} to the club!
+      We've received all the information we need. Your booking for <strong>${club.name}</strong> is now complete. We're looking forward to welcoming ${children.length === 1 ? children[0].name : 'your child(ren)'} to the farm!
     </p>
 
     <!-- Booking Summary -->
-    <div style="background-color: #F3F4F6; border-radius: 12px; padding: 20px; margin: 24px 0;">
-      <h3 style="margin: 0 0 16px; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 600; color: #2D5A3D;">Booking Details</h3>
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Booking Details</h3>
       <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 140px;">Club</td>
@@ -306,7 +319,7 @@ export async function sendBookingComplete(
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Total Paid</td>
-          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #2D5A3D;">${formatPrice(booking.total_amount)}</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #7A7C4A;">${formatPrice(booking.total_amount)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Booking Reference</td>
@@ -317,13 +330,13 @@ export async function sendBookingComplete(
 
     <!-- Children Information -->
     <div style="margin: 24px 0;">
-      <h3 style="margin: 0 0 16px; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 600; color: #2D5A3D;">Registered Children</h3>
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Registered Children</h3>
       <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; background-color: #FFFFFF; border-radius: 8px; overflow: hidden; border: 1px solid #E5E7EB;">
         <thead>
-          <tr style="background-color: #F3F4F6;">
-            <th style="padding: 12px; font-size: 12px; font-weight: 600; text-align: left; color: #6B7280; text-transform: uppercase;">Name</th>
-            <th style="padding: 12px; font-size: 12px; font-weight: 600; text-align: left; color: #6B7280; text-transform: uppercase;">Date of Birth</th>
-            <th style="padding: 12px; font-size: 12px; font-weight: 600; text-align: left; color: #6B7280; text-transform: uppercase;">Allergies</th>
+          <tr style="background-color: #F5F4ED;">
+            <th style="padding: 12px; font-size: 12px; font-weight: 600; text-align: left; color: #5A5C3A; text-transform: uppercase;">Name</th>
+            <th style="padding: 12px; font-size: 12px; font-weight: 600; text-align: left; color: #5A5C3A; text-transform: uppercase;">Date of Birth</th>
+            <th style="padding: 12px; font-size: 12px; font-weight: 600; text-align: left; color: #5A5C3A; text-transform: uppercase;">Allergies</th>
           </tr>
         </thead>
         <tbody>
@@ -332,12 +345,12 @@ export async function sendBookingComplete(
       </table>
     </div>
 
-    ${infoBox('📍 Club Times', `
+    ${infoBox('Club Times', `
       <strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}<br>
       <strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
     `)}
 
-    ${infoBox('🎒 Reminder: What to Bring', `
+    ${infoBox('Reminder: What to Bring', `
       • Packed lunch and water bottle<br>
       • Weather-appropriate clothing (layers recommended)<br>
       • Wellies or sturdy outdoor shoes<br>
@@ -352,7 +365,7 @@ export async function sendBookingComplete(
 
     <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
       See you soon!<br>
-      <strong style="color: #2D5A3D;">The The Clubhouse Team</strong>
+      <strong style="color: #7A7C4A;">The Clubhouse Team</strong>
     </p>
   `;
 
@@ -365,6 +378,7 @@ export async function sendBookingComplete(
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
+      replyTo: fromEmail,
       subject: `Booking Complete - ${club.name}`,
       html: emailTemplate(content),
     });
@@ -392,7 +406,7 @@ export async function sendAdminNotification(
   const adminDashboardUrl = `${siteUrl}/admin/bookings/${booking.id}`;
 
   const content = `
-    <h2 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #2D5A3D;">
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
       New Booking Received
     </h2>
     <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
@@ -400,8 +414,8 @@ export async function sendAdminNotification(
     </p>
 
     <!-- Booking Details -->
-    <div style="background-color: #F3F4F6; border-radius: 12px; padding: 20px; margin: 24px 0;">
-      <h3 style="margin: 0 0 16px; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 600; color: #2D5A3D;">Booking Details</h3>
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Booking Details</h3>
       <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 160px;">Booking ID</td>
@@ -421,11 +435,11 @@ export async function sendAdminNotification(
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Parent Email</td>
-          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;"><a href="mailto:${booking.parent_email}" style="color: #4A7C59;">${booking.parent_email}</a></td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;"><a href="mailto:${booking.parent_email}" style="color: #D4843E;">${booking.parent_email}</a></td>
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Parent Phone</td>
-          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;"><a href="tel:${booking.parent_phone}" style="color: #4A7C59;">${booking.parent_phone}</a></td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;"><a href="tel:${booking.parent_phone}" style="color: #D4843E;">${booking.parent_phone}</a></td>
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Number of Children</td>
@@ -433,12 +447,12 @@ export async function sendAdminNotification(
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Amount Paid</td>
-          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #2D5A3D;">${formatPrice(booking.total_amount)}</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #7A7C4A;">${formatPrice(booking.total_amount)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Status</td>
           <td style="padding: 8px 0; font-size: 14px;">
-            <span style="display: inline-block; padding: 4px 12px; background-color: ${booking.status === 'paid' ? '#DEF7EC' : '#FEF3C7'}; color: ${booking.status === 'paid' ? '#03543F' : '#92400E'}; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
+            <span style="display: inline-block; padding: 4px 12px; background-color: ${booking.status === 'paid' ? '#E8EFE0' : '#FDF6EE'}; color: ${booking.status === 'paid' ? '#5A5C3A' : '#D4843E'}; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
               ${booking.status}
             </span>
           </td>
@@ -466,6 +480,7 @@ export async function sendAdminNotification(
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: adminEmail,
+      replyTo: fromEmail,
       subject: `New Booking: ${booking.parent_name} - ${club.name}`,
       html: emailTemplate(content),
     });
@@ -493,20 +508,20 @@ export async function sendIncompleteReminder(
   const childInfoUrl = `${siteUrl}/booking/${booking.id}/children`;
 
   const content = `
-    <h2 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; color: #2D5A3D;">
-      Don't Forget to Complete Your Booking! 📝
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Don't Forget to Complete Your Booking!
     </h2>
     <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
       Hi ${booking.parent_name.split(' ')[0]},
     </p>
 
     <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6;">
-      We noticed you haven't yet completed the child information for your booking at <strong>${club.name}</strong>. We need this information to ensure your children have the best and safest experience at the club.
+      We noticed you haven't yet completed the child information for your booking at <strong>${club.name}</strong>. We need this information so we can prepare for your child(ren) at the farm.
     </p>
 
     <!-- Booking Summary -->
-    <div style="background-color: #F3F4F6; border-radius: 12px; padding: 20px; margin: 24px 0;">
-      <h3 style="margin: 0 0 16px; font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 600; color: #2D5A3D;">Your Booking</h3>
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Your Booking</h3>
       <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 140px;">Club</td>
@@ -528,8 +543,8 @@ export async function sendIncompleteReminder(
     </div>
 
     <!-- Action Required -->
-    <div style="background-color: #FEF3C7; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #F5A623;">
-      <h3 style="margin: 0 0 8px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; color: #3D3D3D;">What We Need</h3>
+    <div style="background-color: #FDF6EE; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #D4843E;">
+      <h3 style="margin: 0 0 8px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #3D3D3D;">What We Need</h3>
       <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #3D3D3D; line-height: 1.8;">
         <li>Each child's name and date of birth</li>
         <li>Any allergies or medical conditions</li>
@@ -541,12 +556,12 @@ export async function sendIncompleteReminder(
     ${ctaButton('Complete Child Information', childInfoUrl)}
 
     <p style="margin: 24px 0 0; font-size: 14px; color: #6B7280; line-height: 1.6;">
-      This only takes a few minutes and helps us keep your children safe. If you're having any trouble completing the form or have questions, please don't hesitate to reach out.
+      This only takes a few minutes and helps us keep your child(ren) safe. If you're having any trouble completing the form or have questions, please don't hesitate to reach out.
     </p>
 
     <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
       Thanks,<br>
-      <strong style="color: #2D5A3D;">The The Clubhouse Team</strong>
+      <strong style="color: #7A7C4A;">The Clubhouse Team</strong>
     </p>
   `;
 
@@ -559,6 +574,7 @@ export async function sendIncompleteReminder(
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: booking.parent_email,
+      replyTo: fromEmail,
       subject: `Action Required: Complete your booking for ${club.name}`,
       html: emailTemplate(content),
     });
@@ -572,6 +588,204 @@ export async function sendIncompleteReminder(
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     console.error('Failed to send incomplete reminder:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+// =============================================================================
+// NEWSLETTER EMAIL FUNCTIONS
+// =============================================================================
+
+/**
+ * Build a newsletter email with optional club feature and promo code
+ */
+export function buildNewsletterEmail(
+  newsletter: Newsletter,
+  club?: Club | null,
+  promoCode?: PromoCode | null
+): string {
+  // Build hero images section
+  let heroSection = '';
+  if (newsletter.image_urls && newsletter.image_urls.length > 0) {
+    const images = newsletter.image_urls
+      .map(
+        (url) => `
+        <img src="${url}" alt="The Clubhouse" style="width: 100%; max-width: 560px; height: auto; border-radius: 12px; margin-bottom: 16px; display: block;" />
+      `
+      )
+      .join('');
+    heroSection = `
+      <div style="margin-bottom: 24px;">
+        ${images}
+      </div>
+    `;
+  }
+
+  // Build featured club section
+  let clubSection = '';
+  if (club) {
+    clubSection = `
+      <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #7A7C4A;">
+        <h3 style="margin: 0 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">
+          ${club.name}
+        </h3>
+        <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
+          <tr>
+            <td style="padding: 6px 0; font-size: 14px; color: #6B7280; width: 100px;">Dates</td>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: 500; color: #3D3D3D;">${formatDate(club.start_date)} - ${formatDate(club.end_date)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-size: 14px; color: #6B7280;">Times</td>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: 500; color: #3D3D3D;">${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-size: 14px; color: #6B7280;">Ages</td>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: 500; color: #3D3D3D;">${club.min_age} - ${club.max_age} years</td>
+          </tr>
+        </table>
+        ${club.description ? `<p style="margin: 12px 0 0; font-size: 14px; color: #3D3D3D; line-height: 1.6;">${club.description}</p>` : ''}
+      </div>
+    `;
+  }
+
+  // Build promo code section
+  let promoSection = '';
+  if (promoCode) {
+    promoSection = infoBox(
+      `Use code ${promoCode.code} for ${promoCode.discount_percent}% off!`,
+      `Valid until ${formatDate(promoCode.valid_until)}. ${promoCode.max_uses ? `Limited to ${promoCode.max_uses} uses.` : ''}`
+    );
+  }
+
+  // Build CTA section
+  let ctaSection = '';
+  if (newsletter.cta_text && newsletter.cta_url) {
+    ctaSection = ctaButton(newsletter.cta_text, newsletter.cta_url);
+  }
+
+  // Build unsubscribe link
+  const unsubscribeSection = `
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #E5E7EB; text-align: center;">
+      <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
+        You received this email because you subscribed to The Clubhouse newsletter.<br>
+        <a href="${siteUrl}/unsubscribe?email={{email}}" style="color: #7A7C4A; text-decoration: underline;">Unsubscribe</a>
+      </p>
+    </div>
+  `;
+
+  const content = `
+    ${heroSection}
+    <div style="font-size: 16px; line-height: 1.7; color: #3D3D3D;">
+      ${newsletter.body_html}
+    </div>
+    ${clubSection}
+    ${promoSection}
+    ${ctaSection}
+    ${unsubscribeSection}
+  `;
+
+  return emailTemplate(content);
+}
+
+/**
+ * Send newsletter to a list of subscriber emails
+ * Uses batch sending for large lists
+ */
+export async function sendNewsletter(
+  newsletter: Newsletter,
+  subscriberEmails: string[],
+  club?: Club | null,
+  promoCode?: PromoCode | null
+): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, sentCount: 0, errors: ['Email service not configured'] };
+  }
+
+  if (subscriberEmails.length === 0) {
+    return { success: false, sentCount: 0, errors: ['No subscribers to send to'] };
+  }
+
+  const errors: string[] = [];
+  let sentCount = 0;
+
+  // Build the email HTML template
+  const htmlTemplate = buildNewsletterEmail(newsletter, club, promoCode);
+
+  // Batch size for Resend API
+  const BATCH_SIZE = 100;
+
+  // Process in batches
+  for (let i = 0; i < subscriberEmails.length; i += BATCH_SIZE) {
+    const batch = subscriberEmails.slice(i, i + BATCH_SIZE);
+
+    try {
+      // Resend's batch API
+      const batchEmails = batch.map((email) => ({
+        from: `The Clubhouse <${fromEmail}>`,
+        to: email,
+        subject: newsletter.subject,
+        html: htmlTemplate.replace(/{{email}}/g, encodeURIComponent(email)),
+        headers: {
+          'List-Unsubscribe': `<${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}>`,
+        },
+      }));
+
+      const { data, error } = await resend.batch.send(batchEmails);
+
+      if (error) {
+        console.error(`Batch send error:`, error);
+        errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`);
+      } else if (data) {
+        sentCount += data.data.length;
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error(`Batch send exception:`, errorMessage);
+      errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${errorMessage}`);
+    }
+  }
+
+  return {
+    success: sentCount > 0,
+    sentCount,
+    errors,
+  };
+}
+
+/**
+ * Send a test newsletter to a single email address
+ */
+export async function sendTestNewsletter(
+  newsletter: Newsletter,
+  testEmail: string,
+  club?: Club | null,
+  promoCode?: PromoCode | null
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const html = buildNewsletterEmail(newsletter, club, promoCode);
+
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: testEmail,
+      subject: `[TEST] ${newsletter.subject}`,
+      html: html.replace(/{{email}}/g, encodeURIComponent(testEmail)),
+    });
+
+    if (error) {
+      console.error('Failed to send test newsletter:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send test newsletter:', errorMessage);
     return { success: false, error: errorMessage };
   }
 }
