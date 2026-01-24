@@ -22,6 +22,9 @@ export type WaitlistStatus = 'waiting' | 'notified' | 'expired' | 'booked';
 /** Contact submission status */
 export type ContactStatus = 'new' | 'read' | 'replied';
 
+/** Newsletter status */
+export type NewsletterStatus = 'draft' | 'sent';
+
 // =============================================================================
 // TABLE TYPES
 // =============================================================================
@@ -415,6 +418,7 @@ export interface NewsletterSubscriber {
   email: string;
   subscribed_at: string;
   source: string;
+  unsubscribed_at: string | null;
 }
 
 export interface NewsletterSubscriberInsert {
@@ -422,6 +426,7 @@ export interface NewsletterSubscriberInsert {
   email: string;
   subscribed_at?: string;
   source?: string;
+  unsubscribed_at?: string | null;
 }
 
 export interface NewsletterSubscriberUpdate {
@@ -429,6 +434,61 @@ export interface NewsletterSubscriberUpdate {
   email?: string;
   subscribed_at?: string;
   source?: string;
+  unsubscribed_at?: string | null;
+}
+
+/**
+ * Newsletter - Marketing newsletters sent to subscribers
+ */
+export interface Newsletter {
+  id: string;
+  subject: string;
+  preview_text: string | null;
+  body_html: string;
+  image_urls: string[];
+  featured_club_id: string | null;
+  promo_code_id: string | null;
+  cta_text: string | null;
+  cta_url: string | null;
+  status: NewsletterStatus;
+  sent_at: string | null;
+  recipient_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewsletterInsert {
+  id?: string;
+  subject: string;
+  preview_text?: string | null;
+  body_html: string;
+  image_urls?: string[];
+  featured_club_id?: string | null;
+  promo_code_id?: string | null;
+  cta_text?: string | null;
+  cta_url?: string | null;
+  status?: NewsletterStatus;
+  sent_at?: string | null;
+  recipient_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface NewsletterUpdate {
+  id?: string;
+  subject?: string;
+  preview_text?: string | null;
+  body_html?: string;
+  image_urls?: string[];
+  featured_club_id?: string | null;
+  promo_code_id?: string | null;
+  cta_text?: string | null;
+  cta_url?: string | null;
+  status?: NewsletterStatus;
+  sent_at?: string | null;
+  recipient_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // =============================================================================
@@ -487,6 +547,11 @@ export interface Database {
         Row: NewsletterSubscriber;
         Insert: NewsletterSubscriberInsert;
         Update: NewsletterSubscriberUpdate;
+      };
+      newsletters: {
+        Row: Newsletter;
+        Insert: NewsletterInsert;
+        Update: NewsletterUpdate;
       };
     };
     Functions: {

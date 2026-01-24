@@ -15,6 +15,7 @@ import {
   Mail,
   ChevronDown,
   ChevronUp,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,7 +48,7 @@ const sidebarLinks: NavItem[] = [
     defaultExpanded: true,
     items: [
       { href: "/admin/marketing/subscribers", label: "Subscribers", icon: Users },
-      // Future: Compose Newsletter, Social Ads
+      { href: "/admin/marketing/newsletters", label: "Newsletters", icon: Send },
     ],
   },
 ];
