@@ -193,8 +193,94 @@ export function NewslettersManager({
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px]">
+            {/* Mobile Card View */}
+            <div className="space-y-3 md:hidden">
+              {newsletters.map((newsletter) => (
+                <div
+                  key={newsletter.id}
+                  className="rounded-xl border border-gray-200 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3
+                        className="truncate text-sm font-medium"
+                        style={{ color: "var(--craigies-dark-olive)" }}
+                      >
+                        {newsletter.subject}
+                      </h3>
+                      {newsletter.clubs?.name && (
+                        <p className="mt-0.5 text-xs text-gray-500">
+                          Featuring: {newsletter.clubs.name}
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                      style={getStatusBadgeStyles(newsletter.status)}
+                    >
+                      {newsletter.status === "sent" && (
+                        <CheckCircle2 className="h-3 w-3" />
+                      )}
+                      {newsletter.status}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                    {newsletter.sent_at && (
+                      <span>{formatDate(newsletter.sent_at)}</span>
+                    )}
+                    {newsletter.status === "sent" && newsletter.recipient_count && (
+                      <span>{newsletter.recipient_count.toLocaleString()} recipients</span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
+                    <button
+                      onClick={() =>
+                        handlePreview({
+                          ...newsletter,
+                          clubs: undefined,
+                          promo_codes: undefined,
+                        } as Newsletter)
+                      }
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-100"
+                      style={{ color: "var(--craigies-olive)" }}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      Preview
+                    </button>
+                    {newsletter.status === "draft" && (
+                      <>
+                        <button
+                          onClick={() => handleEdit(newsletter)}
+                          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-100"
+                          style={{ color: "var(--craigies-burnt-orange)" }}
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(newsletter.id)}
+                          disabled={deletingId === newsletter.id}
+                          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {deletingId === newsletter.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
                 <thead>
                   <tr className="border-b border-cloud">
                     <th
@@ -340,16 +426,16 @@ export function NewslettersManager({
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-6 flex items-center justify-between border-t border-cloud pt-4">
+              <div className="mt-6 flex flex-col gap-3 border-t border-cloud pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <p
-                  className="text-sm"
+                  className="text-center text-sm sm:text-left"
                   style={{ color: "var(--craigies-dark-olive)" }}
                 >
                   Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
                   {Math.min(currentPage * ITEMS_PER_PAGE, total)} of {total}{" "}
                   newsletters
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
@@ -361,39 +447,49 @@ export function NewslettersManager({
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90"
-                        style={{
-                          backgroundColor:
-                            currentPage === pageNum
-                              ? "var(--craigies-olive)"
-                              : "transparent",
-                          color:
-                            currentPage === pageNum
-                              ? "white"
-                              : "var(--craigies-dark-olive)",
-                          border:
-                            currentPage === pageNum ? "none" : "1px solid #D1D5DB",
-                        }}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+                  {/* Mobile: show current/total */}
+                  <span
+                    className="px-3 text-sm font-medium sm:hidden"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    {currentPage} / {totalPages}
+                  </span>
+                  {/* Desktop: show page numbers */}
+                  <div className="hidden sm:flex sm:items-center sm:gap-2">
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90"
+                          style={{
+                            backgroundColor:
+                              currentPage === pageNum
+                                ? "var(--craigies-olive)"
+                                : "transparent",
+                            color:
+                              currentPage === pageNum
+                                ? "white"
+                                : "var(--craigies-dark-olive)",
+                            border:
+                              currentPage === pageNum ? "none" : "1px solid #D1D5DB",
+                          }}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <button
                     onClick={() =>
                       setCurrentPage((prev) => Math.min(prev + 1, totalPages))
