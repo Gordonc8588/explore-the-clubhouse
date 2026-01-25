@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { sendNewsletterWelcomeEmail } from "@/lib/email";
 
 // Confirmation schema
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const { token } = validationResult.data;
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Find subscriber by token
     const { data: subscriber, error: fetchError } = await supabase
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?error=invalid-token", request.url));
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Find subscriber by token
   const { data: subscriber, error: fetchError } = await supabase
