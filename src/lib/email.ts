@@ -803,7 +803,7 @@ export async function sendNewsletterConfirmationEmail(
     return { success: false, error: 'Email service not configured' };
   }
 
-  const confirmUrl = `${siteUrl}/confirm-email?token=${confirmationToken}`;
+  const confirmUrl = `${siteUrl}/api/newsletter/confirm?token=${confirmationToken}`;
 
   const content = `
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
