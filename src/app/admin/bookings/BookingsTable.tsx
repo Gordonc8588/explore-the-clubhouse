@@ -134,7 +134,7 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
   return (
     <>
       {/* Search and Filters */}
-      <div className="rounded-2xl bg-white p-6 shadow-md">
+      <div className="rounded-2xl bg-white p-4 shadow-md sm:p-6">
         <div
           className="flex items-center gap-2"
           style={{ color: "var(--craigies-dark-olive)" }}
@@ -148,7 +148,7 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
           </span>
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
           {/* Search Input */}
           <div className="sm:col-span-2 lg:col-span-2">
             <label
@@ -285,8 +285,68 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
       </div>
 
       {/* Bookings Table */}
-      <div className="rounded-2xl bg-white p-6 shadow-md">
-        <div className="overflow-x-auto">
+      <div className="rounded-2xl bg-white p-4 shadow-md sm:p-6">
+        {/* Mobile Card View */}
+        <div className="space-y-3 md:hidden">
+          {paginatedBookings.map((booking) => (
+            <div
+              key={booking.id}
+              onClick={() => handleRowClick(booking.id)}
+              className="cursor-pointer rounded-xl border border-gray-200 p-4 transition-colors active:bg-gray-50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: "var(--craigies-olive)" }}
+                    >
+                      {booking.ref}
+                    </span>
+                    <span
+                      className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                      style={getStatusBadgeStyles(booking.status)}
+                    >
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </span>
+                  </div>
+                  <h3
+                    className="mt-1 text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    {booking.parentName}
+                  </h3>
+                  <p className="mt-0.5 truncate text-xs text-gray-500">
+                    {booking.email}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    £{booking.amount.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                <span>{booking.club}</span>
+                <span>{formatDate(booking.date)}</span>
+                {booking.children.length > 0 && (
+                  <span>
+                    {booking.children.length === 1
+                      ? booking.children[0]
+                      : `${booking.children.length} children`}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-cloud">
@@ -409,16 +469,16 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-between border-t border-cloud pt-4">
+          <div className="mt-6 flex flex-col gap-3 border-t border-cloud pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p
-              className="text-sm"
+              className="text-center text-sm sm:text-left"
               style={{ color: "var(--craigies-dark-olive)" }}
             >
               Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
               {Math.min(currentPage * ITEMS_PER_PAGE, filteredBookings.length)}{" "}
               of {filteredBookings.length} bookings
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
@@ -430,24 +490,44 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90"
-                    style={{
-                      backgroundColor:
-                        currentPage === page ? "var(--craigies-olive)" : "transparent",
-                      color:
-                        currentPage === page ? "white" : "var(--craigies-dark-olive)",
-                      border: currentPage === page ? "none" : "1px solid #D1D5DB",
-                    }}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
+              {/* Mobile: show current/total */}
+              <span
+                className="px-3 text-sm font-medium sm:hidden"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                {currentPage} / {totalPages}
+              </span>
+              {/* Desktop: show page numbers */}
+              <div className="hidden sm:flex sm:items-center sm:gap-2">
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90"
+                      style={{
+                        backgroundColor:
+                          currentPage === pageNum ? "var(--craigies-olive)" : "transparent",
+                        color:
+                          currentPage === pageNum ? "white" : "var(--craigies-dark-olive)",
+                        border: currentPage === pageNum ? "none" : "1px solid #D1D5DB",
+                      }}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
               <button
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
