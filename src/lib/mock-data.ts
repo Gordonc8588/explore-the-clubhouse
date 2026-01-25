@@ -25,6 +25,7 @@ export const mockClubs: Club[] = [
     min_age: 5,
     max_age: 11,
     is_active: true,
+    bookings_open: true,
     created_at: '2025-01-15T10:00:00Z',
   },
   {
@@ -42,6 +43,7 @@ export const mockClubs: Club[] = [
     min_age: 5,
     max_age: 11,
     is_active: true,
+    bookings_open: true,
     created_at: '2025-01-15T10:00:00Z',
   },
   {
@@ -59,6 +61,7 @@ export const mockClubs: Club[] = [
     min_age: 5,
     max_age: 11,
     is_active: true,
+    bookings_open: true,
     created_at: '2025-01-15T10:00:00Z',
   },
   {
@@ -76,6 +79,7 @@ export const mockClubs: Club[] = [
     min_age: 5,
     max_age: 11,
     is_active: true,
+    bookings_open: true,
     created_at: '2025-01-15T10:00:00Z',
   },
 ];

@@ -386,16 +386,28 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
               </div>
 
               {/* CTA Button */}
-              <Link
-                href={`/book/${club.slug}`}
-                className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
-                style={{
-                  backgroundColor: "var(--craigies-burnt-orange)",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                Start Booking
-              </Link>
+              {club.bookings_open ? (
+                <Link
+                  href={`/book/${club.slug}`}
+                  className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
+                  style={{
+                    backgroundColor: "var(--craigies-burnt-orange)",
+                    fontFamily: "'Playfair Display', serif",
+                  }}
+                >
+                  Start Booking
+                </Link>
+              ) : (
+                <span
+                  className="inline-block text-white font-semibold py-4 px-8 rounded-lg text-lg shadow-md cursor-not-allowed"
+                  style={{
+                    backgroundColor: "#9CA3AF",
+                    fontFamily: "'Playfair Display', serif",
+                  }}
+                >
+                  Bookings Open Soon
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -481,16 +493,28 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                     </p>
                   )}
 
-                  <Link
-                    href={`/book/${club.slug}?option=${option.id}`}
-                    className="block w-full text-center text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
-                    style={{
-                      backgroundColor: "var(--craigies-olive)",
-                      fontFamily: "'Playfair Display', serif",
-                    }}
-                  >
-                    Select
-                  </Link>
+                  {club.bookings_open ? (
+                    <Link
+                      href={`/book/${club.slug}?option=${option.id}`}
+                      className="block w-full text-center text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+                      style={{
+                        backgroundColor: "var(--craigies-olive)",
+                        fontFamily: "'Playfair Display', serif",
+                      }}
+                    >
+                      Select
+                    </Link>
+                  ) : (
+                    <span
+                      className="block w-full text-center text-white font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
+                      style={{
+                        backgroundColor: "#9CA3AF",
+                        fontFamily: "'Playfair Display', serif",
+                      }}
+                    >
+                      Coming Soon
+                    </span>
+                  )}
                 </article>
               ))}
           </div>
@@ -537,28 +561,42 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
             className="rounded-2xl p-8 sm:p-12 text-center"
-            style={{ backgroundColor: "var(--craigies-olive)" }}
+            style={{ backgroundColor: club.bookings_open ? "var(--craigies-olive)" : "#6B7280" }}
           >
             <h2
               className="text-3xl font-bold text-white sm:text-4xl mb-4"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Ready to Book?
+              {club.bookings_open ? "Ready to Book?" : "Bookings Opening Soon"}
             </h2>
             <p className="font-body text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-              Secure your child&apos;s spot at {club.name}. Spaces fill up
-              quickly, so don&apos;t miss out on the fun!
+              {club.bookings_open
+                ? `Secure your child's spot at ${club.name}. Spaces fill up quickly, so don't miss out on the fun!`
+                : `We're getting ready to open bookings for ${club.name}. Check back soon or sign up to our newsletter to be notified!`}
             </p>
-            <Link
-              href={`/book/${club.slug}`}
-              className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
-              style={{
-                backgroundColor: "var(--craigies-burnt-orange)",
-                fontFamily: "'Playfair Display', serif",
-              }}
-            >
-              Start Booking
-            </Link>
+            {club.bookings_open ? (
+              <Link
+                href={`/book/${club.slug}`}
+                className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
+              >
+                Start Booking
+              </Link>
+            ) : (
+              <Link
+                href="/#newsletter"
+                className="inline-block text-white font-semibold py-4 px-8 rounded-lg transition-opacity hover:opacity-90 text-lg shadow-md"
+                style={{
+                  backgroundColor: "var(--craigies-burnt-orange)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
+              >
+                Get Notified
+              </Link>
+            )}
           </div>
         </div>
       </section>

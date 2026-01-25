@@ -141,19 +141,32 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
         </div>
 
         {/* CTA Button */}
-        <Link
-          href={`/book/${club.slug}`}
-          className="block w-full text-center font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
-          style={{
-            backgroundColor: isSoldOut
-              ? "var(--craigies-olive)"
-              : "var(--craigies-burnt-orange)",
-            color: "white",
-            fontFamily: "'Playfair Display', serif",
-          }}
-        >
-          {isSoldOut ? "Join Waitlist" : "Book Now"}
-        </Link>
+        {club.bookings_open ? (
+          <Link
+            href={`/book/${club.slug}`}
+            className="block w-full text-center font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor: isSoldOut
+                ? "var(--craigies-olive)"
+                : "var(--craigies-burnt-orange)",
+              color: "white",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
+            {isSoldOut ? "Join Waitlist" : "Book Now"}
+          </Link>
+        ) : (
+          <span
+            className="block w-full text-center font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
+            style={{
+              backgroundColor: "#9CA3AF",
+              color: "white",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
+            Bookings Open Soon
+          </span>
+        )}
       </div>
     </article>
   );

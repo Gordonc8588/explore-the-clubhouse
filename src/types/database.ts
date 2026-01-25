@@ -47,6 +47,7 @@ export interface Club {
   min_age: number;
   max_age: number;
   is_active: boolean;
+  bookings_open: boolean; // Whether bookings are available
   created_at: string; // TIMESTAMPTZ as ISO string
 }
 
@@ -65,6 +66,7 @@ export interface ClubInsert {
   min_age?: number;
   max_age?: number;
   is_active?: boolean;
+  bookings_open?: boolean;
   created_at?: string;
 }
 
@@ -83,6 +85,7 @@ export interface ClubUpdate {
   min_age?: number;
   max_age?: number;
   is_active?: boolean;
+  bookings_open?: boolean;
   created_at?: string;
 }
 

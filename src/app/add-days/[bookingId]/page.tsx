@@ -73,6 +73,7 @@ const mockBookingsWithDetails: Record<
       min_age: 5,
       max_age: 11,
       is_active: true,
+      bookings_open: true,
       created_at: "2025-01-15T10:00:00Z",
     },
     children: [
@@ -161,6 +162,7 @@ const mockBookingsWithDetails: Record<
       min_age: 5,
       max_age: 11,
       is_active: true,
+      bookings_open: true,
       created_at: "2025-01-15T10:00:00Z",
     },
     children: [
@@ -232,6 +234,7 @@ const mockBookingsWithDetails: Record<
       min_age: 5,
       max_age: 11,
       is_active: true,
+      bookings_open: true,
       created_at: "2025-01-15T10:00:00Z",
     },
     children: [

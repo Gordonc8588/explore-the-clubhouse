@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Club, BookingOption, ClubDay } from "@/types/database";
 import { BookingForm } from "./BookingForm";
@@ -51,6 +51,11 @@ export default async function BookingPage({ params }: BookingPageProps) {
 
   if (!data) {
     notFound();
+  }
+
+  // Redirect to club page if bookings aren't open yet
+  if (!data.club.bookings_open) {
+    redirect(`/clubs/${clubSlug}`);
   }
 
   return (
