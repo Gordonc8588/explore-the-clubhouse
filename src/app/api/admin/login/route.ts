@@ -3,11 +3,18 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   const { email, password } = await request.json();
 
-  // Mock credentials check - replace with real auth later
-  if (
-    email === "admin@exploretheclubhouse.co.uk" &&
-    password === "admin123"
-  ) {
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@exploretheclubhouse.co.uk";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    console.error("ADMIN_PASSWORD environment variable is not set");
+    return NextResponse.json(
+      { success: false, error: "Server configuration error" },
+      { status: 500 }
+    );
+  }
+
+  if (email === adminEmail && password === adminPassword) {
     const response = NextResponse.json({ success: true });
 
     // Set the admin session cookie
