@@ -65,7 +65,7 @@ export default function HeroSection() {
               </div>
 
               <div className="space-y-2 text-sm" style={{ color: 'var(--craigies-dark-olive)' }}>
-                <p><strong>Time:</strong> 9:30am - 3:00pm</p>
+                <p><strong>Time:</strong> 8:30am - 3:00pm</p>
                 <p><strong>Ages:</strong> 5-12 years</p>
                 <p><strong>Location:</strong> Craigies Farm, South Queensferry</p>
               </div>

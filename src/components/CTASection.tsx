@@ -36,7 +36,7 @@ export default function CTASection() {
             >
               Time
             </h3>
-            <p style={{ color: 'var(--craigies-dark-olive)' }}>9:30am - 3:00pm</p>
+            <p style={{ color: 'var(--craigies-dark-olive)' }}>8:30am - 3:00pm</p>
           </div>
 
           {/* Ages Card */}
