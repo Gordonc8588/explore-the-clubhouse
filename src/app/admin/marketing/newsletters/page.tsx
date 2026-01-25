@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Send, Users, Mail, FileText } from "lucide-react";
 import { NewslettersManager } from "./NewslettersManager";
 
+export const dynamic = "force-dynamic";
+
 async function getNewslettersData() {
   const supabase = createAdminClient();
 
