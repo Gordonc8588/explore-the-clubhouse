@@ -456,18 +456,18 @@ export default function SafeguardingPage() {
               </p>
               <div className="mt-4 flex flex-col gap-3">
                 <a
-                  href="tel:+441234567890"
+                  href="tel:+447907879303"
                   className="inline-flex items-center gap-2 transition-opacity legal-contact-link"
                 >
                   <Phone className="h-4 w-4" />
-                  01onal 234 567
+                  07907 879303
                 </a>
                 <a
-                  href="mailto:safeguarding@exploretheclubhouse.co.uk"
+                  href="mailto:info@exploretheclubhouse.co.uk"
                   className="inline-flex items-center gap-2 transition-opacity legal-contact-link"
                 >
                   <Mail className="h-4 w-4" />
-                  safeguarding@exploretheclubhouse.co.uk
+                  info@exploretheclubhouse.co.uk
                 </a>
               </div>
             </div>

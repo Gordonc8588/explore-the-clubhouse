@@ -81,11 +81,11 @@ export default function PrivacyPage() {
                   <br />
                   The Clubhouse
                   <br />
-                  123 Farm Lane, Countryside, AB12 3CD
+                  West Craigie Farm, South Queensferry EH30 9AR
                   <br />
                   Email: hello@exploretheclubhouse.co.uk
                   <br />
-                  Phone: 01onal 234 567
+                  Phone: 07907 879303
                 </p>
               </div>
             </div>
