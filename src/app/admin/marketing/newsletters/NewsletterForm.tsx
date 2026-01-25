@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,16 +12,23 @@ import {
   Eye,
   Send,
   AlertCircle,
+  ImageIcon,
 } from "lucide-react";
 import { ImageUploader } from "./ImageUploader";
-import type { Newsletter, Club, PromoCode } from "@/types/database";
+import type { Newsletter, Club, PromoCode, NewsletterImage } from "@/types/database";
+
+const newsletterImageSchema = z.object({
+  url: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+});
 
 const newsletterSchema = z.object({
   roughDraft: z.string().optional(),
   subject: z.string().min(1, "Subject is required"),
   preview_text: z.string().optional(),
   body_html: z.string().min(1, "Body content is required"),
-  image_urls: z.array(z.string()),
+  images: z.array(newsletterImageSchema),
   featured_club_id: z.string().optional(),
   promo_code_id: z.string().optional(),
   cta_text: z.string().optional(),
@@ -53,8 +60,16 @@ export function NewsletterForm({
   const [error, setError] = useState<string | null>(null);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
+  const roughDraftRef = useRef<HTMLTextAreaElement>(null);
 
   const isEditing = !!newsletter;
+
+  // Convert legacy image_urls to NewsletterImage format
+  const initialImages: NewsletterImage[] = newsletter?.image_urls?.map((url, index) => ({
+    url,
+    label: `Image ${index + 1}`,
+    description: "",
+  })) || [];
 
   const {
     register,
@@ -69,7 +84,7 @@ export function NewsletterForm({
       subject: newsletter?.subject || "",
       preview_text: newsletter?.preview_text || "",
       body_html: newsletter?.body_html || "",
-      image_urls: newsletter?.image_urls || [],
+      images: initialImages,
       featured_club_id: newsletter?.featured_club_id || "",
       promo_code_id: newsletter?.promo_code_id || "",
       cta_text: newsletter?.cta_text || "Book Now",
@@ -77,7 +92,7 @@ export function NewsletterForm({
     },
   });
 
-  const imageUrls = watch("image_urls");
+  const images = watch("images");
   const featuredClubId = watch("featured_club_id");
   const promoCodeId = watch("promo_code_id");
 
@@ -87,7 +102,6 @@ export function NewsletterForm({
       try {
         const res = await fetch("/api/admin/newsletters?limit=1");
         if (res.ok) {
-          // This is a simplified approach; in production you might want a dedicated endpoint
           const subRes = await fetch("/api/admin/marketing/subscribers/count");
           if (subRes.ok) {
             const data = await subRes.json();
@@ -100,6 +114,28 @@ export function NewsletterForm({
     }
     fetchCount();
   }, []);
+
+  // Insert image reference at cursor position in rough draft
+  const insertImageReference = (label: string) => {
+    const textarea = roughDraftRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentValue = watch("roughDraft") || "";
+    const newValue =
+      currentValue.substring(0, start) +
+      label +
+      currentValue.substring(end);
+
+    setValue("roughDraft", newValue);
+
+    // Restore focus and cursor position after the inserted text
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + label.length, start + label.length);
+    }, 0);
+  };
 
   const handleGenerateAI = async () => {
     const roughDraft = watch("roughDraft");
@@ -117,6 +153,7 @@ export function NewsletterForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roughDraft,
+          images: images,
           clubId: featuredClubId || null,
           promoCodeId: promoCodeId || null,
         }),
@@ -143,12 +180,15 @@ export function NewsletterForm({
     setError(null);
 
     try {
+      // Extract just the URLs for storage (backwards compatible)
+      const imageUrls = data.images.map((img) => img.url);
+
       const payload = {
         ...(isEditing ? { id: newsletter.id } : {}),
         subject: data.subject,
         preview_text: data.preview_text || null,
         body_html: data.body_html,
-        image_urls: data.image_urls,
+        image_urls: imageUrls,
         featured_club_id: data.featured_club_id || null,
         promo_code_id: data.promo_code_id || null,
         cta_text: data.cta_text || null,
@@ -177,12 +217,13 @@ export function NewsletterForm({
 
   const handlePreviewClick = () => {
     const data = watch();
+    const imageUrls = data.images.map((img) => img.url);
     const previewNewsletter: Newsletter = {
       id: newsletter?.id || "preview",
       subject: data.subject,
       preview_text: data.preview_text || null,
       body_html: data.body_html,
-      image_urls: data.image_urls,
+      image_urls: imageUrls,
       featured_club_id: data.featured_club_id || null,
       promo_code_id: data.promo_code_id || null,
       cta_text: data.cta_text || null,
@@ -266,7 +307,28 @@ export function NewsletterForm({
             </div>
           )}
 
-          {/* AI Generation Section */}
+          {/* SECTION 1: Upload Images (moved to top) */}
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <ImageIcon
+                className="h-5 w-5"
+                style={{ color: "var(--craigies-olive)" }}
+              />
+              <h3
+                className="font-semibold"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                1. Upload Images
+              </h3>
+            </div>
+            <ImageUploader
+              images={images}
+              onChange={(newImages) => setValue("images", newImages)}
+              maxImages={5}
+            />
+          </div>
+
+          {/* SECTION 2: AI Content Generation */}
           <div className="rounded-lg border border-gray-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles
@@ -277,7 +339,7 @@ export function NewsletterForm({
                 className="font-semibold"
                 style={{ color: "var(--craigies-dark-olive)" }}
               >
-                AI Content Generation
+                2. AI Content Generation
               </h3>
             </div>
 
@@ -343,12 +405,43 @@ export function NewsletterForm({
                 <textarea
                   id="roughDraft"
                   {...register("roughDraft")}
-                  rows={3}
-                  placeholder="Enter your rough ideas, key points, or notes... The AI will transform these into polished newsletter content."
+                  ref={(e) => {
+                    register("roughDraft").ref(e);
+                    (roughDraftRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = e;
+                  }}
+                  rows={4}
+                  placeholder={
+                    images.length > 0
+                      ? `Enter your notes... Reference uploaded images like "Use Image 1 as the hero" or "Place Image 2 next to the activities section"`
+                      : "Enter your rough ideas, key points, or notes... The AI will transform these into polished newsletter content."
+                  }
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
                   style={{ color: "var(--craigies-dark-olive)" }}
                 />
               </div>
+
+              {/* Image Reference Chips */}
+              {images.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-gray-500">Click to insert:</span>
+                  {images.map((img) => (
+                    <button
+                      key={img.label}
+                      type="button"
+                      onClick={() => insertImageReference(img.label)}
+                      className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors hover:opacity-80"
+                      style={{
+                        backgroundColor: "var(--craigies-cream)",
+                        color: "var(--craigies-dark-olive)",
+                        border: "1px solid var(--craigies-olive)",
+                      }}
+                    >
+                      <ImageIcon className="h-3 w-3" />
+                      {img.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <button
                 type="button"
@@ -372,122 +465,119 @@ export function NewsletterForm({
             </div>
           </div>
 
-          {/* Subject */}
-          <div>
-            <label
-              htmlFor="subject"
-              className="mb-1 block text-sm font-medium"
+          {/* SECTION 3: Review & Edit */}
+          <div className="rounded-lg border border-gray-200 p-4">
+            <h3
+              className="font-semibold mb-4"
               style={{ color: "var(--craigies-dark-olive)" }}
             >
-              Subject Line <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="subject"
-              {...register("subject")}
-              placeholder="Enter email subject..."
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            />
-            {errors.subject && (
-              <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
-            )}
-          </div>
+              3. Review & Edit
+            </h3>
 
-          {/* Preview Text */}
-          <div>
-            <label
-              htmlFor="preview_text"
-              className="mb-1 block text-sm font-medium"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            >
-              Preview Text
-              <span className="ml-1 text-xs text-gray-500">
-                (appears in email inbox preview)
-              </span>
-            </label>
-            <input
-              type="text"
-              id="preview_text"
-              {...register("preview_text")}
-              placeholder="Brief preview shown in inbox..."
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            />
-          </div>
+            <div className="space-y-4">
+              {/* Subject */}
+              <div>
+                <label
+                  htmlFor="subject"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  Subject Line <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  {...register("subject")}
+                  placeholder="Enter email subject..."
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                />
+                {errors.subject && (
+                  <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
+                )}
+              </div>
 
-          {/* Body HTML */}
-          <div>
-            <label
-              htmlFor="body_html"
-              className="mb-1 block text-sm font-medium"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            >
-              Email Body <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="body_html"
-              {...register("body_html")}
-              rows={10}
-              placeholder="Enter HTML content for the email body..."
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 font-mono text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            />
-            {errors.body_html && (
-              <p className="mt-1 text-sm text-red-500">{errors.body_html.message}</p>
-            )}
-          </div>
+              {/* Preview Text */}
+              <div>
+                <label
+                  htmlFor="preview_text"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  Preview Text
+                  <span className="ml-1 text-xs text-gray-500">
+                    (appears in email inbox preview)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  id="preview_text"
+                  {...register("preview_text")}
+                  placeholder="Brief preview shown in inbox..."
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                />
+              </div>
 
-          {/* Images */}
-          <div>
-            <label
-              className="mb-2 block text-sm font-medium"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            >
-              Newsletter Images
-            </label>
-            <ImageUploader
-              images={imageUrls}
-              onChange={(urls) => setValue("image_urls", urls)}
-              maxImages={3}
-            />
-          </div>
+              {/* Body HTML */}
+              <div>
+                <label
+                  htmlFor="body_html"
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  Email Body <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="body_html"
+                  {...register("body_html")}
+                  rows={10}
+                  placeholder="Enter HTML content for the email body..."
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 font-mono text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                />
+                {errors.body_html && (
+                  <p className="mt-1 text-sm text-red-500">{errors.body_html.message}</p>
+                )}
+              </div>
 
-          {/* CTA */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label
-                htmlFor="cta_text"
-                className="mb-1 block text-sm font-medium"
-                style={{ color: "var(--craigies-dark-olive)" }}
-              >
-                CTA Button Text
-              </label>
-              <input
-                type="text"
-                id="cta_text"
-                {...register("cta_text")}
-                placeholder="e.g., Book Now"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
-                style={{ color: "var(--craigies-dark-olive)" }}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="cta_url"
-                className="mb-1 block text-sm font-medium"
-                style={{ color: "var(--craigies-dark-olive)" }}
-              >
-                CTA Button URL
-              </label>
-              <input
-                type="url"
-                id="cta_url"
-                {...register("cta_url")}
-                placeholder="https://exploretheclubhouse.co.uk/clubs"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
-                style={{ color: "var(--craigies-dark-olive)" }}
-              />
+              {/* CTA */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="cta_text"
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    CTA Button Text
+                  </label>
+                  <input
+                    type="text"
+                    id="cta_text"
+                    {...register("cta_text")}
+                    placeholder="e.g., Book Now"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="cta_url"
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  >
+                    CTA Button URL
+                  </label>
+                  <input
+                    type="url"
+                    id="cta_url"
+                    {...register("cta_url")}
+                    placeholder="https://exploretheclubhouse.co.uk/clubs"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
+                    style={{ color: "var(--craigies-dark-olive)" }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

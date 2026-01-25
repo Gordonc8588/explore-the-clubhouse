@@ -3,12 +3,12 @@ import type { NextConfig } from "next";
 // Content Security Policy
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.google-analytics.com https://www.gstatic.com https://www.google.com https://js.stripe.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.google-analytics.com https://www.gstatic.com https://www.google.com https://js.stripe.com https://upload-widget.cloudinary.com https://widget.cloudinary.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: blob: https://res.cloudinary.com https://*.google-analytics.com https://www.googletagmanager.com https://*.stripe.com https://www.gstatic.com;
   font-src 'self' https://fonts.gstatic.com;
-  connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.google.com https://api.stripe.com;
-  frame-src 'self' https://www.google.com https://js.stripe.com https://maps.google.com;
+  connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.google.com https://api.stripe.com https://api.cloudinary.com https://*.cloudinary.com;
+  frame-src 'self' https://www.google.com https://js.stripe.com https://maps.google.com https://upload-widget.cloudinary.com https://widget.cloudinary.com;
   frame-ancestors 'none';
   form-action 'self';
   base-uri 'self';

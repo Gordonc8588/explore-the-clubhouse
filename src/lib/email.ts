@@ -597,6 +597,16 @@ export async function sendIncompleteReminder(
 // =============================================================================
 
 /**
+ * Check if images are already embedded in the HTML body
+ * Returns true if the body contains <img> tags with src attributes
+ */
+function hasEmbeddedImages(bodyHtml: string): boolean {
+  // Check for img tags with src attributes
+  const imgRegex = /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i;
+  return imgRegex.test(bodyHtml);
+}
+
+/**
  * Build a newsletter email with optional club feature and promo code
  */
 export function buildNewsletterEmail(
@@ -604,9 +614,13 @@ export function buildNewsletterEmail(
   club?: Club | null,
   promoCode?: PromoCode | null
 ): string {
-  // Build hero images section
+  // Check if images are already embedded in body_html by the AI
+  const imagesEmbedded = hasEmbeddedImages(newsletter.body_html);
+
+  // Build hero images section only if images are NOT already embedded
+  // This maintains backwards compatibility with existing newsletters
   let heroSection = '';
-  if (newsletter.image_urls && newsletter.image_urls.length > 0) {
+  if (!imagesEmbedded && newsletter.image_urls && newsletter.image_urls.length > 0) {
     const images = newsletter.image_urls
       .map(
         (url) => `
@@ -621,9 +635,9 @@ export function buildNewsletterEmail(
     `;
   }
 
-  // Build featured club section
+  // Build featured club section - SKIP if AI has embedded images (AI handles club info in body)
   let clubSection = '';
-  if (club) {
+  if (club && !imagesEmbedded) {
     clubSection = `
       <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #7A7C4A;">
         <h3 style="margin: 0 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">
@@ -648,9 +662,9 @@ export function buildNewsletterEmail(
     `;
   }
 
-  // Build promo code section
+  // Build promo code section - SKIP if AI has embedded images (AI handles promo info in body)
   let promoSection = '';
-  if (promoCode) {
+  if (promoCode && !imagesEmbedded) {
     promoSection = infoBox(
       `Use code ${promoCode.code} for ${promoCode.discount_percent}% off!`,
       `Valid until ${formatDate(promoCode.valid_until)}. ${promoCode.max_uses ? `Limited to ${promoCode.max_uses} uses.` : ''}`

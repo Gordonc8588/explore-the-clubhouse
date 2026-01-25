@@ -501,6 +501,61 @@ export interface NewsletterUpdate {
 }
 
 // =============================================================================
+// NEWSLETTER IMAGE TYPE
+// =============================================================================
+
+/**
+ * NewsletterImage - Image metadata for AI-powered newsletter generation
+ */
+export interface NewsletterImage {
+  url: string;
+  label: string;
+  description?: string;
+}
+
+/**
+ * StoredNewsletterImage - Saved image in the library for reuse across newsletters
+ */
+export interface StoredNewsletterImage {
+  id: string;
+  url: string;
+  public_id: string | null; // Cloudinary public ID for transformations
+  label: string | null;
+  description: string | null;
+  tags: string[];
+  width: number | null;
+  height: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StoredNewsletterImageInsert {
+  id?: string;
+  url: string;
+  public_id?: string | null;
+  label?: string | null;
+  description?: string | null;
+  tags?: string[];
+  width?: number | null;
+  height?: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface StoredNewsletterImageUpdate {
+  id?: string;
+  url?: string;
+  public_id?: string | null;
+  label?: string | null;
+  description?: string | null;
+  tags?: string[];
+  width?: number | null;
+  height?: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// =============================================================================
 // DATABASE TYPE (for Supabase client)
 // =============================================================================
 
@@ -561,6 +616,11 @@ export interface Database {
         Row: Newsletter;
         Insert: NewsletterInsert;
         Update: NewsletterUpdate;
+      };
+      newsletter_images: {
+        Row: StoredNewsletterImage;
+        Insert: StoredNewsletterImageInsert;
+        Update: StoredNewsletterImageUpdate;
       };
     };
     Functions: {

@@ -39,14 +39,25 @@ function formatTime(timeString: string): string {
   return `${displayHour}:${minutes}${ampm}`;
 }
 
+/**
+ * Check if images are already embedded in the HTML body
+ */
+function hasEmbeddedImages(bodyHtml: string): boolean {
+  const imgRegex = /<img[^>]+src\s*=\s*["'][^"']+["'][^>]*>/i;
+  return imgRegex.test(bodyHtml);
+}
+
 function buildPreviewHtml(
   newsletter: Newsletter,
   club?: Club | null,
   promoCode?: PromoCode | null
 ): string {
-  // Build hero images section
+  // Check if AI has embedded images in the body (indicates AI-generated content)
+  const imagesEmbedded = hasEmbeddedImages(newsletter.body_html);
+
+  // Build hero images section - SKIP if AI has embedded images
   let heroSection = "";
-  if (newsletter.image_urls && newsletter.image_urls.length > 0) {
+  if (!imagesEmbedded && newsletter.image_urls && newsletter.image_urls.length > 0) {
     const images = newsletter.image_urls
       .map(
         (url) => `
@@ -61,9 +72,9 @@ function buildPreviewHtml(
     `;
   }
 
-  // Build featured club section
+  // Build featured club section - SKIP if AI has embedded images (AI handles this)
   let clubSection = "";
-  if (club) {
+  if (club && !imagesEmbedded) {
     clubSection = `
       <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #7A7C4A;">
         <h3 style="margin: 0 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">
@@ -88,9 +99,9 @@ function buildPreviewHtml(
     `;
   }
 
-  // Build promo code section
+  // Build promo code section - SKIP if AI has embedded images (AI handles this)
   let promoSection = "";
-  if (promoCode) {
+  if (promoCode && !imagesEmbedded) {
     promoSection = `
       <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #7A7C4A;">
         <h3 style="margin: 0 0 8px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #5A5C3A;">Use code ${promoCode.code} for ${promoCode.discount_percent}% off!</h3>
