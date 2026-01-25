@@ -47,14 +47,23 @@ export function NewsletterSignup({
 
   if (subscribed) {
     return (
-      <p
-        className={`font-body text-sm font-semibold ${
-          variant === "standalone" ? "text-white text-lg" : ""
-        }`}
-        style={{ color: "var(--craigies-burnt-orange)" }}
-      >
-        Thanks for subscribing! You&apos;ll hear from us soon.
-      </p>
+      <div className={variant === "standalone" ? "text-center" : ""}>
+        <p
+          className={`font-body font-semibold ${
+            variant === "standalone" ? "text-white text-lg mb-2" : "text-sm"
+          }`}
+          style={{ color: variant === "standalone" ? "white" : "var(--craigies-burnt-orange)" }}
+        >
+          Check your email to confirm!
+        </p>
+        <p
+          className={`font-body ${
+            variant === "standalone" ? "text-white/80 text-sm" : "text-xs text-stone mt-1"
+          }`}
+        >
+          We&apos;ve sent you a confirmation link. Click it to complete your subscription.
+        </p>
+      </div>
     );
   }
 

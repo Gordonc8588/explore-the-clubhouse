@@ -78,11 +78,12 @@ export async function POST(request: Request) {
       promoCode = promoData;
     }
 
-    // Fetch all active subscribers
+    // Fetch all confirmed and active subscribers
     const { data: subscribers, error: subscribersError } = await supabase
       .from("newsletter_subscribers")
       .select("email")
-      .is("unsubscribed_at", null);
+      .not("confirmed_at", "is", null)  // Only confirmed subscribers
+      .is("unsubscribed_at", null);      // Not unsubscribed
 
     if (subscribersError) {
       console.error("Error fetching subscribers:", subscribersError);
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
 
     if (!subscribers || subscribers.length === 0) {
       return NextResponse.json(
-        { error: "No active subscribers to send to" },
+        { error: "No confirmed subscribers to send to" },
         { status: 400 }
       );
     }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIP } from "@/lib/rate-limit";
+import { sendNewsletterConfirmationEmail } from "@/lib/email";
+import crypto from "crypto";
 
 // Newsletter subscription schema
 const newsletterSchema = z.object({
@@ -15,6 +17,11 @@ const RATE_LIMIT_OPTIONS = {
   refillInterval: 60 * 1000,
   refillRate: 5,
 };
+
+// Generate a secure random token
+function generateConfirmationToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
 
 // Brevo API sync (graceful failure)
 async function syncToBrevo(email: string, source: string): Promise<void> {
@@ -91,18 +98,111 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, source } = validationResult.data;
+    const normalizedEmail = email.toLowerCase().trim();
 
-    // Save to Supabase (primary storage)
+    // Check if already subscribed
     const supabase = await createClient();
+    const { data: existing } = await supabase
+      .from("newsletter_subscribers")
+      .select("id, confirmed_at, unsubscribed_at")
+      .eq("email", normalizedEmail)
+      .single();
+
+    if (existing) {
+      // Already confirmed and not unsubscribed
+      if (existing.confirmed_at && !existing.unsubscribed_at) {
+        return NextResponse.json(
+          { error: "This email is already subscribed to our newsletter." },
+          { status: 409 }
+        );
+      }
+
+      // Previously unsubscribed - allow re-subscribe with new confirmation
+      if (existing.unsubscribed_at) {
+        const confirmationToken = generateConfirmationToken();
+
+        const { error: updateError } = await supabase
+          .from("newsletter_subscribers")
+          .update({
+            confirmation_token: confirmationToken,
+            confirmed_at: null,
+            unsubscribed_at: null,
+            source,
+          })
+          .eq("id", existing.id);
+
+        if (updateError) {
+          console.error("Database update error:", updateError);
+          return NextResponse.json(
+            { error: "Failed to subscribe. Please try again." },
+            { status: 500 }
+          );
+        }
+
+        // Send confirmation email
+        const emailResult = await sendNewsletterConfirmationEmail(normalizedEmail, confirmationToken);
+        if (!emailResult.success) {
+          console.error("Failed to send confirmation email:", emailResult.error);
+        }
+
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Please check your email to confirm your subscription.",
+            requiresConfirmation: true,
+          },
+          { status: 200 }
+        );
+      }
+
+      // Exists but not confirmed - resend confirmation
+      const confirmationToken = generateConfirmationToken();
+
+      const { error: updateError } = await supabase
+        .from("newsletter_subscribers")
+        .update({
+          confirmation_token: confirmationToken,
+          source,
+        })
+        .eq("id", existing.id);
+
+      if (updateError) {
+        console.error("Database update error:", updateError);
+        return NextResponse.json(
+          { error: "Failed to subscribe. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      // Resend confirmation email
+      const emailResult = await sendNewsletterConfirmationEmail(normalizedEmail, confirmationToken);
+      if (!emailResult.success) {
+        console.error("Failed to send confirmation email:", emailResult.error);
+      }
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Please check your email to confirm your subscription.",
+          requiresConfirmation: true,
+        },
+        { status: 200 }
+      );
+    }
+
+    // New subscriber - create with confirmation token
+    const confirmationToken = generateConfirmationToken();
+
     const { error: dbError } = await supabase
       .from("newsletter_subscribers")
       .insert({
-        email: email.toLowerCase().trim(),
+        email: normalizedEmail,
         source,
+        confirmation_token: confirmationToken,
       });
 
     if (dbError) {
-      // Check if it's a duplicate email error
+      // Check if it's a duplicate email error (race condition)
       if (dbError.code === "23505") {
         return NextResponse.json(
           { error: "This email is already subscribed to our newsletter." },
@@ -117,16 +217,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sync to Brevo (secondary, graceful failure)
-    // This happens in the background and doesn't block the response
-    syncToBrevo(email, source).catch((err) =>
+    // Send confirmation email
+    const emailResult = await sendNewsletterConfirmationEmail(normalizedEmail, confirmationToken);
+    if (!emailResult.success) {
+      console.error("Failed to send confirmation email:", emailResult.error);
+      // Don't fail the request - they can request resend
+    }
+
+    // Sync to Brevo (secondary, graceful failure) - only after confirmation
+    // We'll move this to the confirm endpoint later
+    // For now, sync immediately to capture the lead
+    syncToBrevo(normalizedEmail, source).catch((err) =>
       console.error("Background Brevo sync failed:", err)
     );
 
     return NextResponse.json(
       {
         success: true,
-        message: "Thanks for subscribing! You'll hear from us soon.",
+        message: "Please check your email to confirm your subscription.",
+        requiresConfirmation: true,
       },
       { status: 200 }
     );

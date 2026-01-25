@@ -422,6 +422,8 @@ export interface NewsletterSubscriber {
   subscribed_at: string;
   source: string;
   unsubscribed_at: string | null;
+  confirmation_token: string | null;
+  confirmed_at: string | null;
 }
 
 export interface NewsletterSubscriberInsert {
@@ -430,6 +432,8 @@ export interface NewsletterSubscriberInsert {
   subscribed_at?: string;
   source?: string;
   unsubscribed_at?: string | null;
+  confirmation_token?: string | null;
+  confirmed_at?: string | null;
 }
 
 export interface NewsletterSubscriberUpdate {
@@ -438,6 +442,8 @@ export interface NewsletterSubscriberUpdate {
   subscribed_at?: string;
   source?: string;
   unsubscribed_at?: string | null;
+  confirmation_token?: string | null;
+  confirmed_at?: string | null;
 }
 
 /**

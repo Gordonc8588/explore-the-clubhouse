@@ -789,3 +789,133 @@ export async function sendTestNewsletter(
     return { success: false, error: errorMessage };
   }
 }
+
+/**
+ * Send newsletter subscription confirmation email (double opt-in)
+ * User must click the link to confirm their email address
+ */
+export async function sendNewsletterConfirmationEmail(
+  email: string,
+  confirmationToken: string
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const confirmUrl = `${siteUrl}/confirm-email?token=${confirmationToken}`;
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Confirm Your Subscription
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      Thanks for signing up to The Clubhouse newsletter!
+    </p>
+
+    <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6; color: #3D3D3D;">
+      Please click the button below to confirm your email address and start receiving updates about our holiday clubs, special offers, and farm news.
+    </p>
+
+    ${ctaButton('Confirm My Email', confirmUrl)}
+
+    <p style="margin: 24px 0 0; font-size: 14px; color: #6B7280; line-height: 1.6;">
+      If you didn't sign up for this newsletter, you can safely ignore this email.
+    </p>
+
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
+      <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
+        This link will expire in 7 days. If you need a new confirmation link, simply sign up again.
+      </p>
+    </div>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: email,
+      subject: 'Please confirm your newsletter subscription',
+      html: emailTemplate(content),
+    });
+
+    if (error) {
+      console.error('Failed to send confirmation email:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send confirmation email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Send welcome email after newsletter subscription is confirmed
+ */
+export async function sendNewsletterWelcomeEmail(
+  email: string
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Welcome to The Clubhouse!
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      Your subscription is now confirmed.
+    </p>
+
+    <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6; color: #3D3D3D;">
+      Thank you for joining our newsletter! You'll be the first to hear about:
+    </p>
+
+    <ul style="margin: 0 0 24px; padding-left: 24px; font-size: 16px; line-height: 1.8; color: #3D3D3D;">
+      <li>New holiday club dates and booking openings</li>
+      <li>Exclusive early-bird offers and discounts</li>
+      <li>News and updates from the farm</li>
+      <li>Tips for making the most of your child's adventure</li>
+    </ul>
+
+    ${ctaButton('View Our Clubs', `${siteUrl}/clubs`)}
+
+    <p style="margin: 24px 0 0; font-size: 14px; color: #6B7280; line-height: 1.6;">
+      We're excited to have you as part of The Clubhouse community!
+    </p>
+
+    <p style="margin: 16px 0 0; font-size: 16px; color: #3D3D3D;">
+      See you soon,<br>
+      <strong style="color: #7A7C4A;">The Clubhouse Team</strong>
+    </p>
+
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #E5E7EB; text-align: center;">
+      <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
+        <a href="${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #7A7C4A; text-decoration: underline;">Unsubscribe</a>
+      </p>
+    </div>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: email,
+      subject: 'Welcome to The Clubhouse Newsletter!',
+      html: emailTemplate(content),
+    });
+
+    if (error) {
+      console.error('Failed to send welcome email:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send welcome email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
