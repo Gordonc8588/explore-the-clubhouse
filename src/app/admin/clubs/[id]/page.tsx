@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ClubEditForm } from "./ClubEditForm";
 
+export const dynamic = "force-dynamic";
+
 interface ClubEditPageProps {
   params: Promise<{ id: string }>;
 }

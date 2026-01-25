@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Users, UserPlus, TrendingUp, Tag } from "lucide-react";
 import { SubscribersTable } from "./SubscribersTable";
 
+export const dynamic = "force-dynamic";
+
 async function getSubscribersData() {
   const supabase = createAdminClient();
 

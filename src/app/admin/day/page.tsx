@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 async function getFirstEventDate(): Promise<string> {
   const supabase = await createClient();
 

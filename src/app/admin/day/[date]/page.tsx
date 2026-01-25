@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DailyAttendanceView } from "./DailyAttendanceView";
 
+export const dynamic = "force-dynamic";
+
 interface DailyPageProps {
   params: Promise<{ date: string }>;
 }

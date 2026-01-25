@@ -7,6 +7,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { ClubsGrid } from "./ClubsGrid";
 
+export const dynamic = "force-dynamic";
+
 async function getClubsData() {
   const supabase = await createClient();
 

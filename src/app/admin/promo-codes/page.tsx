@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Tag } from "lucide-react";
 import { PromoCodesManager } from "./PromoCodesManager";
 
+export const dynamic = "force-dynamic";
+
 async function getPromoCodesData() {
   const supabase = await createClient();
 

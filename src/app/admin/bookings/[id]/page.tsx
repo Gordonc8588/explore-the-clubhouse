@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BookingDetail } from "./BookingDetail";
 
+export const dynamic = "force-dynamic";
+
 interface BookingPageProps {
   params: Promise<{ id: string }>;
 }

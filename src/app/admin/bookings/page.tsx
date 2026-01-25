@@ -8,6 +8,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { BookingsTable } from "./BookingsTable";
 
+export const dynamic = "force-dynamic";
+
 async function getBookingsData() {
   const supabase = await createClient();
 
