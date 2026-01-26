@@ -20,10 +20,14 @@ function getResendClient(): Resend | null {
   return resendClient;
 }
 
-// Trim env vars to remove any accidental whitespace/newlines
-const fromEmail = (process.env.RESEND_FROM_EMAIL || 'hello@exploretheclubhouse.co.uk').trim();
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk').trim();
-const adminEmail = (process.env.ADMIN_EMAIL || 'admin@exploretheclubhouse.co.uk').trim();
+// Clean env vars - remove whitespace and any literal \n or \r characters that might be present
+function cleanEnvVar(value: string): string {
+  return value.trim().replace(/\\n$/, '').replace(/\\r$/, '').trim();
+}
+
+const fromEmail = cleanEnvVar(process.env.RESEND_FROM_EMAIL || 'hello@exploretheclubhouse.co.uk');
+const siteUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk');
+const adminEmail = cleanEnvVar(process.env.ADMIN_EMAIL || 'admin@exploretheclubhouse.co.uk');
 
 // =============================================================================
 // HELPER FUNCTIONS
