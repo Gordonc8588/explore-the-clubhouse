@@ -337,6 +337,55 @@ export function ReviewStep({
         </div>
       </div>
 
+      {/* Quick Policy Summary */}
+      <div
+        className="rounded-xl p-4 border"
+        style={{
+          backgroundColor: "rgba(122, 124, 74, 0.08)",
+          borderColor: "var(--craigies-olive)",
+        }}
+      >
+        <h4
+          className="font-semibold text-sm mb-3"
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            color: "var(--craigies-dark-olive)",
+          }}
+        >
+          Quick Policy Summary
+        </h4>
+        <div className="space-y-2 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+          <div className="flex items-start gap-2">
+            <span className="text-base leading-none mt-0.5">•</span>
+            <span>We are an <strong>Activity Club</strong>, not a Childcare Service</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-base leading-none mt-0.5">•</span>
+            <span><strong>Cancellations:</strong> 14+ days = full refund, 7-13 days = 50%, &lt;7 days = no refund</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-base leading-none mt-0.5">•</span>
+            <span><strong>Behaviour:</strong> Children must follow safety instructions; severe behaviour may result in immediate collection with no refund</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-base leading-none mt-0.5">•</span>
+            <span><strong>Forms:</strong> Child information forms must be completed within 3 days of booking</span>
+          </div>
+        </div>
+        <a
+          href="/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 mt-3 text-sm font-medium hover:underline"
+          style={{ color: "var(--craigies-burnt-orange)" }}
+        >
+          Read full policy
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+
       {/* Agreements */}
       <label className="flex items-start gap-3 cursor-pointer group">
         <div className="relative flex-shrink-0 mt-0.5">
@@ -377,7 +426,7 @@ export function ReviewStep({
           className="text-sm"
           style={{ color: "var(--craigies-dark-olive)" }}
         >
-          I agree to the{" "}
+          I have read and agree to The Clubhouse&apos;s{" "}
           <a
             href="/terms"
             className="underline"
@@ -385,17 +434,7 @@ export function ReviewStep({
             target="_blank"
             rel="noopener noreferrer"
           >
-            Terms & Conditions
-          </a>
-          {" "}and have read the{" "}
-          <a
-            href="/terms"
-            className="underline"
-            style={{ color: "var(--craigies-burnt-orange)" }}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Cancellation Policy
+            Cancellation & Behaviour Policy
           </a>
         </span>
       </label>
