@@ -18,11 +18,15 @@ export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
     if (!stripe) {
+      console.error("[Checkout] Stripe not initialized. STRIPE_SECRET_KEY present:", !!process.env.STRIPE_SECRET_KEY);
+      console.error("[Checkout] Key prefix:", process.env.STRIPE_SECRET_KEY?.substring(0, 8));
       return NextResponse.json(
         { error: "Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable." },
         { status: 500 }
       );
     }
+
+    console.log("[Checkout] Stripe initialized, processing request...");
 
     const body: CheckoutRequestBody = await request.json();
 
@@ -196,6 +200,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
+
+    // Log more details for Stripe errors
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error name:", error.name);
+      if ('type' in error) {
+        console.error("Stripe error type:", (error as { type: string }).type);
+      }
+      if ('code' in error) {
+        console.error("Stripe error code:", (error as { code: string }).code);
+      }
+    }
+
     return NextResponse.json(
       { error: "Failed to create checkout session" },
       { status: 500 }
