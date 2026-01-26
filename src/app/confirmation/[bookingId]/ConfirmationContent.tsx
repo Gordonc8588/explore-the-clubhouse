@@ -199,6 +199,38 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
           </div>
         </div>
 
+        {/* Important Information */}
+        <div
+          className="rounded-xl p-5 mb-6 border-l-4"
+          style={{
+            backgroundColor: "rgba(122, 124, 74, 0.08)",
+            borderColor: "var(--craigies-olive)",
+          }}
+        >
+          <h3
+            className="font-semibold mb-2"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            Important Information
+          </h3>
+          <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+            The Clubhouse is a drop-off activity club and is not a Care Inspectorate-registered childcare service. While we strive to be welcoming and inclusive, we are unfortunately unable to provide the level of support required for children with additional support needs or significant behavioural circumstances.
+          </p>
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 mt-2 text-sm font-medium hover:underline"
+            style={{ color: "var(--craigies-burnt-orange)" }}
+          >
+            View full Cancellation & Behaviour Policy
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+
         {/* What Happens Next */}
         <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 mb-6">
           <h2

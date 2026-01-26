@@ -211,13 +211,12 @@ export async function sendBookingConfirmation(
 
     <!-- Terms & Conditions -->
     <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #7A7C4A;">
-      <h3 style="margin: 0 0 12px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #5A5C3A;">Key Points to Note</h3>
-      <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #3D3D3D; line-height: 1.8;">
-        <li><strong>The Clubhouse is not a childcare service.</strong> Our activities are designed as supervised experiences rather than dedicated child care.</li>
-        <li><strong>Support for children with additional needs:</strong> While we strive to create an inclusive environment, we are unable to provide one-on-one support. However, we have a limited number of spaces available for parents or guardians to attend alongside children who require additional assistance. If your child would benefit from this, please <a href="mailto:hello@exploretheclubhouse.co.uk" style="color: #D4843E;">contact us</a> directly to check availability.</li>
-      </ul>
-      <p style="margin: 12px 0 0; font-size: 14px; color: #3D3D3D;">
-        Please review our full <a href="https://exploretheclubhouse.co.uk/terms" style="color: #D4843E; font-weight: 500;">Terms & Conditions</a>.
+      <h3 style="margin: 0 0 12px; font-family: 'Nunito Sans', sans-serif; font-size: 16px; font-weight: 600; color: #5A5C3A;">Important Information</h3>
+      <p style="margin: 0 0 12px; font-size: 14px; color: #3D3D3D; line-height: 1.8;">
+        The Clubhouse is a drop-off activity club and is not a Care Inspectorate-registered childcare service. While we strive to be welcoming and inclusive, we are unfortunately unable to provide the level of support required for children with additional support needs or significant behavioural circumstances.
+      </p>
+      <p style="margin: 0; font-size: 14px; color: #3D3D3D;">
+        Please review our full <a href="https://exploretheclubhouse.co.uk/terms" style="color: #D4843E; font-weight: 500;">Cancellation & Behaviour Policy</a>.
       </p>
     </div>
 
