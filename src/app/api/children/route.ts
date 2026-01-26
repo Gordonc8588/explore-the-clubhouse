@@ -5,6 +5,13 @@ import { sendBookingComplete } from "@/lib/email";
 
 const phoneRegex = /^[\d\s+()-]+$/;
 
+// Simplified schema for add-on workshops (only name + DOB required)
+const simplifiedChildSchema = z.object({
+  childName: z.string().min(1, "Child name is required"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+});
+
+// Full schema for regular bookings
 const childSchema = z.object({
   // Child Details
   childName: z.string().min(1, "Child name is required"),
@@ -76,12 +83,26 @@ const childSchema = z.object({
 const createChildrenRequestSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
   children: z.array(childSchema).min(1, "At least one child is required"),
+  simplified: z.boolean().optional().default(false),
+});
+
+const simplifiedChildrenRequestSchema = z.object({
+  bookingId: z.string().min(1, "Booking ID is required"),
+  children: z.array(simplifiedChildSchema).min(1, "At least one child is required"),
+  simplified: z.literal(true),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validation = createChildrenRequestSchema.safeParse(body);
+
+    // Check if this is a simplified submission (for add-on workshops)
+    const isSimplified = body.simplified === true;
+
+    // Use appropriate schema based on submission type
+    const validation = isSimplified
+      ? simplifiedChildrenRequestSchema.safeParse(body)
+      : createChildrenRequestSchema.safeParse(body);
 
     if (!validation.success) {
       const errors = validation.error.issues.map((issue) => ({
@@ -136,45 +157,84 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert children with all new fields
-    const childRecords = children.map((child) => ({
-      booking_id: bookingId,
-      name: child.childName,
-      date_of_birth: child.dateOfBirth,
-      allergies: child.allergies || "",
-      medical_notes: child.medicalNotes || "",
+    // Insert children - handle simplified vs full form differently
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const childRecords = children.map((child: any) => {
+      if (isSimplified) {
+        // Simplified form: only name + DOB, use placeholder values for required fields
+        // These children have already completed forms for their main club booking
+        return {
+          booking_id: bookingId,
+          name: child.childName,
+          date_of_birth: child.dateOfBirth,
+          allergies: "",
+          medical_notes: "",
+          // Placeholder values for add-on workshops (parent has full form elsewhere)
+          emergency_contact_name: "See main booking",
+          emergency_contact_phone: "See main booking",
+          emergency_contact_relationship: "See main booking",
+          emergency_contact_2_name: "See main booking",
+          emergency_contact_2_phone: "See main booking",
+          emergency_contact_2_relationship: "See main booking",
+          pickup_person_1_name: null,
+          pickup_person_1_phone: null,
+          pickup_person_1_relationship: null,
+          pickup_person_2_name: null,
+          pickup_person_2_phone: null,
+          pickup_person_2_relationship: null,
+          pickup_person_3_name: null,
+          pickup_person_3_phone: null,
+          pickup_person_3_relationship: null,
+          // Consents assumed from main booking
+          photo_consent: true,
+          activity_consent: true,
+          medical_consent: true,
+          farm_animal_consent: true,
+          woodland_consent: true,
+          parent_notes: "Add-on workshop - see main club booking for full details",
+        };
+      }
 
-      // Emergency Contact 1
-      emergency_contact_name: child.emergencyContact1Name,
-      emergency_contact_phone: child.emergencyContact1Phone,
-      emergency_contact_relationship: child.emergencyContact1Relationship,
+      // Full form: use all provided data
+      return {
+        booking_id: bookingId,
+        name: child.childName,
+        date_of_birth: child.dateOfBirth,
+        allergies: child.allergies || "",
+        medical_notes: child.medicalNotes || "",
 
-      // Emergency Contact 2
-      emergency_contact_2_name: child.emergencyContact2Name,
-      emergency_contact_2_phone: child.emergencyContact2Phone,
-      emergency_contact_2_relationship: child.emergencyContact2Relationship,
+        // Emergency Contact 1
+        emergency_contact_name: child.emergencyContact1Name,
+        emergency_contact_phone: child.emergencyContact1Phone,
+        emergency_contact_relationship: child.emergencyContact1Relationship,
 
-      // Authorized Pickup Persons
-      pickup_person_1_name: child.pickupPerson1Name || null,
-      pickup_person_1_phone: child.pickupPerson1Phone || null,
-      pickup_person_1_relationship: child.pickupPerson1Relationship || null,
-      pickup_person_2_name: child.pickupPerson2Name || null,
-      pickup_person_2_phone: child.pickupPerson2Phone || null,
-      pickup_person_2_relationship: child.pickupPerson2Relationship || null,
-      pickup_person_3_name: child.pickupPerson3Name || null,
-      pickup_person_3_phone: child.pickupPerson3Phone || null,
-      pickup_person_3_relationship: child.pickupPerson3Relationship || null,
+        // Emergency Contact 2
+        emergency_contact_2_name: child.emergencyContact2Name,
+        emergency_contact_2_phone: child.emergencyContact2Phone,
+        emergency_contact_2_relationship: child.emergencyContact2Relationship,
 
-      // Consents
-      photo_consent: child.photoConsent,
-      activity_consent: child.activityConsent,
-      medical_consent: child.medicalConsent,
-      farm_animal_consent: child.farmAnimalConsent,
-      woodland_consent: child.woodlandConsent,
+        // Authorized Pickup Persons
+        pickup_person_1_name: child.pickupPerson1Name || null,
+        pickup_person_1_phone: child.pickupPerson1Phone || null,
+        pickup_person_1_relationship: child.pickupPerson1Relationship || null,
+        pickup_person_2_name: child.pickupPerson2Name || null,
+        pickup_person_2_phone: child.pickupPerson2Phone || null,
+        pickup_person_2_relationship: child.pickupPerson2Relationship || null,
+        pickup_person_3_name: child.pickupPerson3Name || null,
+        pickup_person_3_phone: child.pickupPerson3Phone || null,
+        pickup_person_3_relationship: child.pickupPerson3Relationship || null,
 
-      // Parent Notes
-      parent_notes: child.parentNotes || null,
-    }));
+        // Consents
+        photo_consent: child.photoConsent,
+        activity_consent: child.activityConsent,
+        medical_consent: child.medicalConsent,
+        farm_animal_consent: child.farmAnimalConsent,
+        woodland_consent: child.woodlandConsent,
+
+        // Parent Notes
+        parent_notes: child.parentNotes || null,
+      };
+    });
 
     const { data: savedChildren, error: childrenError } = await supabase
       .from('children')

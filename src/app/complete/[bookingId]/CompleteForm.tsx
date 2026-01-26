@@ -3,9 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw, Loader2, Info } from "lucide-react";
 import { ChildInfoForm, type ChildInfoFormValues } from "@/components/ChildInfoForm";
 import type { Booking, BookingOption, Club, Child } from "@/types/database";
+
+// Simplified child data for add-on workshops
+interface SimplifiedChildData {
+  childName: string;
+  dateOfBirth: string;
+}
 
 function formatPrice(priceInPence: number): string {
   return "£" + (priceInPence / 100).toFixed(2);
@@ -36,6 +42,14 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
     Array(booking.num_children).fill(null)
   );
   const hasAutoVerified = useRef(false);
+
+  // Simplified form state for add-on workshops
+  const isAddOnWorkshop = club.slug === "add-on-workshop";
+  const [useSimplifiedForm, setUseSimplifiedForm] = useState(isAddOnWorkshop);
+  const [simplifiedChildren, setSimplifiedChildren] = useState<SimplifiedChildData[]>(
+    Array(booking.num_children).fill(null).map(() => ({ childName: "", dateOfBirth: "" }))
+  );
+  const [hasCompletedMainForms, setHasCompletedMainForms] = useState(true);
 
   const isAlreadyComplete = booking.status === "complete" || existingChildren.length > 0;
 
@@ -188,6 +202,60 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
     }
   };
 
+  // Handle simplified form submission for add-on workshops
+  const handleSimplifiedSubmit = async () => {
+    setError(null);
+
+    // Validate simplified form data
+    const hasIncomplete = simplifiedChildren.some(
+      (child) => !child.childName.trim() || !child.dateOfBirth
+    );
+
+    if (hasIncomplete) {
+      setError("Please fill in name and date of birth for all children");
+      return;
+    }
+
+    // If they haven't completed main forms, switch to full form mode
+    if (!hasCompletedMainForms) {
+      setUseSimplifiedForm(false);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/children", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          children: simplifiedChildren,
+          simplified: true,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to save children information");
+      }
+
+      router.push("/confirmation/" + booking.id);
+    } catch (err) {
+      console.error("Submit error:", err);
+      setError(err instanceof Error ? err.message : "Failed to save information");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const updateSimplifiedChild = (index: number, field: keyof SimplifiedChildData, value: string) => {
+    const updated = [...simplifiedChildren];
+    updated[index] = { ...updated[index], [field]: value };
+    setSimplifiedChildren(updated);
+  };
+
   // Already complete - show summary
   if (isAlreadyComplete) {
     return (
@@ -304,6 +372,181 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
     );
   }
 
+  // Simplified form for add-on workshops
+  if (isAddOnWorkshop && useSimplifiedForm) {
+    return (
+      <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+          {/* Booking Summary */}
+          <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+            <h1
+              className="text-2xl font-bold mb-4"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Workshop Registration
+            </h1>
+            <p className="text-stone mb-6">
+              Quick registration for your add-on workshop booking.
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
+                <div>
+                  <p className="text-sm text-stone">Workshop</p>
+                  <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                    {club.name}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Users className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
+                <div>
+                  <p className="text-sm text-stone">Children</p>
+                  <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                    {booking.num_children} {booking.num_children === 1 ? "child" : "children"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Info Notice */}
+          <div
+            className="rounded-2xl p-4 mb-6 flex gap-3"
+            style={{ backgroundColor: "var(--craigies-olive)" }}
+          >
+            <Info className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
+            <div className="text-sm text-white">
+              <p className="font-semibold">Add-on Workshop</p>
+              <p className="text-white/90 mt-1">
+                If you&apos;ve already completed the full registration forms for your main club booking,
+                you only need to confirm the children&apos;s names and dates of birth below.
+              </p>
+            </div>
+          </div>
+
+          {/* Simplified Child Forms */}
+          <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+            <h2
+              className="text-xl font-bold mb-6"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Children Attending
+            </h2>
+
+            <div className="space-y-6">
+              {Array.from({ length: booking.num_children }, (_, index) => (
+                <div key={index} className="p-4 rounded-xl border border-cloud bg-cloud/30">
+                  <h3 className="font-medium text-bark mb-4">Child {index + 1}</h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor={`child-name-${index}`}
+                        className="block text-sm font-medium text-stone mb-1.5"
+                      >
+                        Child&apos;s Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id={`child-name-${index}`}
+                        type="text"
+                        value={simplifiedChildren[index]?.childName || ""}
+                        onChange={(e) => updateSimplifiedChild(index, "childName", e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-stone bg-white text-bark transition-all focus:outline-none focus:border-forest focus:ring-2 focus:ring-sage/30"
+                        placeholder="Enter child's full name"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`child-dob-${index}`}
+                        className="block text-sm font-medium text-stone mb-1.5"
+                      >
+                        Date of Birth <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id={`child-dob-${index}`}
+                        type="date"
+                        value={simplifiedChildren[index]?.dateOfBirth || ""}
+                        onChange={(e) => updateSimplifiedChild(index, "dateOfBirth", e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-stone bg-white text-bark transition-all focus:outline-none focus:border-forest focus:ring-2 focus:ring-sage/30"
+                        max={new Date().toISOString().split("T")[0]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Confirmation checkbox */}
+            <div className="mt-6 p-4 rounded-xl border border-cloud bg-white">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasCompletedMainForms}
+                  onChange={(e) => setHasCompletedMainForms(e.target.checked)}
+                  className="mt-1 w-5 h-5 rounded border-stone text-forest focus:ring-forest focus:ring-offset-0"
+                />
+                <div className="flex-1">
+                  <span className="font-medium text-bark">
+                    I have already completed the full registration forms
+                  </span>
+                  <p className="mt-1 text-sm text-stone">
+                    I confirm that I have submitted the full child information forms (emergency contacts,
+                    medical details, consents) for another club booking and those details are still current.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {!hasCompletedMainForms && (
+              <div className="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                <p className="text-sm text-amber-800">
+                  <strong>No problem!</strong> Click the button below and we&apos;ll show you the full registration form.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-red-800">{error}</p>
+            </div>
+          )}
+
+          {/* Submit Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              type="button"
+              onClick={handleSimplifiedSubmit}
+              disabled={isSubmitting}
+              className="font-semibold py-4 px-8 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                color: "white",
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
+              {isSubmitting
+                ? "Submitting..."
+                : hasCompletedMainForms
+                  ? "Confirm Registration"
+                  : "Continue to Full Form"
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Full form for regular bookings
   return (
     <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
