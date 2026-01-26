@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 const relationshipOptions = [
+  { value: "parent", label: "Parent" },
   { value: "grandparent", label: "Grandparent" },
   { value: "aunt_uncle", label: "Aunt/Uncle" },
   { value: "older_sibling", label: "Older Sibling (18+)" },
@@ -381,7 +382,7 @@ export function ChildInfoForm({
         </div>
 
         {/* Allergies Details (conditional) */}
-        {hasAllergies && (
+        {hasAllergies === true && (
           <div>
             <label
               htmlFor="allergies"
@@ -436,7 +437,7 @@ export function ChildInfoForm({
         </div>
 
         {/* Medical Notes Details (conditional) */}
-        {hasMedicalConditions && (
+        {hasMedicalConditions === true && (
           <div>
             <label
               htmlFor="medicalNotes"
