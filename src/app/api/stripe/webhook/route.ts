@@ -190,14 +190,20 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
   }
 
   // 5. Get club details for email
-  const { data: club } = await supabase
+  console.log(`[Webhook] Fetching club with id: ${clubId}`);
+  const { data: club, error: clubError } = await supabase
     .from('clubs')
     .select('*')
     .eq('id', clubId)
     .single();
 
+  if (clubError) {
+    console.error(`[Webhook] Failed to fetch club ${clubId}:`, clubError);
+  }
+
   // 6. Send confirmation emails
   if (club) {
+    console.log(`[Webhook] Found club: ${club.name}, sending emails...`);
     // Send customer confirmation email
     const confirmationResult = await sendBookingConfirmation(booking, club);
     if (confirmationResult.success) {
@@ -213,6 +219,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
     } else {
       console.error(`[Webhook] Failed to send admin notification: ${adminResult.error}`);
     }
+  } else {
+    console.error(`[Webhook] Club not found for id ${clubId}, skipping confirmation emails`);
   }
 
   console.log(`[Webhook] Successfully processed checkout.session.completed for booking ${bookingId}`);
