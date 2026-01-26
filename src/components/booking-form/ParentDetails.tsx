@@ -83,6 +83,7 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
           <input
             id="parentName"
             type="text"
+            autoComplete="name"
             {...register("parentName")}
             className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none"
             style={{
@@ -121,6 +122,7 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
           <input
             id="parentEmail"
             type="email"
+            autoComplete="email"
             {...register("parentEmail")}
             className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none"
             style={{
@@ -159,6 +161,7 @@ export function ParentDetails({ formData, onNext }: ParentDetailsProps) {
           <input
             id="parentPhone"
             type="tel"
+            autoComplete="tel"
             {...register("parentPhone")}
             className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none"
             style={{

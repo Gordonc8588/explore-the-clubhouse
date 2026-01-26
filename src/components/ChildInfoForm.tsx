@@ -479,6 +479,7 @@ export function ChildInfoForm({
               <input
                 id="emergencyContact1Name"
                 type="text"
+                autoComplete="name"
                 {...register("emergencyContact1Name")}
                 className={inputClassName(!!errors.emergencyContact1Name)}
                 placeholder="Full name"
@@ -502,6 +503,7 @@ export function ChildInfoForm({
                 <input
                   id="emergencyContact1Phone"
                   type="tel"
+                  autoComplete="tel"
                   {...register("emergencyContact1Phone")}
                   className={`${inputClassName(!!errors.emergencyContact1Phone)} pl-10`}
                   placeholder="07123 456789"
@@ -556,6 +558,7 @@ export function ChildInfoForm({
               <input
                 id="emergencyContact2Name"
                 type="text"
+                autoComplete="name"
                 {...register("emergencyContact2Name")}
                 className={inputClassName(!!errors.emergencyContact2Name)}
                 placeholder="Full name"
@@ -579,6 +582,7 @@ export function ChildInfoForm({
                 <input
                   id="emergencyContact2Phone"
                   type="tel"
+                  autoComplete="tel"
                   {...register("emergencyContact2Phone")}
                   className={`${inputClassName(!!errors.emergencyContact2Phone)} pl-10`}
                   placeholder="07123 456789"
