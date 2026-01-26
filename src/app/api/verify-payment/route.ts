@@ -102,9 +102,10 @@ export async function POST(request: NextRequest) {
 
     if (club) {
       console.log(`[VerifyPayment] Sending confirmation emails for booking ${bookingId}`);
+      const timeSlot = booking.booking_options?.time_slot;
 
       // Send customer confirmation
-      const confirmResult = await sendBookingConfirmation(updatedBooking, club);
+      const confirmResult = await sendBookingConfirmation(updatedBooking, club, timeSlot);
       if (confirmResult.success) {
         console.log(`[VerifyPayment] Sent confirmation to ${updatedBooking.parent_email}`);
       } else {

@@ -98,10 +98,10 @@ export async function POST(request: NextRequest) {
     const { bookingId, children } = validation.data;
     const supabase = createAdminClient();
 
-    // Get booking with club details
+    // Get booking with club and booking option details
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .select('*, clubs(*)')
+      .select('*, clubs(*), booking_options(time_slot)')
       .eq('id', bookingId)
       .single();
 
@@ -200,7 +200,8 @@ export async function POST(request: NextRequest) {
     // Send completion email
     if (booking.clubs) {
       try {
-        await sendBookingComplete(booking, booking.clubs, savedChildren || []);
+        const timeSlot = booking.booking_options?.time_slot;
+        await sendBookingComplete(booking, booking.clubs, savedChildren || [], timeSlot);
         console.log(`[Children API] Sent completion email to ${booking.parent_email}`);
       } catch (emailError) {
         console.error("[Children API] Failed to send completion email:", emailError);

@@ -205,7 +205,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
   if (club) {
     console.log(`[Webhook] Found club: ${club.name}, sending emails...`);
     // Send customer confirmation email
-    const confirmationResult = await sendBookingConfirmation(booking, club);
+    const confirmationResult = await sendBookingConfirmation(booking, club, timeSlot);
     if (confirmationResult.success) {
       console.log(`[Webhook] Sent confirmation email to ${booking.parent_email} (messageId: ${confirmationResult.messageId})`);
     } else {

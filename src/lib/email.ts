@@ -4,7 +4,7 @@
  */
 
 import { Resend } from 'resend';
-import type { Booking, Club, Child, Newsletter, PromoCode } from '@/types/database';
+import type { Booking, Club, Child, Newsletter, PromoCode, TimeSlot } from '@/types/database';
 
 // Lazy initialize Resend client to avoid errors when API key is not set
 let resendClient: Resend | null = null;
@@ -145,6 +145,22 @@ function infoBox(title: string, content: string): string {
   `;
 }
 
+/**
+ * Generate club times HTML based on the booked time slot
+ * For full day bookings, shows a single continuous time range
+ * For half-day bookings, shows only the relevant session
+ */
+function getClubTimesHtml(club: Club, timeSlot?: TimeSlot): string {
+  if (timeSlot === 'morning') {
+    return `<strong>Session Time:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}`;
+  }
+  if (timeSlot === 'afternoon') {
+    return `<strong>Session Time:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}`;
+  }
+  // Full day - show single continuous time range
+  return `<strong>Drop-off:</strong> ${formatTime(club.morning_start)}<br><strong>Pick-up:</strong> ${formatTime(club.afternoon_end)}`;
+}
+
 // =============================================================================
 // EMAIL FUNCTIONS
 // =============================================================================
@@ -161,7 +177,8 @@ export interface SendEmailResult {
  */
 export async function sendBookingConfirmation(
   booking: Booking,
-  club: Club
+  club: Club,
+  timeSlot?: TimeSlot
 ): Promise<SendEmailResult> {
   const childInfoUrl = `${siteUrl}/booking/${booking.id}/children`;
 
@@ -225,10 +242,7 @@ export async function sendBookingConfirmation(
       </p>
     </div>
 
-    ${infoBox('Club Times', `
-      <strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}<br>
-      <strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
-    `)}
+    ${infoBox('Club Times', getClubTimesHtml(club, timeSlot))}
 
     ${infoBox('What to Bring', `
       • Packed lunch and water bottle<br>
@@ -287,7 +301,8 @@ export async function sendBookingConfirmation(
 export async function sendBookingComplete(
   booking: Booking,
   club: Club,
-  children: Child[]
+  children: Child[],
+  timeSlot?: TimeSlot
 ): Promise<SendEmailResult> {
   const childrenList = children
     .map(
@@ -353,10 +368,7 @@ export async function sendBookingComplete(
       </table>
     </div>
 
-    ${infoBox('Club Times', `
-      <strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}<br>
-      <strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
-    `)}
+    ${infoBox('Club Times', getClubTimesHtml(club, timeSlot))}
 
     ${infoBox('Reminder: What to Bring', `
       • Packed lunch and water bottle<br>
