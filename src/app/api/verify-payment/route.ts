@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sendBookingConfirmation, sendAdminNotification } from '@/lib/email';
 
 /**
  * Manual payment verification endpoint for local development.
@@ -74,20 +75,51 @@ export async function POST(request: NextRequest) {
     }
 
     // Payment is complete - update the booking
-    const { error: updateError } = await supabase
+    const { data: updatedBooking, error: updateError } = await supabase
       .from('bookings')
       .update({
         status: 'paid',
         stripe_payment_intent_id: session.payment_intent as string,
       })
-      .eq('id', bookingId);
+      .eq('id', bookingId)
+      .select()
+      .single();
 
-    if (updateError) {
+    if (updateError || !updatedBooking) {
       console.error('Failed to update booking:', updateError);
       return NextResponse.json(
         { error: 'Failed to update booking status' },
         { status: 500 }
       );
+    }
+
+    // Send confirmation emails
+    const { data: club } = await supabase
+      .from('clubs')
+      .select('*')
+      .eq('id', updatedBooking.club_id)
+      .single();
+
+    if (club) {
+      console.log(`[VerifyPayment] Sending confirmation emails for booking ${bookingId}`);
+
+      // Send customer confirmation
+      const confirmResult = await sendBookingConfirmation(updatedBooking, club);
+      if (confirmResult.success) {
+        console.log(`[VerifyPayment] Sent confirmation to ${updatedBooking.parent_email}`);
+      } else {
+        console.error(`[VerifyPayment] Failed to send confirmation: ${confirmResult.error}`);
+      }
+
+      // Send admin notification
+      const adminResult = await sendAdminNotification(updatedBooking, club);
+      if (adminResult.success) {
+        console.log(`[VerifyPayment] Sent admin notification`);
+      } else {
+        console.error(`[VerifyPayment] Failed to send admin notification: ${adminResult.error}`);
+      }
+    } else {
+      console.error(`[VerifyPayment] Club not found for booking ${bookingId}`);
     }
 
     // Create booking_days records if needed
