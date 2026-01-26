@@ -382,7 +382,7 @@ export function ChildInfoForm({
         </div>
 
         {/* Allergies Details (conditional) */}
-        {hasAllergies === true && (
+        {String(hasAllergies) === "true" && (
           <div>
             <label
               htmlFor="allergies"
@@ -437,7 +437,7 @@ export function ChildInfoForm({
         </div>
 
         {/* Medical Notes Details (conditional) */}
-        {hasMedicalConditions === true && (
+        {String(hasMedicalConditions) === "true" && (
           <div>
             <label
               htmlFor="medicalNotes"
