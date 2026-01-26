@@ -66,15 +66,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Club not found" }, { status: 404 });
     }
 
+    // Format time string (HH:MM:SS or HH:MM) to display format (e.g., "3:00pm")
+    const formatTime = (timeStr: string): string => {
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      const period = hours >= 12 ? "pm" : "am";
+      const displayHours = hours % 12 || 12;
+      return `${displayHours}:${minutes.toString().padStart(2, "0")}${period}`;
+    };
+
     // Format time slot for display
     const formatTimeSlot = (slot: string) => {
       switch (slot) {
         case "full_day":
-          return "Full Day (8:30am - 3:30pm)";
+          return `Full Day (${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)})`;
         case "morning":
-          return "Morning (8:30am - 12:00pm)";
+          return `Morning (${formatTime(club.morning_start)} - ${formatTime(club.morning_end)})`;
         case "afternoon":
-          return "Afternoon (12:00pm - 3:30pm)";
+          return `Afternoon (${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)})`;
         default:
           return "";
       }

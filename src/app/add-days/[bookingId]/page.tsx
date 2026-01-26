@@ -432,15 +432,23 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
   // Generate booking reference
   const bookingRef = booking.id.toUpperCase().replace("BOOKING-", "ETC-");
 
+  // Format time string (HH:MM:SS or HH:MM) to display format (e.g., "3:00pm")
+  const formatTime = (timeStr: string): string => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    const period = hours >= 12 ? "pm" : "am";
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, "0")}${period}`;
+  };
+
   // Format time slot for display
   const formatTimeSlot = (slot: string) => {
     switch (slot) {
       case "full_day":
-        return "8:30am - 3:30pm";
+        return `${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)}`;
       case "morning":
-        return "8:30am - 12:00pm";
+        return `${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}`;
       case "afternoon":
-        return "12:00pm - 3:30pm";
+        return `${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}`;
       default:
         return "";
     }
