@@ -61,6 +61,14 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
     }
   };
 
+  const getDropOffTime = () => {
+    return bookingOption.time_slot === "afternoon"
+      ? formatTime(club.afternoon_start)
+      : formatTime(club.morning_start);
+  };
+
+  const isAfternoonOnly = bookingOption.time_slot === "afternoon";
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--craigies-cream)" }}>
       {/* Success Banner */}
@@ -256,11 +264,15 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
             </li>
             <li className="flex items-start gap-3">
               <ChevronRight className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
-              <span>Drop off your child at the farm at {formatTime(club.morning_start)}</span>
+              <span>Drop off your child at the farm at {getDropOffTime()}</span>
             </li>
             <li className="flex items-start gap-3">
               <ChevronRight className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "var(--craigies-burnt-orange)" }} />
-              <span>Bring suitable outdoor clothing and a packed lunch</span>
+              <span>
+                {isAfternoonOnly
+                  ? "Bring suitable outdoor clothing"
+                  : "Bring suitable outdoor clothing and a packed lunch"}
+              </span>
             </li>
           </ul>
         </div>
