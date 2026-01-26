@@ -20,9 +20,10 @@ function getResendClient(): Resend | null {
   return resendClient;
 }
 
-const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@exploretheclubhouse.co.uk';
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk';
-const adminEmail = process.env.ADMIN_EMAIL || 'admin@exploretheclubhouse.co.uk';
+// Trim env vars to remove any accidental whitespace/newlines
+const fromEmail = (process.env.RESEND_FROM_EMAIL || 'hello@exploretheclubhouse.co.uk').trim();
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk').trim();
+const adminEmail = (process.env.ADMIN_EMAIL || 'admin@exploretheclubhouse.co.uk').trim();
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -247,8 +248,11 @@ export async function sendBookingConfirmation(
   try {
     const resend = getResendClient();
     if (!resend) {
+      console.error('[BookingConfirmation] Email service not configured - RESEND_API_KEY missing');
       return { success: false, error: 'Email service not configured' };
     }
+
+    console.log(`[BookingConfirmation] Sending to: "${booking.parent_email}" from: "${fromEmail}"`);
 
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
@@ -259,14 +263,15 @@ export async function sendBookingConfirmation(
     });
 
     if (error) {
-      console.error('Failed to send booking confirmation:', error);
+      console.error('[BookingConfirmation] Resend API error:', JSON.stringify(error));
       return { success: false, error: error.message };
     }
 
+    console.log(`[BookingConfirmation] Successfully sent, messageId: ${data?.id}`);
     return { success: true, messageId: data?.id };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Failed to send booking confirmation:', errorMessage);
+    console.error('[BookingConfirmation] Exception:', errorMessage);
     return { success: false, error: errorMessage };
   }
 }
@@ -473,8 +478,11 @@ export async function sendAdminNotification(
   try {
     const resend = getResendClient();
     if (!resend) {
+      console.error('[AdminNotification] Email service not configured - RESEND_API_KEY missing');
       return { success: false, error: 'Email service not configured' };
     }
+
+    console.log(`[AdminNotification] Sending to: "${adminEmail}" from: "${fromEmail}"`);
 
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
@@ -485,14 +493,15 @@ export async function sendAdminNotification(
     });
 
     if (error) {
-      console.error('Failed to send admin notification:', error);
+      console.error('[AdminNotification] Resend API error:', JSON.stringify(error));
       return { success: false, error: error.message };
     }
 
+    console.log(`[AdminNotification] Successfully sent, messageId: ${data?.id}`);
     return { success: true, messageId: data?.id };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Failed to send admin notification:', errorMessage);
+    console.error('[AdminNotification] Exception:', errorMessage);
     return { success: false, error: errorMessage };
   }
 }

@@ -198,18 +198,20 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
 
   // 6. Send confirmation emails
   if (club) {
-    try {
-      await sendBookingConfirmation(booking, club);
-      console.log(`[Webhook] Sent confirmation email to ${booking.parent_email}`);
-    } catch (emailError) {
-      console.error(`[Webhook] Failed to send confirmation email:`, emailError);
+    // Send customer confirmation email
+    const confirmationResult = await sendBookingConfirmation(booking, club);
+    if (confirmationResult.success) {
+      console.log(`[Webhook] Sent confirmation email to ${booking.parent_email} (messageId: ${confirmationResult.messageId})`);
+    } else {
+      console.error(`[Webhook] Failed to send confirmation email to ${booking.parent_email}: ${confirmationResult.error}`);
     }
 
-    try {
-      await sendAdminNotification(booking, club);
-      console.log(`[Webhook] Sent admin notification email`);
-    } catch (emailError) {
-      console.error(`[Webhook] Failed to send admin notification:`, emailError);
+    // Send admin notification email
+    const adminResult = await sendAdminNotification(booking, club);
+    if (adminResult.success) {
+      console.log(`[Webhook] Sent admin notification email (messageId: ${adminResult.messageId})`);
+    } else {
+      console.error(`[Webhook] Failed to send admin notification: ${adminResult.error}`);
     }
   }
 
