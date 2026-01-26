@@ -169,6 +169,9 @@ export function ChildInfoForm({
 }: ChildInfoFormProps) {
   const [visiblePickupSlots, setVisiblePickupSlots] = useState(0);
 
+  // Helper to create unique IDs for inputs when multiple forms exist
+  const inputId = (name: string) => `${formId}-${name}`;
+
   const {
     register,
     handleSubmit,
@@ -298,13 +301,13 @@ export function ChildInfoForm({
           {/* Child Name */}
           <div>
             <label
-              htmlFor="childName"
+              htmlFor={inputId("childName")}
               className="block text-sm font-medium text-stone mb-1.5"
             >
               Child&apos;s Full Name <span className="text-error">*</span>
             </label>
             <input
-              id="childName"
+              id={inputId("childName")}
               type="text"
               {...register("childName")}
               className={inputClassName(!!errors.childName)}
@@ -320,13 +323,13 @@ export function ChildInfoForm({
           {/* Date of Birth */}
           <div>
             <label
-              htmlFor="dateOfBirth"
+              htmlFor={inputId("dateOfBirth")}
               className="block text-sm font-medium text-stone mb-1.5"
             >
               Date of Birth <span className="text-error">*</span>
             </label>
             <input
-              id="dateOfBirth"
+              id={inputId("dateOfBirth")}
               type="date"
               {...register("dateOfBirth")}
               className={inputClassName(!!errors.dateOfBirth)}
@@ -381,13 +384,13 @@ export function ChildInfoForm({
         {String(hasAllergies) === "true" && (
           <div>
             <label
-              htmlFor="allergies"
+              htmlFor={inputId("allergies")}
               className="block text-sm font-medium text-stone mb-1.5"
             >
               Please provide details <span className="text-error">*</span>
             </label>
             <textarea
-              id="allergies"
+              id={inputId("allergies")}
               {...register("allergies")}
               className={textareaClassName(!!errors.allergies)}
               placeholder="e.g., Nuts, Dairy, Gluten, Vegetarian, Vegan"
@@ -432,13 +435,13 @@ export function ChildInfoForm({
         {String(hasMedicalConditions) === "true" && (
           <div>
             <label
-              htmlFor="medicalNotes"
+              htmlFor={inputId("medicalNotes")}
               className="block text-sm font-medium text-stone mb-1.5"
             >
               Please provide details <span className="text-error">*</span>
             </label>
             <textarea
-              id="medicalNotes"
+              id={inputId("medicalNotes")}
               {...register("medicalNotes")}
               className={textareaClassName(!!errors.medicalNotes)}
               placeholder="e.g., Asthma, Diabetes, EpiPen required, ADHD"
@@ -471,13 +474,13 @@ export function ChildInfoForm({
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label
-                htmlFor="emergencyContact1Name"
+                htmlFor={inputId("emergencyContact1Name")}
                 className="block text-sm font-medium text-stone mb-1.5"
               >
                 Name <span className="text-error">*</span>
               </label>
               <input
-                id="emergencyContact1Name"
+                id={inputId("emergencyContact1Name")}
                 type="text"
                 autoComplete="name"
                 {...register("emergencyContact1Name")}
@@ -493,7 +496,7 @@ export function ChildInfoForm({
 
             <div>
               <label
-                htmlFor="emergencyContact1Phone"
+                htmlFor={inputId("emergencyContact1Phone")}
                 className="block text-sm font-medium text-stone mb-1.5"
               >
                 Phone <span className="text-error">*</span>
@@ -501,7 +504,7 @@ export function ChildInfoForm({
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-pebble" />
                 <input
-                  id="emergencyContact1Phone"
+                  id={inputId("emergencyContact1Phone")}
                   type="tel"
                   autoComplete="tel"
                   {...register("emergencyContact1Phone")}
@@ -518,13 +521,13 @@ export function ChildInfoForm({
 
             <div>
               <label
-                htmlFor="emergencyContact1Relationship"
+                htmlFor={inputId("emergencyContact1Relationship")}
                 className="block text-sm font-medium text-stone mb-1.5"
               >
                 Relationship <span className="text-error">*</span>
               </label>
               <select
-                id="emergencyContact1Relationship"
+                id={inputId("emergencyContact1Relationship")}
                 {...register("emergencyContact1Relationship")}
                 className={selectClassName(!!errors.emergencyContact1Relationship)}
               >
@@ -550,13 +553,13 @@ export function ChildInfoForm({
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label
-                htmlFor="emergencyContact2Name"
+                htmlFor={inputId("emergencyContact2Name")}
                 className="block text-sm font-medium text-stone mb-1.5"
               >
                 Name <span className="text-error">*</span>
               </label>
               <input
-                id="emergencyContact2Name"
+                id={inputId("emergencyContact2Name")}
                 type="text"
                 autoComplete="name"
                 {...register("emergencyContact2Name")}
@@ -572,7 +575,7 @@ export function ChildInfoForm({
 
             <div>
               <label
-                htmlFor="emergencyContact2Phone"
+                htmlFor={inputId("emergencyContact2Phone")}
                 className="block text-sm font-medium text-stone mb-1.5"
               >
                 Phone <span className="text-error">*</span>
@@ -580,7 +583,7 @@ export function ChildInfoForm({
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-pebble" />
                 <input
-                  id="emergencyContact2Phone"
+                  id={inputId("emergencyContact2Phone")}
                   type="tel"
                   autoComplete="tel"
                   {...register("emergencyContact2Phone")}
@@ -597,13 +600,13 @@ export function ChildInfoForm({
 
             <div>
               <label
-                htmlFor="emergencyContact2Relationship"
+                htmlFor={inputId("emergencyContact2Relationship")}
                 className="block text-sm font-medium text-stone mb-1.5"
               >
                 Relationship <span className="text-error">*</span>
               </label>
               <select
-                id="emergencyContact2Relationship"
+                id={inputId("emergencyContact2Relationship")}
                 {...register("emergencyContact2Relationship")}
                 className={selectClassName(!!errors.emergencyContact2Relationship)}
               >
@@ -683,13 +686,13 @@ export function ChildInfoForm({
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <label
-                    htmlFor={`pickupPerson${slot}Name`}
+                    htmlFor={inputId(`pickupPerson${slot}Name`)}
                     className="block text-sm font-medium text-stone mb-1.5"
                   >
                     Name
                   </label>
                   <input
-                    id={`pickupPerson${slot}Name`}
+                    id={inputId(`pickupPerson${slot}Name`)}
                     type="text"
                     {...register(`pickupPerson${slot}Name` as keyof ChildInfoFormValues)}
                     className={inputClassName(false)}
@@ -699,7 +702,7 @@ export function ChildInfoForm({
 
                 <div>
                   <label
-                    htmlFor={`pickupPerson${slot}Phone`}
+                    htmlFor={inputId(`pickupPerson${slot}Phone`)}
                     className="block text-sm font-medium text-stone mb-1.5"
                   >
                     Phone
@@ -707,7 +710,7 @@ export function ChildInfoForm({
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-pebble" />
                     <input
-                      id={`pickupPerson${slot}Phone`}
+                      id={inputId(`pickupPerson${slot}Phone`)}
                       type="tel"
                       {...register(`pickupPerson${slot}Phone` as keyof ChildInfoFormValues)}
                       className={`${inputClassName(false)} pl-10`}
@@ -718,13 +721,13 @@ export function ChildInfoForm({
 
                 <div>
                   <label
-                    htmlFor={`pickupPerson${slot}Relationship`}
+                    htmlFor={inputId(`pickupPerson${slot}Relationship`)}
                     className="block text-sm font-medium text-stone mb-1.5"
                   >
                     Relationship
                   </label>
                   <select
-                    id={`pickupPerson${slot}Relationship`}
+                    id={inputId(`pickupPerson${slot}Relationship`)}
                     {...register(`pickupPerson${slot}Relationship` as keyof ChildInfoFormValues)}
                     className={selectClassName(false)}
                   >
@@ -772,8 +775,9 @@ export function ChildInfoForm({
               errors.photoConsent ? "border-error bg-error/5" : "border-cloud bg-white"
             }`}
           >
-            <label className="flex items-start gap-3 cursor-pointer">
+            <label htmlFor={inputId("photoConsent")} className="flex items-start gap-3 cursor-pointer">
               <input
+                id={inputId("photoConsent")}
                 type="checkbox"
                 {...register("photoConsent")}
                 className="mt-1 w-5 h-5 rounded border-stone text-forest focus:ring-forest focus:ring-offset-0"
@@ -799,8 +803,9 @@ export function ChildInfoForm({
               errors.activityConsent ? "border-error bg-error/5" : "border-cloud bg-white"
             }`}
           >
-            <label className="flex items-start gap-3 cursor-pointer">
+            <label htmlFor={inputId("activityConsent")} className="flex items-start gap-3 cursor-pointer">
               <input
+                id={inputId("activityConsent")}
                 type="checkbox"
                 {...register("activityConsent")}
                 className="mt-1 w-5 h-5 rounded border-stone text-forest focus:ring-forest focus:ring-offset-0"
@@ -833,8 +838,9 @@ export function ChildInfoForm({
               errors.medicalConsent ? "border-error bg-error/5" : "border-cloud bg-white"
             }`}
           >
-            <label className="flex items-start gap-3 cursor-pointer">
+            <label htmlFor={inputId("medicalConsent")} className="flex items-start gap-3 cursor-pointer">
               <input
+                id={inputId("medicalConsent")}
                 type="checkbox"
                 {...register("medicalConsent")}
                 className="mt-1 w-5 h-5 rounded border-stone text-forest focus:ring-forest focus:ring-offset-0"
@@ -868,8 +874,9 @@ export function ChildInfoForm({
               errors.farmAnimalConsent ? "border-error bg-error/5" : "border-cloud bg-white"
             }`}
           >
-            <label className="flex items-start gap-3 cursor-pointer">
+            <label htmlFor={inputId("farmAnimalConsent")} className="flex items-start gap-3 cursor-pointer">
               <input
+                id={inputId("farmAnimalConsent")}
                 type="checkbox"
                 {...register("farmAnimalConsent")}
                 className="mt-1 w-5 h-5 rounded border-stone text-forest focus:ring-forest focus:ring-offset-0"
@@ -903,8 +910,9 @@ export function ChildInfoForm({
               errors.woodlandConsent ? "border-error bg-error/5" : "border-cloud bg-white"
             }`}
           >
-            <label className="flex items-start gap-3 cursor-pointer">
+            <label htmlFor={inputId("woodlandConsent")} className="flex items-start gap-3 cursor-pointer">
               <input
+                id={inputId("woodlandConsent")}
                 type="checkbox"
                 {...register("woodlandConsent")}
                 className="mt-1 w-5 h-5 rounded border-stone text-forest focus:ring-forest focus:ring-offset-0"
@@ -948,13 +956,13 @@ export function ChildInfoForm({
 
         <div>
           <label
-            htmlFor="parentNotes"
+            htmlFor={inputId("parentNotes")}
             className="block text-sm font-medium text-stone mb-1.5"
           >
             Parent Notes <span className="text-pebble">(Optional)</span>
           </label>
           <textarea
-            id="parentNotes"
+            id={inputId("parentNotes")}
             {...register("parentNotes")}
             className={textareaClassName(!!errors.parentNotes)}
             placeholder="Any concerns, behavioral notes, special needs, or other information that would help our staff care for your child..."
