@@ -61,7 +61,7 @@ export default function TermsPage() {
                 The Clubhouse – Cancellation & Behaviour Policy
               </h2>
               <p className="mt-4 font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
-                Please note: We are an Activity Club and do not offer a Childcare Service. All children participating must be able to take direction in hands-on activities, work safely with animals, and engage positively in a group environment.
+                The Clubhouse is a drop-off activity club and is not a Care Inspectorate-registered childcare service. While we strive to be welcoming and inclusive, we are unfortunately unable to provide the level of support required for children with additional support needs or significant behavioural circumstances.
               </p>
             </div>
 
