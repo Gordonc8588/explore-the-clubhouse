@@ -1,36 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Script from "next/script";
 
-const COOKIE_CONSENT_KEY = "cookie-consent";
-
 export function GoogleAnalytics() {
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
-  useEffect(() => {
-    // Check initial consent status
-    const checkConsent = () => {
-      const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-      setShouldLoad(consent === "accepted");
-    };
-
-    checkConsent();
-
-    // Listen for consent updates
-    const handleConsentUpdate = () => {
-      checkConsent();
-    };
-
-    window.addEventListener("cookie-consent-updated", handleConsentUpdate);
-    return () => {
-      window.removeEventListener("cookie-consent-updated", handleConsentUpdate);
-    };
-  }, []);
-
-  // Don't load if no GA ID or no consent
-  if (!gaId || !shouldLoad) {
+  if (!gaId) {
     return null;
   }
 
