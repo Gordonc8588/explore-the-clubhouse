@@ -117,28 +117,39 @@ export function DateSelect({
   };
 
   const handleDayClick = (date: Date, event: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent scroll jump on mobile when state updates
+    // Prevent default behavior and blur to reduce scroll issues
+    event.preventDefault();
     event.currentTarget.blur();
+
+    // Save scroll position before state update
+    const scrollY = window.scrollY;
 
     const dateStr = date.toISOString().split("T")[0];
     const clubDay = clubDayMap.get(dateStr);
 
     if (!clubDay || !clubDay.is_available) return;
 
+    let newDates: string[];
     if (isSingleDay) {
       // Single day: replace selection
-      const newDates = [dateStr];
-      setSelectedDates(newDates);
-      onNext({ selectedDates: newDates });
+      newDates = [dateStr];
     } else if (isMultiDay) {
       // Multi day: toggle selection
       const isSelected = selectedDates.includes(dateStr);
-      const newDates = isSelected
+      newDates = isSelected
         ? selectedDates.filter((d) => d !== dateStr)
         : [...selectedDates, dateStr];
-      setSelectedDates(newDates);
-      onNext({ selectedDates: newDates });
+    } else {
+      return;
     }
+
+    setSelectedDates(newDates);
+    onNext({ selectedDates: newDates });
+
+    // Restore scroll position after React re-renders
+    requestAnimationFrame(() => {
+      window.scrollTo(0, scrollY);
+    });
   };
 
   const isDateInRange = (date: Date): boolean => {
