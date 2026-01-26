@@ -29,9 +29,21 @@ function formatAgeRange(minAge: number, maxAge: number): string {
   return `Ages ${minAge}-${maxAge}`;
 }
 
+function formatTime(timeStr: string): string {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  const period = hours >= 12 ? "pm" : "am";
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${minutes.toString().padStart(2, "0")}${period}`;
+}
+
+function formatTimeRange(morningStart: string, afternoonEnd: string): string {
+  return `${formatTime(morningStart)} - ${formatTime(afternoonEnd)}`;
+}
+
 export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
   const dateRange = formatDateRange(club.start_date, club.end_date);
   const ageRange = formatAgeRange(club.min_age, club.max_age);
+  const timeRange = formatTimeRange(club.morning_start, club.afternoon_end);
 
   return (
     <article className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow hover:shadow-lg">
@@ -137,6 +149,26 @@ export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
               />
             </svg>
             {ageRange}
+          </p>
+          <p
+            className="text-sm flex items-center gap-2"
+            style={{ color: "var(--craigies-dark-olive)" }}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {timeRange}
           </p>
         </div>
 
