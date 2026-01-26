@@ -19,7 +19,9 @@ interface OptionSelectProps {
 }
 
 export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
-  const handleSelect = (option: BookingOption) => {
+  const handleSelect = (option: BookingOption, event: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent scroll jump on mobile when state updates
+    event.currentTarget.blur();
     onNext({ selectedOption: option });
   };
 
@@ -41,7 +43,7 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
       <button
         key={option.id}
         type="button"
-        onClick={() => handleSelect(option)}
+        onClick={(e) => handleSelect(option, e)}
         className="w-full p-6 rounded-2xl text-left transition-all bg-white hover:shadow-lg shadow-md"
         style={
           isSelected

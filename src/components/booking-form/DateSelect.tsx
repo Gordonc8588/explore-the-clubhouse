@@ -116,7 +116,10 @@ export function DateSelect({
     }
   };
 
-  const handleDayClick = (date: Date) => {
+  const handleDayClick = (date: Date, event: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent scroll jump on mobile when state updates
+    event.currentTarget.blur();
+
     const dateStr = date.toISOString().split("T")[0];
     const clubDay = clubDayMap.get(dateStr);
 
@@ -273,7 +276,7 @@ export function DateSelect({
               <button
                 key={dateKey}
                 type="button"
-                onClick={() => isClickable && handleDayClick(date)}
+                onClick={(e) => isClickable && handleDayClick(date, e)}
                 disabled={!isClickable}
                 className={`
                   aspect-square p-1 rounded-lg flex items-center justify-center transition-all
