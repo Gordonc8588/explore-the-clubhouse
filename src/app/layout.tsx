@@ -5,6 +5,7 @@ import { Navigation } from "@/components/Navigation";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { MetaPixel } from "@/components/MetaPixel";
+import { UTMCapture } from "@/components/UTMCapture";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -147,6 +148,7 @@ export default function RootLayout({
         <CookieConsent />
         <GoogleAnalytics />
         <MetaPixel />
+        <UTMCapture />
       </body>
     </html>
   );
