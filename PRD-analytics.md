@@ -152,3 +152,4 @@ vercel.json                            # Cron config
 3. **Conversion value optimization** - Pass revenue to Meta for ROAS tracking
 4. **A/B testing integration** - Track experiment variants in analytics
 5. **Dashboard improvements** - Add more visualizations, export features
+6. **Newsletter click tracking** - Wire up `/api/newsletter/click` endpoint to wrap newsletter links, enabling per-subscriber click tracking in the database (currently only UTM tracking is active)
