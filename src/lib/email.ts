@@ -631,6 +631,36 @@ function hasEmbeddedImages(bodyHtml: string): boolean {
 }
 
 /**
+ * Add UTM parameters to a URL for newsletter tracking
+ */
+function addNewsletterUTMParams(url: string, newsletterId: string): string {
+  try {
+    const urlObj = new URL(url, siteUrl);
+    // Only add UTM params if URL is on our domain
+    if (urlObj.hostname.includes('exploretheclubhouse') || urlObj.hostname === 'localhost') {
+      urlObj.searchParams.set('utm_source', 'newsletter');
+      urlObj.searchParams.set('utm_medium', 'email');
+      urlObj.searchParams.set('utm_campaign', newsletterId);
+    }
+    return urlObj.toString();
+  } catch {
+    // If URL parsing fails, return original
+    return url;
+  }
+}
+
+/**
+ * Add UTM parameters to all links in HTML content
+ */
+function addUTMParamsToAllLinks(html: string, newsletterId: string): string {
+  // Match href attributes in anchor tags
+  return html.replace(/href="([^"]+)"/g, (match, url) => {
+    const newUrl = addNewsletterUTMParams(url, newsletterId);
+    return `href="${newUrl}"`;
+  });
+}
+
+/**
  * Build a newsletter email with optional club feature and promo code
  */
 export function buildNewsletterEmail(
@@ -695,10 +725,11 @@ export function buildNewsletterEmail(
     );
   }
 
-  // Build CTA section
+  // Build CTA section with UTM tracking
   let ctaSection = '';
   if (newsletter.cta_text && newsletter.cta_url) {
-    ctaSection = ctaButton(newsletter.cta_text, newsletter.cta_url);
+    const trackedCtaUrl = addNewsletterUTMParams(newsletter.cta_url, newsletter.id);
+    ctaSection = ctaButton(newsletter.cta_text, trackedCtaUrl);
   }
 
   // Build unsubscribe link
@@ -711,10 +742,13 @@ export function buildNewsletterEmail(
     </div>
   `;
 
+  // Add UTM params to all links in the body content
+  const trackedBodyHtml = addUTMParamsToAllLinks(newsletter.body_html, newsletter.id);
+
   const content = `
     ${heroSection}
     <div style="font-size: 16px; line-height: 1.7; color: #3D3D3D;">
-      ${newsletter.body_html}
+      ${trackedBodyHtml}
     </div>
     ${clubSection}
     ${promoSection}

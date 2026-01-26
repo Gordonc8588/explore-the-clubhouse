@@ -222,6 +222,13 @@ export interface Booking {
   promo_code_id: string | null;
   stripe_payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
+  // UTM attribution fields
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  landing_page: string | null;
+  referrer: string | null;
+  attributed_newsletter_id: string | null;
   created_at: string;
 }
 
@@ -238,6 +245,13 @@ export interface BookingInsert {
   promo_code_id?: string | null;
   stripe_payment_intent_id?: string | null;
   stripe_checkout_session_id?: string | null;
+  // UTM attribution fields
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  landing_page?: string | null;
+  referrer?: string | null;
+  attributed_newsletter_id?: string | null;
   created_at?: string;
 }
 
@@ -254,6 +268,13 @@ export interface BookingUpdate {
   promo_code_id?: string | null;
   stripe_payment_intent_id?: string | null;
   stripe_checkout_session_id?: string | null;
+  // UTM attribution fields
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  landing_page?: string | null;
+  referrer?: string | null;
+  attributed_newsletter_id?: string | null;
   created_at?: string;
 }
 
@@ -604,6 +625,56 @@ export interface StoredNewsletterImageUpdate {
 }
 
 // =============================================================================
+// ANALYTICS TYPES
+// =============================================================================
+
+/**
+ * AnalyticsEvent - First-party analytics event storage (90-day retention)
+ */
+export interface AnalyticsEvent {
+  id: string;
+  event_name: string;
+  event_data: Record<string, unknown>;
+  session_id: string | null;
+  page_url: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  created_at: string;
+}
+
+export interface AnalyticsEventInsert {
+  id?: string;
+  event_name: string;
+  event_data?: Record<string, unknown>;
+  session_id?: string | null;
+  page_url?: string | null;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  created_at?: string;
+}
+
+/**
+ * NewsletterClick - Tracks clicks on newsletter links for attribution
+ */
+export interface NewsletterClick {
+  id: string;
+  newsletter_id: string | null;
+  subscriber_email: string;
+  link_url: string;
+  clicked_at: string;
+}
+
+export interface NewsletterClickInsert {
+  id?: string;
+  newsletter_id?: string | null;
+  subscriber_email: string;
+  link_url: string;
+  clicked_at?: string;
+}
+
+// =============================================================================
 // DATABASE TYPE (for Supabase client)
 // =============================================================================
 
@@ -669,6 +740,16 @@ export interface Database {
         Row: StoredNewsletterImage;
         Insert: StoredNewsletterImageInsert;
         Update: StoredNewsletterImageUpdate;
+      };
+      analytics_events: {
+        Row: AnalyticsEvent;
+        Insert: AnalyticsEventInsert;
+        Update: Partial<AnalyticsEventInsert>;
+      };
+      newsletter_clicks: {
+        Row: NewsletterClick;
+        Insert: NewsletterClickInsert;
+        Update: Partial<NewsletterClickInsert>;
       };
     };
     Functions: {

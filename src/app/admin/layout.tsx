@@ -16,6 +16,10 @@ import {
   ChevronDown,
   ChevronUp,
   Send,
+  BarChart3,
+  TrendingUp,
+  Target,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -49,6 +53,18 @@ const sidebarLinks: NavItem[] = [
     items: [
       { href: "/admin/marketing/subscribers", label: "Subscribers", icon: Users },
       { href: "/admin/marketing/newsletters", label: "Newsletters", icon: Send },
+    ],
+  },
+  {
+    label: "Analytics",
+    icon: BarChart3,
+    isGroup: true,
+    defaultExpanded: false,
+    items: [
+      { href: "/admin/analytics", label: "Overview", icon: TrendingUp },
+      { href: "/admin/analytics/funnel", label: "Funnel", icon: Target },
+      { href: "/admin/analytics/campaigns", label: "Campaigns", icon: Megaphone },
+      { href: "/admin/analytics/newsletters", label: "Newsletters", icon: Mail },
     ],
   },
 ];

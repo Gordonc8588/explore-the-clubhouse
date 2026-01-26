@@ -8,6 +8,7 @@ import {
   AvailabilityCalendar,
   type ClubDayWithAvailability,
 } from "@/components/AvailabilityCalendar";
+import { ClubViewTracker } from "@/components/analytics/ClubViewTracker";
 
 function formatPrice(priceInPence: number): string {
   return `£${(priceInPence / 100).toFixed(2)}`;
@@ -185,6 +186,9 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
 
   return (
     <div style={{ backgroundColor: "var(--craigies-cream)" }} className="min-h-screen">
+      {/* Analytics tracking */}
+      <ClubViewTracker club={{ id: club.id, name: club.name, slug: club.slug }} />
+
       {/* Hero Section */}
       <section
         className="relative overflow-hidden py-12 sm:py-16 lg:py-20"

@@ -224,6 +224,12 @@ export async function POST(request: NextRequest) {
       promo_code_id: promoCodeRecord?.id || null,
       stripe_payment_intent_id: null,
       stripe_checkout_session_id: null,
+      utm_source: null,
+      utm_medium: null,
+      utm_campaign: null,
+      landing_page: null,
+      referrer: null,
+      attributed_newsletter_id: null,
       created_at: new Date().toISOString(),
     };
 

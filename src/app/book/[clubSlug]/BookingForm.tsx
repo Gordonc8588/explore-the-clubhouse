@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Club, ClubDay, BookingOption, PromoCode as PromoCodeType } from "@/types/database";
 import { OptionSelect, type BookingFormData } from "@/components/booking-form/OptionSelect";
@@ -9,6 +9,11 @@ import { ParentDetails } from "@/components/booking-form/ParentDetails";
 import { ChildrenCount } from "@/components/booking-form/ChildrenCount";
 import { PromoCode } from "@/components/booking-form/PromoCode";
 import { ReviewStep } from "@/components/booking-form/ReviewStep";
+import {
+  trackFunnelStep,
+  trackAddToCart,
+  getCheckoutUTMParams,
+} from "@/lib/analytics";
 
 const STEPS = [
   { number: 1, label: "Option" },
@@ -41,6 +46,19 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
   });
   const [appliedPromo, setAppliedPromo] = useState<PromoCodeType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasTrackedStart = useRef(false);
+
+  // Track booking start once when component mounts
+  useEffect(() => {
+    if (!hasTrackedStart.current) {
+      hasTrackedStart.current = true;
+      trackFunnelStep('start_booking', {
+        club_id: club.id,
+        club_name: club.name,
+        club_slug: club.slug,
+      });
+    }
+  }, [club.id, club.name, club.slug]);
 
   const canProceed = useMemo(() => {
     switch (currentStep) {
@@ -69,6 +87,54 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
 
   const handleNext = () => {
     if (currentStep < 6 && canProceed) {
+      // Track step completion before moving to next step
+      const total = calculateTotal();
+      switch (currentStep) {
+        case 1:
+          if (formData.selectedOption) {
+            trackAddToCart({
+              club_id: club.id,
+              club_name: club.name,
+              option_id: formData.selectedOption.id,
+              option_name: formData.selectedOption.name,
+              value: total,
+              num_children: formData.childrenCount,
+            });
+          }
+          break;
+        case 2:
+          trackFunnelStep('select_dates', {
+            club_id: club.id,
+            club_name: club.name,
+            num_days: formData.selectedDates.length,
+          });
+          break;
+        case 3:
+          trackFunnelStep('enter_children', {
+            club_id: club.id,
+            club_name: club.name,
+            num_children: formData.childrenCount,
+            value: total,
+          });
+          break;
+        case 4:
+          trackFunnelStep('enter_details', {
+            club_id: club.id,
+            club_name: club.name,
+            value: total,
+          });
+          break;
+        case 5:
+          if (appliedPromo) {
+            trackFunnelStep('apply_promo', {
+              club_id: club.id,
+              club_name: club.name,
+              value: total,
+            });
+          }
+          break;
+      }
+
       if (currentStep === 1 && formData.selectedOption?.option_type === "full_week") {
         setCurrentStep(3);
       } else {
@@ -91,7 +157,24 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
     if (!formData.selectedOption) return;
     setIsSubmitting(true);
 
+    const total = calculateTotal();
+
+    // Track initiate payment event
+    trackFunnelStep('initiate_payment', {
+      club_id: club.id,
+      club_name: club.name,
+      club_slug: club.slug,
+      option_id: formData.selectedOption.id,
+      option_name: formData.selectedOption.name,
+      value: total,
+      num_children: formData.childrenCount,
+      num_days: formData.selectedDates.length,
+    });
+
     try {
+      // Get UTM params for attribution
+      const utmParams = getCheckoutUTMParams();
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,6 +188,7 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
           parentPhone: formData.parentPhone,
           childrenCount: formData.childrenCount,
           promoCodeId: appliedPromo?.id || null,
+          utmParams,
         }),
       });
 

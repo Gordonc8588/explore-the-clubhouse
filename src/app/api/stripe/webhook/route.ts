@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingConfirmation, sendAdminNotification } from '@/lib/email';
+import { trackPurchaseConversion } from '@/lib/meta-conversions';
 
 interface SessionMetadata {
   bookingId: string;
@@ -18,6 +19,10 @@ interface SessionMetadata {
   subtotal: string;
   discountAmount: string;
   total: string;
+  // UTM attribution
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -222,6 +227,41 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
   } else {
     console.error(`[Webhook] Club not found for id ${clubId}, skipping confirmation emails`);
   }
+
+  // 7. Track purchase conversion via Meta Conversions API (server-side)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk';
+  const metaResult = await trackPurchaseConversion({
+    bookingId: booking.id,
+    email: booking.parent_email,
+    phone: booking.parent_phone,
+    value: booking.total_amount,
+    clubId: clubId,
+    clubName: club?.name || 'Holiday Club',
+    numChildren: booking.num_children,
+    eventSourceUrl: `${siteUrl}/book/${clubSlug}`,
+  });
+
+  if (metaResult.success) {
+    console.log(`[Webhook] Meta Conversions API purchase tracked for booking ${bookingId}`);
+  } else if (metaResult.error !== 'Meta Conversions API not configured') {
+    console.error(`[Webhook] Meta Conversions API error: ${metaResult.error}`);
+  }
+
+  // 8. Store analytics event for first-party tracking
+  await supabase.from('analytics_events').insert({
+    event_name: 'purchase',
+    event_data: {
+      booking_id: bookingId,
+      club_id: clubId,
+      club_name: club?.name,
+      value: booking.total_amount,
+      num_children: booking.num_children,
+      promo_code_id: promoCodeId || null,
+    },
+    utm_source: metadata.utmSource || null,
+    utm_medium: metadata.utmMedium || null,
+    utm_campaign: metadata.utmCampaign || null,
+  });
 
   console.log(`[Webhook] Successfully processed checkout.session.completed for booking ${bookingId}`);
 }

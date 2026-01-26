@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+interface UTMParams {
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  landing_page: string | null;
+  referrer: string | null;
+}
+
 interface CheckoutRequestBody {
   clubId: string;
   clubSlug: string;
@@ -12,6 +20,7 @@ interface CheckoutRequestBody {
   parentPhone: string;
   childrenCount: number;
   promoCodeId: string | null;
+  utmParams?: UTMParams;
 }
 
 export async function POST(request: NextRequest) {
@@ -40,6 +49,7 @@ export async function POST(request: NextRequest) {
       parentPhone,
       childrenCount,
       promoCodeId,
+      utmParams,
     } = body;
 
     // Validate required fields
@@ -121,7 +131,7 @@ export async function POST(request: NextRequest) {
     const discountAmount = Math.round((subtotal * discountPercent) / 100);
     const total = subtotal - discountAmount;
 
-    // Create pending booking in database
+    // Create pending booking in database with UTM attribution
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
@@ -134,6 +144,16 @@ export async function POST(request: NextRequest) {
         total_amount: total,
         status: 'pending',
         promo_code_id: promoCodeId || null,
+        // UTM attribution
+        utm_source: utmParams?.utm_source || null,
+        utm_medium: utmParams?.utm_medium || null,
+        utm_campaign: utmParams?.utm_campaign || null,
+        landing_page: utmParams?.landing_page || null,
+        referrer: utmParams?.referrer || null,
+        // Check if this is a newsletter attribution
+        attributed_newsletter_id: utmParams?.utm_source === 'newsletter' && utmParams?.utm_campaign
+          ? utmParams.utm_campaign
+          : null,
       })
       .select()
       .single();
@@ -186,6 +206,10 @@ export async function POST(request: NextRequest) {
         subtotal: String(subtotal),
         discountAmount: String(discountAmount),
         total: String(total),
+        // UTM attribution for webhook
+        utmSource: utmParams?.utm_source || "",
+        utmMedium: utmParams?.utm_medium || "",
+        utmCampaign: utmParams?.utm_campaign || "",
       },
       success_url: `${baseUrl}/complete/${booking.id}`,
       cancel_url: `${baseUrl}/book/${clubSlug}?cancelled=true`,
