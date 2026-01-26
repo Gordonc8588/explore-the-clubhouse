@@ -31,7 +31,11 @@ async function getAttendanceData(date: string) {
           allergies,
           medical_notes,
           emergency_contact_name,
-          emergency_contact_phone
+          emergency_contact_phone,
+          emergency_contact_relationship,
+          emergency_contact_2_name,
+          emergency_contact_2_phone,
+          emergency_contact_2_relationship
         )
       )
     `)
@@ -52,6 +56,11 @@ async function getAttendanceData(date: string) {
     allergies: string[];
     medicalNotes: string;
     emergencyContact: {
+      name: string;
+      phone: string;
+      relationship: string;
+    };
+    emergencyContact2: {
       name: string;
       phone: string;
       relationship: string;
@@ -95,7 +104,12 @@ async function getAttendanceData(date: string) {
         emergencyContact: {
           name: child.emergency_contact_name || "",
           phone: child.emergency_contact_phone || "",
-          relationship: "", // Not stored in database
+          relationship: child.emergency_contact_relationship || "",
+        },
+        emergencyContact2: {
+          name: child.emergency_contact_2_name || "",
+          phone: child.emergency_contact_2_phone || "",
+          relationship: child.emergency_contact_2_relationship || "",
         },
       });
     }

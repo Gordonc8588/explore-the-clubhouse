@@ -3,18 +3,74 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendBookingComplete } from "@/lib/email";
 
+const phoneRegex = /^[\d\s+()-]+$/;
+
 const childSchema = z.object({
+  // Child Details
   childName: z.string().min(1, "Child name is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
+
+  // Health & Dietary
   hasAllergies: z.boolean().optional(),
   allergies: z.string().optional().default(""),
   hasMedicalConditions: z.boolean().optional(),
   medicalNotes: z.string().optional().default(""),
-  emergencyContactName: z.string().min(1, "Emergency contact name is required"),
-  emergencyContactPhone: z.string().min(1, "Emergency contact phone is required"),
+
+  // Emergency Contact 1
+  emergencyContact1Name: z.string().min(1, "Emergency contact 1 name is required"),
+  emergencyContact1Phone: z.string().min(1, "Emergency contact 1 phone is required"),
+  emergencyContact1Relationship: z.string().min(1, "Emergency contact 1 relationship is required"),
+
+  // Emergency Contact 2
+  emergencyContact2Name: z.string().min(1, "Emergency contact 2 name is required"),
+  emergencyContact2Phone: z.string().min(1, "Emergency contact 2 phone is required"),
+  emergencyContact2Relationship: z.string().min(1, "Emergency contact 2 relationship is required"),
+
+  // Authorized Pickup Persons (optional)
+  pickupPerson1Name: z.string().optional().default(""),
+  pickupPerson1Phone: z.string().optional().default(""),
+  pickupPerson1Relationship: z.string().optional().default(""),
+  pickupPerson2Name: z.string().optional().default(""),
+  pickupPerson2Phone: z.string().optional().default(""),
+  pickupPerson2Relationship: z.string().optional().default(""),
+  pickupPerson3Name: z.string().optional().default(""),
+  pickupPerson3Phone: z.string().optional().default(""),
+  pickupPerson3Relationship: z.string().optional().default(""),
+
+  // Consents
   photoConsent: z.boolean(),
   activityConsent: z.literal(true, "Activity consent is required"),
   medicalConsent: z.literal(true, "Medical consent is required"),
+  farmAnimalConsent: z.literal(true, "Farm animal consent is required"),
+  woodlandConsent: z.literal(true, "Woodland consent is required"),
+
+  // Parent Notes
+  parentNotes: z.string().optional().default(""),
+}).refine((data) => {
+  // Validate pickup person phone if name is provided
+  if (data.pickupPerson1Name && data.pickupPerson1Phone) {
+    return phoneRegex.test(data.pickupPerson1Phone);
+  }
+  return true;
+}, {
+  message: "Please enter a valid phone number for pickup person 1",
+  path: ["pickupPerson1Phone"],
+}).refine((data) => {
+  if (data.pickupPerson2Name && data.pickupPerson2Phone) {
+    return phoneRegex.test(data.pickupPerson2Phone);
+  }
+  return true;
+}, {
+  message: "Please enter a valid phone number for pickup person 2",
+  path: ["pickupPerson2Phone"],
+}).refine((data) => {
+  if (data.pickupPerson3Name && data.pickupPerson3Phone) {
+    return phoneRegex.test(data.pickupPerson3Phone);
+  }
+  return true;
+}, {
+  message: "Please enter a valid phone number for pickup person 3",
+  path: ["pickupPerson3Phone"],
 });
 
 const createChildrenRequestSchema = z.object({
@@ -80,18 +136,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert children
+    // Insert children with all new fields
     const childRecords = children.map((child) => ({
       booking_id: bookingId,
       name: child.childName,
       date_of_birth: child.dateOfBirth,
       allergies: child.allergies || "",
       medical_notes: child.medicalNotes || "",
-      emergency_contact_name: child.emergencyContactName,
-      emergency_contact_phone: child.emergencyContactPhone,
+
+      // Emergency Contact 1
+      emergency_contact_name: child.emergencyContact1Name,
+      emergency_contact_phone: child.emergencyContact1Phone,
+      emergency_contact_relationship: child.emergencyContact1Relationship,
+
+      // Emergency Contact 2
+      emergency_contact_2_name: child.emergencyContact2Name,
+      emergency_contact_2_phone: child.emergencyContact2Phone,
+      emergency_contact_2_relationship: child.emergencyContact2Relationship,
+
+      // Authorized Pickup Persons
+      pickup_person_1_name: child.pickupPerson1Name || null,
+      pickup_person_1_phone: child.pickupPerson1Phone || null,
+      pickup_person_1_relationship: child.pickupPerson1Relationship || null,
+      pickup_person_2_name: child.pickupPerson2Name || null,
+      pickup_person_2_phone: child.pickupPerson2Phone || null,
+      pickup_person_2_relationship: child.pickupPerson2Relationship || null,
+      pickup_person_3_name: child.pickupPerson3Name || null,
+      pickup_person_3_phone: child.pickupPerson3Phone || null,
+      pickup_person_3_relationship: child.pickupPerson3Relationship || null,
+
+      // Consents
       photo_consent: child.photoConsent,
       activity_consent: child.activityConsent,
       medical_consent: child.medicalConsent,
+      farm_animal_consent: child.farmAnimalConsent,
+      woodland_consent: child.woodlandConsent,
+
+      // Parent Notes
+      parent_notes: child.parentNotes || null,
     }));
 
     const { data: savedChildren, error: childrenError } = await supabase

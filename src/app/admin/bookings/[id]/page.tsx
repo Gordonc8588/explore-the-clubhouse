@@ -70,6 +70,30 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
       ? []
       : allergiesText.split(',').map((a: string) => a.trim()).filter((a: string) => a);
 
+    // Build pickup persons array from individual fields
+    const pickupPersons = [];
+    if (child.pickup_person_1_name) {
+      pickupPersons.push({
+        name: child.pickup_person_1_name,
+        phone: child.pickup_person_1_phone || "",
+        relationship: child.pickup_person_1_relationship || "",
+      });
+    }
+    if (child.pickup_person_2_name) {
+      pickupPersons.push({
+        name: child.pickup_person_2_name,
+        phone: child.pickup_person_2_phone || "",
+        relationship: child.pickup_person_2_relationship || "",
+      });
+    }
+    if (child.pickup_person_3_name) {
+      pickupPersons.push({
+        name: child.pickup_person_3_name,
+        phone: child.pickup_person_3_phone || "",
+        relationship: child.pickup_person_3_relationship || "",
+      });
+    }
+
     return {
       id: child.id,
       name: child.name,
@@ -77,15 +101,25 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
       age: calculateAge(child.date_of_birth),
       allergies: allergiesArray,
       medicalNotes: child.medical_notes || "",
-      emergencyContact: {
+      emergencyContact1: {
         name: child.emergency_contact_name || "",
         phone: child.emergency_contact_phone || "",
         relationship: child.emergency_contact_relationship || "",
       },
+      emergencyContact2: {
+        name: child.emergency_contact_2_name || "",
+        phone: child.emergency_contact_2_phone || "",
+        relationship: child.emergency_contact_2_relationship || "",
+      },
+      pickupPersons,
       consents: {
         photoConsent: child.photo_consent ?? false,
+        activityConsent: child.activity_consent ?? false,
         medicalConsent: child.medical_consent ?? false,
+        farmAnimalConsent: child.farm_animal_consent ?? false,
+        woodlandConsent: child.woodland_consent ?? false,
       },
+      parentNotes: child.parent_notes || "",
     };
   }) || [];
 

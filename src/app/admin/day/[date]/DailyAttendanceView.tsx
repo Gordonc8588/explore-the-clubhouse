@@ -15,6 +15,12 @@ import {
   Sunset,
 } from "lucide-react";
 
+interface EmergencyContact {
+  name: string;
+  phone: string;
+  relationship: string;
+}
+
 interface Child {
   id: string;
   name: string;
@@ -23,11 +29,8 @@ interface Child {
   session: "AM" | "PM" | "Full";
   allergies: string[];
   medicalNotes: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
+  emergencyContact: EmergencyContact;
+  emergencyContact2: EmergencyContact;
 }
 
 interface DailyAttendanceViewProps {
@@ -352,7 +355,7 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       className="pb-3 text-left text-sm font-semibold"
                       style={{ color: "var(--craigies-dark-olive)" }}
                     >
-                      Emergency Contact
+                      Emergency Contacts
                     </th>
                   </tr>
                 </thead>
@@ -433,31 +436,56 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                         )}
                       </td>
                       <td className="py-4">
-                        {child.emergencyContact.name ? (
-                          <>
-                            <p
-                              className="text-sm"
-                              style={{ color: "var(--craigies-dark-olive)" }}
-                            >
-                              {child.emergencyContact.name}
-                            </p>
-                            {child.emergencyContact.relationship && (
-                              <p className="font-body text-xs text-stone">
-                                {child.emergencyContact.relationship}
+                        <div className="space-y-2">
+                          {/* Emergency Contact 1 */}
+                          {child.emergencyContact.name ? (
+                            <div className="border-b border-cloud/50 pb-2">
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--craigies-dark-olive)" }}
+                              >
+                                {child.emergencyContact.name}
                               </p>
-                            )}
-                            {child.emergencyContact.phone && (
-                              <p className="flex items-center gap-1 font-body text-xs text-stone">
-                                <Phone className="h-3 w-3" />
-                                {child.emergencyContact.phone}
+                              {child.emergencyContact.relationship && (
+                                <p className="font-body text-xs text-stone capitalize">
+                                  {child.emergencyContact.relationship.replace('_', ' ')}
+                                </p>
+                              )}
+                              {child.emergencyContact.phone && (
+                                <p className="flex items-center gap-1 font-body text-xs text-stone">
+                                  <Phone className="h-3 w-3" />
+                                  {child.emergencyContact.phone}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="font-body text-sm text-pebble">
+                              Not provided
+                            </span>
+                          )}
+                          {/* Emergency Contact 2 */}
+                          {child.emergencyContact2?.name && (
+                            <div>
+                              <p
+                                className="text-sm font-medium"
+                                style={{ color: "var(--craigies-dark-olive)" }}
+                              >
+                                {child.emergencyContact2.name}
                               </p>
-                            )}
-                          </>
-                        ) : (
-                          <span className="font-body text-sm text-pebble">
-                            Not provided
-                          </span>
-                        )}
+                              {child.emergencyContact2.relationship && (
+                                <p className="font-body text-xs text-stone capitalize">
+                                  {child.emergencyContact2.relationship.replace('_', ' ')}
+                                </p>
+                              )}
+                              {child.emergencyContact2.phone && (
+                                <p className="flex items-center gap-1 font-body text-xs text-stone">
+                                  <Phone className="h-3 w-3" />
+                                  {child.emergencyContact2.phone}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

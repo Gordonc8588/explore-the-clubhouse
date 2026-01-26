@@ -296,9 +296,25 @@ export interface Child {
   medical_notes: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
+  emergency_contact_relationship: string | null;
+  emergency_contact_2_name: string | null;
+  emergency_contact_2_phone: string | null;
+  emergency_contact_2_relationship: string | null;
+  pickup_person_1_name: string | null;
+  pickup_person_1_phone: string | null;
+  pickup_person_1_relationship: string | null;
+  pickup_person_2_name: string | null;
+  pickup_person_2_phone: string | null;
+  pickup_person_2_relationship: string | null;
+  pickup_person_3_name: string | null;
+  pickup_person_3_phone: string | null;
+  pickup_person_3_relationship: string | null;
   photo_consent: boolean;
   activity_consent: boolean;
   medical_consent: boolean;
+  farm_animal_consent: boolean;
+  woodland_consent: boolean;
+  parent_notes: string | null;
   created_at: string;
 }
 
@@ -311,9 +327,25 @@ export interface ChildInsert {
   medical_notes: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
+  emergency_contact_relationship?: string | null;
+  emergency_contact_2_name?: string | null;
+  emergency_contact_2_phone?: string | null;
+  emergency_contact_2_relationship?: string | null;
+  pickup_person_1_name?: string | null;
+  pickup_person_1_phone?: string | null;
+  pickup_person_1_relationship?: string | null;
+  pickup_person_2_name?: string | null;
+  pickup_person_2_phone?: string | null;
+  pickup_person_2_relationship?: string | null;
+  pickup_person_3_name?: string | null;
+  pickup_person_3_phone?: string | null;
+  pickup_person_3_relationship?: string | null;
   photo_consent: boolean;
   activity_consent: boolean;
   medical_consent: boolean;
+  farm_animal_consent?: boolean;
+  woodland_consent?: boolean;
+  parent_notes?: string | null;
   created_at?: string;
 }
 
@@ -326,9 +358,25 @@ export interface ChildUpdate {
   medical_notes?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
+  emergency_contact_relationship?: string | null;
+  emergency_contact_2_name?: string | null;
+  emergency_contact_2_phone?: string | null;
+  emergency_contact_2_relationship?: string | null;
+  pickup_person_1_name?: string | null;
+  pickup_person_1_phone?: string | null;
+  pickup_person_1_relationship?: string | null;
+  pickup_person_2_name?: string | null;
+  pickup_person_2_phone?: string | null;
+  pickup_person_2_relationship?: string | null;
+  pickup_person_3_name?: string | null;
+  pickup_person_3_phone?: string | null;
+  pickup_person_3_relationship?: string | null;
   photo_consent?: boolean;
   activity_consent?: boolean;
   medical_consent?: boolean;
+  farm_animal_consent?: boolean;
+  woodland_consent?: boolean;
+  parent_notes?: string | null;
   created_at?: string;
 }
 

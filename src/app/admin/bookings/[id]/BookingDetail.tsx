@@ -17,7 +17,23 @@ import {
   XCircle,
   RefreshCw,
   Bell,
+  UserPlus,
+  FileText,
+  Trees,
+  PawPrint,
 } from "lucide-react";
+
+interface EmergencyContact {
+  name: string;
+  phone: string;
+  relationship: string;
+}
+
+interface PickupPerson {
+  name: string;
+  phone: string;
+  relationship: string;
+}
 
 interface Child {
   id: string;
@@ -26,15 +42,17 @@ interface Child {
   age: number;
   allergies: string[];
   medicalNotes: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
+  emergencyContact1: EmergencyContact;
+  emergencyContact2: EmergencyContact;
+  pickupPersons: PickupPerson[];
   consents: {
     photoConsent: boolean;
+    activityConsent: boolean;
     medicalConsent: boolean;
+    farmAnimalConsent: boolean;
+    woodlandConsent: boolean;
   };
+  parentNotes: string;
 }
 
 interface BookedDay {
@@ -504,7 +522,7 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                     </p>
                   </div>
 
-                  {/* Emergency Contact */}
+                  {/* Emergency Contact 1 */}
                   <div className="rounded-xl bg-cloud/50 p-4">
                     <div className="flex items-center gap-2">
                       <Phone className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
@@ -513,28 +531,116 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                         fontFamily: "'Playfair Display', serif",
                         color: "var(--craigies-dark-olive)",
                       }}>
-                        Emergency Contact
+                        Emergency Contact 1
                       </h5>
                     </div>
                     <div className="mt-2">
-                      {child.emergencyContact.name ? (
+                      {child.emergencyContact1.name ? (
                         <>
                           <p className="font-medium"
-              style={{ color: "var(--craigies-dark-olive)" }}>
-                            {child.emergencyContact.name}
+                            style={{ color: "var(--craigies-dark-olive)" }}>
+                            {child.emergencyContact1.name}
                           </p>
-                          {child.emergencyContact.phone && (
+                          {child.emergencyContact1.relationship && (
+                            <p className="text-xs text-stone capitalize">
+                              {child.emergencyContact1.relationship.replace('_', ' ')}
+                            </p>
+                          )}
+                          {child.emergencyContact1.phone && (
                             <a
-                              href={`tel:${child.emergencyContact.phone}`}
+                              href={`tel:${child.emergencyContact1.phone}`}
                               className="font-body text-sm text-forest hover:underline"
                             >
-                              {child.emergencyContact.phone}
+                              {child.emergencyContact1.phone}
                             </a>
                           )}
                         </>
                       ) : (
                         <p className="text-sm"
-              style={{ color: "var(--craigies-dark-olive)" }}>Not provided</p>
+                          style={{ color: "var(--craigies-dark-olive)" }}>Not provided</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Emergency Contact 2 */}
+                  <div className="rounded-xl bg-cloud/50 p-4">
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+                      <h5 className="font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>
+                        Emergency Contact 2
+                      </h5>
+                    </div>
+                    <div className="mt-2">
+                      {child.emergencyContact2.name ? (
+                        <>
+                          <p className="font-medium"
+                            style={{ color: "var(--craigies-dark-olive)" }}>
+                            {child.emergencyContact2.name}
+                          </p>
+                          {child.emergencyContact2.relationship && (
+                            <p className="text-xs text-stone capitalize">
+                              {child.emergencyContact2.relationship.replace('_', ' ')}
+                            </p>
+                          )}
+                          {child.emergencyContact2.phone && (
+                            <a
+                              href={`tel:${child.emergencyContact2.phone}`}
+                              className="font-body text-sm text-forest hover:underline"
+                            >
+                              {child.emergencyContact2.phone}
+                            </a>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm"
+                          style={{ color: "var(--craigies-dark-olive)" }}>Not provided</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Authorized Pickup Persons */}
+                  <div className="rounded-xl bg-cloud/50 p-4">
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+                      <h5 className="font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        color: "var(--craigies-dark-olive)",
+                      }}>
+                        Authorized Pickup
+                      </h5>
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {child.pickupPersons.length > 0 ? (
+                        child.pickupPersons.map((person, idx) => (
+                          <div key={idx} className="border-b border-cloud/50 pb-2 last:border-0 last:pb-0">
+                            <p className="font-medium text-sm"
+                              style={{ color: "var(--craigies-dark-olive)" }}>
+                              {person.name}
+                            </p>
+                            {person.relationship && (
+                              <p className="text-xs text-stone capitalize">
+                                {person.relationship.replace('_', ' ')}
+                              </p>
+                            )}
+                            {person.phone && (
+                              <a
+                                href={`tel:${person.phone}`}
+                                className="font-body text-xs text-forest hover:underline"
+                              >
+                                {person.phone}
+                              </a>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-stone">
+                          Booking parent only
+                        </p>
                       )}
                     </div>
                   </div>
@@ -557,7 +663,16 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                           }`}
                         />
                         <span className="text-sm"
-                      style={{ color: "var(--craigies-dark-olive)" }}>Photo</span>
+                          style={{ color: "var(--craigies-dark-olive)" }}>Photo</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            child.consents.activityConsent ? "bg-green-500" : "bg-red-500"
+                          }`}
+                        />
+                        <span className="text-sm"
+                          style={{ color: "var(--craigies-dark-olive)" }}>Activity</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span
@@ -566,10 +681,51 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                           }`}
                         />
                         <span className="text-sm"
-                      style={{ color: "var(--craigies-dark-olive)" }}>Medical</span>
+                          style={{ color: "var(--craigies-dark-olive)" }}>Medical</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            child.consents.farmAnimalConsent ? "bg-green-500" : "bg-red-500"
+                          }`}
+                        />
+                        <span className="text-sm"
+                          style={{ color: "var(--craigies-dark-olive)" }}>
+                          <PawPrint className="inline h-3 w-3 mr-0.5" />Farm
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            child.consents.woodlandConsent ? "bg-green-500" : "bg-red-500"
+                          }`}
+                        />
+                        <span className="text-sm"
+                          style={{ color: "var(--craigies-dark-olive)" }}>
+                          <Trees className="inline h-3 w-3 mr-0.5" />Woodland
+                        </span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Parent Notes */}
+                  {child.parentNotes && (
+                    <div className="rounded-xl bg-cloud/50 p-4 sm:col-span-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+                        <h5 className="font-bold"
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                          color: "var(--craigies-dark-olive)",
+                        }}>
+                          Parent Notes
+                        </h5>
+                      </div>
+                      <p className="mt-2 font-body text-sm text-bark whitespace-pre-wrap">
+                        {child.parentNotes}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
