@@ -10,10 +10,10 @@ const childSchema = z.object({
   childName: z.string().min(1, "Child name is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
 
-  // Health & Dietary
-  hasAllergies: z.boolean().optional(),
+  // Health & Dietary (accepts string "true"/"false" from form radio buttons)
+  hasAllergies: z.union([z.boolean(), z.enum(["true", "false"])]).optional().transform((val) => val === true || val === "true"),
   allergies: z.string().optional().default(""),
-  hasMedicalConditions: z.boolean().optional(),
+  hasMedicalConditions: z.union([z.boolean(), z.enum(["true", "false"])]).optional().transform((val) => val === true || val === "true"),
   medicalNotes: z.string().optional().default(""),
 
   // Emergency Contact 1

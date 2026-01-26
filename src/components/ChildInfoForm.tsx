@@ -49,10 +49,10 @@ const childInfoSchema = z.object({
       return dob < today;
     }, "Date of birth must be in the past"),
 
-  // Health & Dietary
-  hasAllergies: z.boolean(),
+  // Health & Dietary (radio buttons send string "true"/"false")
+  hasAllergies: z.enum(["true", "false"]),
   allergies: z.string().max(1000, "Allergies text is too long").optional(),
-  hasMedicalConditions: z.boolean(),
+  hasMedicalConditions: z.enum(["true", "false"]),
   medicalNotes: z.string().max(1000, "Medical notes text is too long").optional(),
 
   // Emergency Contact 1
@@ -112,7 +112,7 @@ const childInfoSchema = z.object({
   // Parent Notes
   parentNotes: z.string().max(2000, "Notes must be less than 2000 characters").optional(),
 }).refine((data) => {
-  if (data.hasAllergies && (!data.allergies || data.allergies.trim() === "")) {
+  if (data.hasAllergies === "true" && (!data.allergies || data.allergies.trim() === "")) {
     return false;
   }
   return true;
@@ -120,7 +120,7 @@ const childInfoSchema = z.object({
   message: "Please provide details about the allergies",
   path: ["allergies"],
 }).refine((data) => {
-  if (data.hasMedicalConditions && (!data.medicalNotes || data.medicalNotes.trim() === "")) {
+  if (data.hasMedicalConditions === "true" && (!data.medicalNotes || data.medicalNotes.trim() === "")) {
     return false;
   }
   return true;
@@ -180,9 +180,9 @@ export function ChildInfoForm({
     defaultValues: {
       childName: "",
       dateOfBirth: "",
-      hasAllergies: false,
+      hasAllergies: "false",
       allergies: "",
-      hasMedicalConditions: false,
+      hasMedicalConditions: "false",
       medicalNotes: "",
       emergencyContact1Name: "",
       emergencyContact1Phone: "",
@@ -359,9 +359,7 @@ export function ChildInfoForm({
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
-                {...register("hasAllergies", {
-                  setValueAs: (v) => v === "true",
-                })}
+                {...register("hasAllergies")}
                 value="false"
                 className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
               />
@@ -370,9 +368,7 @@ export function ChildInfoForm({
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
-                {...register("hasAllergies", {
-                  setValueAs: (v) => v === "true",
-                })}
+                {...register("hasAllergies")}
                 value="true"
                 className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
               />
@@ -414,9 +410,7 @@ export function ChildInfoForm({
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
-                {...register("hasMedicalConditions", {
-                  setValueAs: (v) => v === "true",
-                })}
+                {...register("hasMedicalConditions")}
                 value="false"
                 className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
               />
@@ -425,9 +419,7 @@ export function ChildInfoForm({
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
-                {...register("hasMedicalConditions", {
-                  setValueAs: (v) => v === "true",
-                })}
+                {...register("hasMedicalConditions")}
                 value="true"
                 className="w-4 h-4 border-stone text-forest focus:ring-forest focus:ring-offset-0"
               />
