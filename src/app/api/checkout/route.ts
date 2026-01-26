@@ -46,6 +46,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate children count (max 5 per booking)
+    const MAX_CHILDREN_PER_BOOKING = 5;
+    if (childrenCount < 1 || childrenCount > MAX_CHILDREN_PER_BOOKING) {
+      return NextResponse.json(
+        { error: `Number of children must be between 1 and ${MAX_CHILDREN_PER_BOOKING}. For larger groups, please contact us.` },
+        { status: 400 }
+      );
+    }
+
     const supabase = createAdminClient();
 
     // Get club from database

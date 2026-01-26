@@ -13,7 +13,7 @@ export function ChildrenCount({
   formData,
   onNext,
   minChildren = 1,
-  maxChildren = 10,
+  maxChildren = 5,
 }: ChildrenCountProps) {
   const count = formData.childrenCount;
 
@@ -149,6 +149,14 @@ export function ChildrenCount({
 
         <p className="mt-4 text-center text-sm text-stone">
           {count === 1 ? "1 child" : `${count} children`}
+          {count >= maxChildren && (
+            <span className="block mt-1 text-xs">
+              Maximum {maxChildren} children per booking. For larger groups, please{" "}
+              <a href="/contact" className="underline" style={{ color: "var(--craigies-burnt-orange)" }}>
+                contact us
+              </a>.
+            </span>
+          )}
         </p>
       </div>
 
