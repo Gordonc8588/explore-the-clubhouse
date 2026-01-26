@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { ChildInfoForm, type ChildInfoFormValues } from "@/components/ChildInfoForm";
 import type { Booking, BookingOption, Club, Child } from "@/types/database";
 
@@ -22,6 +22,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isAutoVerifying, setIsAutoVerifying] = useState(booking.status === "pending");
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [childrenData, setChildrenData] = useState<(ChildInfoFormValues | null)[]>(
@@ -34,8 +35,53 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
   const childrenDataRef = useRef<(ChildInfoFormValues | null)[]>(
     Array(booking.num_children).fill(null)
   );
+  const hasAutoVerified = useRef(false);
 
   const isAlreadyComplete = booking.status === "complete" || existingChildren.length > 0;
+
+  // Auto-verify payment on mount if status is pending
+  useEffect(() => {
+    if (booking.status === "pending" && !hasAutoVerified.current) {
+      hasAutoVerified.current = true;
+      autoVerifyPayment();
+    }
+  }, [booking.status]);
+
+  const autoVerifyPayment = async () => {
+    setIsAutoVerifying(true);
+    let attempts = 0;
+    const maxAttempts = 5;
+    const delayMs = 1500;
+
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch("/api/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: booking.id }),
+        });
+
+        const result = await response.json();
+
+        if (result.success && (result.status === "verified" || result.status === "already_paid")) {
+          // Payment verified - refresh the page to show the form
+          window.location.reload();
+          return;
+        }
+      } catch (err) {
+        console.error("Auto-verify attempt failed:", err);
+      }
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+
+    // After all attempts, show manual button
+    setIsAutoVerifying(false);
+    setVerifyMessage("Payment verification is taking longer than expected. Click below to check again.");
+  };
 
   const handleVerifyPayment = async () => {
     setIsVerifying(true);
@@ -183,53 +229,75 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
       <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-md p-8 text-center">
-            <AlertCircle className="mx-auto h-16 w-16" style={{ color: "var(--craigies-burnt-orange)" }} />
-            <h1
-              className="mt-4 text-3xl font-bold"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: "var(--craigies-dark-olive)",
-              }}
-            >
-              Payment Pending
-            </h1>
-            <p className="mt-2 text-stone">
-              This booking has not been paid yet. Please complete payment first.
-            </p>
+            {isAutoVerifying ? (
+              // Auto-verifying state
+              <>
+                <Loader2 className="mx-auto h-16 w-16 animate-spin" style={{ color: "var(--craigies-olive)" }} />
+                <h1
+                  className="mt-4 text-3xl font-bold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
+                  Verifying Payment
+                </h1>
+                <p className="mt-2 text-stone">
+                  Please wait while we confirm your payment...
+                </p>
+              </>
+            ) : (
+              // Manual verification state (fallback)
+              <>
+                <AlertCircle className="mx-auto h-16 w-16" style={{ color: "var(--craigies-burnt-orange)" }} />
+                <h1
+                  className="mt-4 text-3xl font-bold"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
+                  Payment Pending
+                </h1>
+                <p className="mt-2 text-stone">
+                  This booking has not been paid yet. Please complete payment first.
+                </p>
 
-            {/* Verify Payment Button */}
-            <div className="mt-6 space-y-3">
-              <button
-                onClick={handleVerifyPayment}
-                disabled={isVerifying}
-                className="inline-flex items-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-opacity disabled:opacity-50"
-                style={{
-                  backgroundColor: "var(--craigies-burnt-orange)",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                <RefreshCw className={"h-5 w-5 " + (isVerifying ? "animate-spin" : "")} />
-                {isVerifying ? "Checking..." : "Check Payment Status"}
-              </button>
+                {/* Verify Payment Button */}
+                <div className="mt-6 space-y-3">
+                  <button
+                    onClick={handleVerifyPayment}
+                    disabled={isVerifying}
+                    className="inline-flex items-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-opacity disabled:opacity-50"
+                    style={{
+                      backgroundColor: "var(--craigies-burnt-orange)",
+                      fontFamily: "'Playfair Display', serif",
+                    }}
+                  >
+                    <RefreshCw className={"h-5 w-5 " + (isVerifying ? "animate-spin" : "")} />
+                    {isVerifying ? "Checking..." : "Check Payment Status"}
+                  </button>
 
-              {verifyMessage && (
-                <p className="text-sm text-stone">{verifyMessage}</p>
-              )}
+                  {verifyMessage && (
+                    <p className="text-sm text-stone">{verifyMessage}</p>
+                  )}
 
-              <p className="text-sm text-stone">
-                Already paid? Click above to verify your payment.
-              </p>
-            </div>
+                  <p className="text-sm text-stone">
+                    Already paid? Click above to verify your payment.
+                  </p>
+                </div>
 
-            <div className="mt-6 pt-6 border-t border-stone/20">
-              <Link
-                href="/clubs"
-                className="font-medium"
-                style={{ color: "var(--craigies-burnt-orange)" }}
-              >
-                ← Back to Clubs
-              </Link>
-            </div>
+                <div className="mt-6 pt-6 border-t border-stone/20">
+                  <Link
+                    href="/clubs"
+                    className="font-medium"
+                    style={{ color: "var(--craigies-burnt-orange)" }}
+                  >
+                    ← Back to Clubs
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
