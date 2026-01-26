@@ -98,6 +98,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = createAdminClient();
+    const { slug, bookings_open } = await request.json();
+
+    if (!slug) {
+      return NextResponse.json({ error: "Slug is required" }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from("clubs")
+      .update({ bookings_open })
+      .eq("slug", slug);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, bookings_open });
+  } catch (error) {
+    console.error("Club patch error:", error);
+    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const supabase = createAdminClient();
