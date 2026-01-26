@@ -108,7 +108,7 @@ export default async function WhatsOnPage() {
                   color: "var(--craigies-dark-olive)",
                 }}
               >
-                🌱 Farm Activity Club – Spring 2025 🌱
+                🌱 Farm Activity Club – Easter 2026 🌱
               </h2>
               <p
                 className="mt-2 font-body text-lg font-semibold"
