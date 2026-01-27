@@ -10,9 +10,15 @@ commands:
 rules:
   - Always read BRANDING.md before creating any UI components to understand the
     brand colors, fonts, and styling guidelines
-  - "Use Tailwind CSS classes with brand colors: bg-forest, bg-meadow, bg-sage
-    for greens; bg-sunshine, bg-amber for accents; bg-bark, bg-stone for text"
-  - Use font-display (Nunito) for headings and font-body (Nunito Sans) for body
+  - "Use Tailwind CSS classes with brand colors: bg-olive, bg-cream, bg-burnt-orange
+    for Craigies palette; bg-dark-olive for dark accents"
+  - Use Playfair Display (font-heading) for headings and Nunito Sans (font-body) for body
     text
+  - "Meta Ads: Mirror the existing newsletter pattern (ImageUploader, AI generation,
+    Preview) for consistent UX"
+  - "Meta Ads: Store all prices/budgets in pence (integers), convert to pounds for display"
+  - "Meta Ads: Use existing admin auth (cookie-based admin-session) for all ad routes"
+  - "Meta Ads: Follow Meta Ad Specs - Primary text 125 chars, Headline 40 chars,
+    Description 30 chars recommended"
 boundaries:
   never_touch: []

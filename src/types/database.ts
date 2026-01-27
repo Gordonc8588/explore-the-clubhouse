@@ -25,6 +25,21 @@ export type ContactStatus = 'new' | 'read' | 'replied';
 /** Newsletter status */
 export type NewsletterStatus = 'draft' | 'sent';
 
+/** Conversation role for AI chat */
+export type ConversationRole = 'user' | 'assistant';
+
+/** Message in newsletter AI conversation history */
+export interface NewsletterConversationMessage {
+  role: ConversationRole;
+  content: string;
+  timestamp: number;
+  generatedContent?: {
+    subject: string;
+    previewText: string;
+    bodyHtml: string;
+  };
+}
+
 // =============================================================================
 // TABLE TYPES
 // =============================================================================

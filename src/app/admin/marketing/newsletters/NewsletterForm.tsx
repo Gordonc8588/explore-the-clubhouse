@@ -13,9 +13,11 @@ import {
   Send,
   AlertCircle,
   ImageIcon,
+  MessageSquare,
+  RotateCcw,
 } from "lucide-react";
 import { ImageUploader } from "./ImageUploader";
-import type { Newsletter, Club, PromoCode, NewsletterImage } from "@/types/database";
+import type { Newsletter, Club, PromoCode, NewsletterImage, NewsletterConversationMessage } from "@/types/database";
 
 const newsletterImageSchema = z.object({
   url: z.string(),
@@ -61,6 +63,13 @@ export function NewsletterForm({
   const [showSendConfirm, setShowSendConfirm] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const roughDraftRef = useRef<HTMLTextAreaElement>(null);
+
+  // Conversation state for AI follow-up prompts
+  const [conversationHistory, setConversationHistory] = useState<NewsletterConversationMessage[]>([]);
+  const [summarizedContext, setSummarizedContext] = useState<string | undefined>();
+  const [isRefining, setIsRefining] = useState(false);
+  const [followUpInput, setFollowUpInput] = useState("");
+  const hasGeneratedContent = conversationHistory.length > 0;
 
   const isEditing = !!newsletter;
 
@@ -147,6 +156,11 @@ export function NewsletterForm({
     setIsGenerating(true);
     setError(null);
 
+    // Clear conversation history for fresh generation
+    setConversationHistory([]);
+    setSummarizedContext(undefined);
+    setFollowUpInput("");
+
     try {
       const response = await fetch("/api/admin/newsletters/generate", {
         method: "POST",
@@ -168,10 +182,107 @@ export function NewsletterForm({
       setValue("subject", data.subject);
       setValue("preview_text", data.previewText);
       setValue("body_html", data.bodyHtml);
+
+      // Seed conversation history with initial exchange
+      const timestamp = Date.now();
+      setConversationHistory([
+        {
+          role: "user",
+          content: roughDraft,
+          timestamp,
+        },
+        {
+          role: "assistant",
+          content: "Generated initial newsletter content",
+          timestamp: timestamp + 1,
+          generatedContent: {
+            subject: data.subject,
+            previewText: data.previewText,
+            bodyHtml: data.bodyHtml,
+          },
+        },
+      ]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate content");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRefineAI = async () => {
+    if (!followUpInput.trim()) {
+      setError("Please enter a refinement request");
+      return;
+    }
+
+    setIsRefining(true);
+    setError(null);
+
+    try {
+      const currentFormState = {
+        subject: watch("subject"),
+        previewText: watch("preview_text") || "",
+        bodyHtml: watch("body_html"),
+      };
+
+      const response = await fetch("/api/admin/newsletters/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roughDraft: watch("roughDraft") || "",
+          images: images,
+          clubId: featuredClubId || null,
+          promoCodeId: promoCodeId || null,
+          conversationHistory,
+          followUpPrompt: followUpInput,
+          currentFormState,
+          summarizedContext,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to refine content");
+      }
+
+      const data = await response.json();
+      setValue("subject", data.subject);
+      setValue("preview_text", data.previewText);
+      setValue("body_html", data.bodyHtml);
+
+      // Append to conversation history
+      const timestamp = Date.now();
+      setConversationHistory((prev) => [
+        ...prev,
+        {
+          role: "user",
+          content: followUpInput,
+          timestamp,
+        },
+        {
+          role: "assistant",
+          content: "Applied refinements",
+          timestamp: timestamp + 1,
+          generatedContent: {
+            subject: data.subject,
+            previewText: data.previewText,
+            bodyHtml: data.bodyHtml,
+          },
+        },
+      ]);
+
+      // Update summarized context if provided
+      if (data.conversationMetadata?.summarizedContext) {
+        setSummarizedContext(data.conversationMetadata.summarizedContext);
+      }
+
+      // Clear the follow-up input
+      setFollowUpInput("");
+    } catch (err) {
+      // Keep history intact on error
+      setError(err instanceof Error ? err.message : "Failed to refine content");
+    } finally {
+      setIsRefining(false);
     }
   };
 
@@ -446,7 +557,7 @@ export function NewsletterForm({
               <button
                 type="button"
                 onClick={handleGenerateAI}
-                disabled={isGenerating}
+                disabled={isGenerating || isRefining}
                 className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
               >
@@ -458,10 +569,83 @@ export function NewsletterForm({
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Generate with AI
+                    {hasGeneratedContent ? "Regenerate" : "Generate with AI"}
                   </>
                 )}
               </button>
+
+              {/* Follow-up Refinement UI */}
+              {hasGeneratedContent && (
+                <div className="mt-4 rounded-lg border border-dashed p-4" style={{ borderColor: "var(--craigies-olive)" }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <MessageSquare className="h-4 w-4" style={{ color: "var(--craigies-olive)" }} />
+                    <span className="text-sm font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
+                      Refine with AI
+                    </span>
+                    {summarizedContext && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                        History summarized
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Show last 1-2 user prompts */}
+                  {conversationHistory.filter(m => m.role === "user").slice(-2).length > 0 && (
+                    <div className="mb-3 space-y-1">
+                      <p className="text-xs text-gray-500">Recent requests:</p>
+                      {conversationHistory
+                        .filter(m => m.role === "user")
+                        .slice(-2)
+                        .map((msg, idx) => (
+                          <div
+                            key={msg.timestamp}
+                            className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600 truncate"
+                            title={msg.content}
+                          >
+                            {idx + 1}. {msg.content.length > 60 ? msg.content.slice(0, 60) + "..." : msg.content}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={followUpInput}
+                      onChange={(e) => setFollowUpInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && followUpInput.trim()) {
+                          e.preventDefault();
+                          handleRefineAI();
+                        }
+                      }}
+                      placeholder="e.g., Make it more playful, shorten the intro..."
+                      className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-2"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                      disabled={isRefining}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRefineAI}
+                      disabled={isRefining || !followUpInput.trim()}
+                      className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{ backgroundColor: "var(--craigies-olive)" }}
+                    >
+                      {isRefining ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Refining...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="h-4 w-4" />
+                          Refine
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
+import type { ConversationRole } from "@/types/database";
 
 // Check if user is admin
 async function isAdmin() {
@@ -16,12 +17,112 @@ const imageSchema = z.object({
   description: z.string().optional(),
 });
 
+const conversationMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]) as z.ZodType<ConversationRole>,
+  content: z.string(),
+  timestamp: z.number(),
+  generatedContent: z.object({
+    subject: z.string(),
+    previewText: z.string(),
+    bodyHtml: z.string(),
+  }).optional(),
+});
+
+const currentFormStateSchema = z.object({
+  subject: z.string(),
+  previewText: z.string(),
+  bodyHtml: z.string(),
+});
+
 const generateSchema = z.object({
   roughDraft: z.string().min(1, "Draft content is required"),
   images: z.array(imageSchema).optional().default([]),
   clubId: z.string().uuid().optional().nullable(),
   promoCodeId: z.string().uuid().optional().nullable(),
+  // Follow-up conversation fields
+  conversationHistory: z.array(conversationMessageSchema).optional().default([]),
+  followUpPrompt: z.string().optional(),
+  currentFormState: currentFormStateSchema.optional(),
+  summarizedContext: z.string().optional(),
 });
+
+// Token estimation utilities
+const TOKEN_LIMIT = 100000; // Summarize when approaching this limit
+
+function estimateTokens(text: string): number {
+  // Rough estimate: ~4 characters per token
+  return Math.ceil(text.length / 4);
+}
+
+function estimateConversationTokens(
+  conversationHistory: z.infer<typeof conversationMessageSchema>[],
+  currentFormState?: z.infer<typeof currentFormStateSchema>,
+  summarizedContext?: string
+): number {
+  let total = 0;
+
+  // Count conversation history
+  for (const msg of conversationHistory) {
+    total += estimateTokens(msg.content);
+    if (msg.generatedContent) {
+      total += estimateTokens(msg.generatedContent.subject);
+      total += estimateTokens(msg.generatedContent.previewText);
+      total += estimateTokens(msg.generatedContent.bodyHtml);
+    }
+  }
+
+  // Count current form state
+  if (currentFormState) {
+    total += estimateTokens(currentFormState.subject);
+    total += estimateTokens(currentFormState.previewText);
+    total += estimateTokens(currentFormState.bodyHtml);
+  }
+
+  // Count summarized context
+  if (summarizedContext) {
+    total += estimateTokens(summarizedContext);
+  }
+
+  return total;
+}
+
+async function summarizeConversationHistory(
+  anthropic: Anthropic,
+  conversationHistory: z.infer<typeof conversationMessageSchema>[],
+  keepLastN: number = 2
+): Promise<{ summarizedContext: string; keptMessages: z.infer<typeof conversationMessageSchema>[] }> {
+  // Keep the last N exchanges (user + assistant pairs)
+  const keptMessages = conversationHistory.slice(-keepLastN * 2);
+  const toSummarize = conversationHistory.slice(0, -keepLastN * 2);
+
+  if (toSummarize.length === 0) {
+    return { summarizedContext: "", keptMessages };
+  }
+
+  // Build summary of older messages
+  const historyText = toSummarize.map(msg => {
+    let text = `${msg.role}: ${msg.content}`;
+    if (msg.generatedContent) {
+      text += `\n[Generated: Subject "${msg.generatedContent.subject}"]`;
+    }
+    return text;
+  }).join("\n\n");
+
+  const summaryResponse = await anthropic.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1000,
+    messages: [{
+      role: "user",
+      content: `Summarize this newsletter editing conversation history concisely, capturing key decisions, preferences expressed, and the evolution of the content. Keep it brief but preserve important context:\n\n${historyText}`,
+    }],
+    system: "You are summarizing a conversation history for context. Be concise but preserve key decisions and preferences.",
+  });
+
+  const textBlock = summaryResponse.content.find(block => block.type === "text");
+  const summarizedContext = textBlock?.type === "text" ? textBlock.text : "";
+
+  return { summarizedContext, keptMessages };
+}
 
 // Format date to readable string
 function formatDate(dateString: string): string {
@@ -47,7 +148,7 @@ function formatTime(timeString: string): string {
 const SYSTEM_PROMPT = `You are an expert email marketing copywriter and HTML designer for "The Clubhouse", a premium children's holiday club set on a working farm in the Scottish Borders, UK.
 
 ## About The Clubhouse
-The Clubhouse offers unforgettable farm experiences for children aged 5-11 during school holidays. Activities include:
+The Clubhouse offers unforgettable farm experiences for children aged 5-12 during school holidays. Activities include:
 - Animal care: feeding lambs, collecting eggs, grooming ponies
 - Nature exploration: woodland walks, pond dipping, bug hunts
 - Creative activities: seasonal crafts, den building, outdoor cooking
@@ -162,7 +263,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const { roughDraft, images, clubId, promoCodeId } = parsed.data;
+    const {
+      roughDraft,
+      images,
+      clubId,
+      promoCodeId,
+      conversationHistory,
+      followUpPrompt,
+      currentFormState,
+      summarizedContext: existingSummarizedContext,
+    } = parsed.data;
+
+    const isFollowUp = conversationHistory.length > 0 && followUpPrompt;
 
     const supabase = createAdminClient();
 
@@ -218,8 +330,32 @@ IMPORTANT: Include ALL ${images.length} images in the newsletter HTML using plac
 `;
     }
 
-    // Build user prompt
-    const userPrompt = `Create a marketing newsletter email for The Clubhouse.
+    // Initialize Anthropic client early (needed for summarization)
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
+    // Handle token limits and summarization for follow-ups
+    let summarizedContext = existingSummarizedContext;
+    let workingHistory = conversationHistory;
+
+    if (isFollowUp) {
+      const estimatedTokens = estimateConversationTokens(
+        conversationHistory,
+        currentFormState,
+        existingSummarizedContext
+      );
+
+      if (estimatedTokens > TOKEN_LIMIT) {
+        console.log(`Token estimate ${estimatedTokens} exceeds limit, summarizing...`);
+        const result = await summarizeConversationHistory(anthropic, conversationHistory, 2);
+        summarizedContext = result.summarizedContext;
+        workingHistory = result.keptMessages;
+      }
+    }
+
+    // Build user prompt for initial generation
+    const initialUserPrompt = `Create a marketing newsletter email for The Clubhouse.
 
 ## Admin's Notes:
 ${roughDraft || "Create an engaging newsletter promoting this club with compelling copy about the farm experience."}
@@ -246,8 +382,33 @@ ${clubInfo}${promoInfo}${imageInfo}
 - Limit to 1-2 links in body text (excluding CTA)
 - Encourage replies by asking a genuine question somewhere in the email`;
 
-    // Build message content with images for vision
-    const messageContent: Anthropic.MessageParam["content"] = [];
+    // Build follow-up prompt if this is a refinement request
+    const followUpUserPrompt = isFollowUp ? `The user wants to refine the newsletter content.
+
+## Current Form State (including any manual edits):
+- Subject: ${currentFormState?.subject || "(empty)"}
+- Preview Text: ${currentFormState?.previewText || "(empty)"}
+- Body HTML:
+${currentFormState?.bodyHtml || "(empty)"}
+
+## User's Refinement Request:
+${followUpPrompt}
+
+${clubInfo}${promoInfo}${imageInfo}
+
+## Instructions:
+Apply the user's requested changes to the current content. Maintain the same JSON response format.
+${images.length > 0 ? `Continue using image placeholders {{IMAGE_1}} to {{IMAGE_${images.length}}} as needed.` : ""}
+
+Respond with ONLY valid JSON (no markdown code blocks):
+{
+  "subject": "Updated subject line",
+  "previewText": "Updated preview text",
+  "bodyHtml": "<updated HTML content>"
+}` : "";
+
+    // Build message content with images for vision (for initial request)
+    const imageContent: Anthropic.MessageParam["content"] = [];
 
     // Add images for vision analysis
     for (const image of images) {
@@ -271,11 +432,11 @@ ${clubInfo}${promoInfo}${imageInfo}
           | "image/webp";
 
         // Add image with label context
-        messageContent.push({
+        imageContent.push({
           type: "text",
           text: `[${image.label}${image.description ? ` - ${image.description}` : ""}]:`,
         });
-        messageContent.push({
+        imageContent.push({
           type: "image",
           source: {
             type: "base64",
@@ -288,26 +449,68 @@ ${clubInfo}${promoInfo}${imageInfo}
       }
     }
 
-    // Add the main prompt text
-    messageContent.push({
-      type: "text",
-      text: userPrompt,
-    });
+    // Build messages array for API call
+    const messages: Anthropic.MessageParam[] = [];
 
-    // Call Claude API with vision
-    const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
+    if (isFollowUp) {
+      // Add summarized context as a system-like first message if present
+      if (summarizedContext) {
+        messages.push({
+          role: "user",
+          content: `[Previous conversation summary: ${summarizedContext}]`,
+        });
+        messages.push({
+          role: "assistant",
+          content: "I understand the context from our previous conversation. Let me continue helping you refine the newsletter.",
+        });
+      }
 
+      // Add historical messages
+      for (const msg of workingHistory) {
+        if (msg.role === "user") {
+          messages.push({
+            role: "user",
+            content: msg.content,
+          });
+        } else if (msg.role === "assistant" && msg.generatedContent) {
+          // For assistant messages, include the JSON response they generated
+          messages.push({
+            role: "assistant",
+            content: JSON.stringify({
+              subject: msg.generatedContent.subject,
+              previewText: msg.generatedContent.previewText,
+              bodyHtml: msg.generatedContent.bodyHtml,
+            }),
+          });
+        }
+      }
+
+      // Add the current follow-up request with images
+      const followUpContent: Anthropic.MessageParam["content"] = [
+        ...imageContent,
+        { type: "text", text: followUpUserPrompt },
+      ];
+      messages.push({
+        role: "user",
+        content: followUpContent,
+      });
+    } else {
+      // Initial generation: single user message with images
+      const initialContent: Anthropic.MessageParam["content"] = [
+        ...imageContent,
+        { type: "text", text: initialUserPrompt },
+      ];
+      messages.push({
+        role: "user",
+        content: initialContent,
+      });
+    }
+
+    // Call Claude API
     const message = await anthropic.messages.create({
       model: "claude-opus-4-5-20251101",
       max_tokens: 8000,
-      messages: [
-        {
-          role: "user",
-          content: messageContent,
-        },
-      ],
+      messages,
       system: SYSTEM_PROMPT,
     });
 
@@ -344,10 +547,22 @@ ${clubInfo}${promoInfo}${imageInfo}
       bodyHtml = bodyHtml.replace(new RegExp(placeholder, "g"), images[i].url);
     }
 
+    // Calculate estimated tokens for the response
+    const estimatedTokens = estimateConversationTokens(
+      workingHistory,
+      { subject: generated.subject, previewText: generated.previewText, bodyHtml },
+      summarizedContext
+    );
+
     return NextResponse.json({
       subject: generated.subject,
       previewText: generated.previewText,
       bodyHtml: bodyHtml,
+      conversationMetadata: {
+        summarizedContext: summarizedContext || undefined,
+        estimatedTokens,
+        wasSummarized: summarizedContext !== existingSummarizedContext,
+      },
     });
   } catch (error) {
     console.error("Error generating newsletter content:", error);

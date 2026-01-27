@@ -198,7 +198,7 @@ function buildPreviewHtml(
           <tr>
             <td align="center" style="padding-top: 32px;">
               <p style="margin: 0 0 8px; font-size: 14px; color: #6B7280;">
-                The Clubhouse | Fun-filled farm experiences for children aged 5-11
+                The Clubhouse | Fun-filled farm experiences for children aged 5-12
               </p>
               <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
                 If you have any questions, please contact us at<br>
