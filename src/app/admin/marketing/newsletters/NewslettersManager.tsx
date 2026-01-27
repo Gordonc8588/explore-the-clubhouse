@@ -70,6 +70,7 @@ export function NewslettersManager({
   const [previewClub, setPreviewClub] = useState<Club | null>(null);
   const [previewPromo, setPreviewPromo] = useState<PromoCode | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [sendingId, setSendingId] = useState<string | null>(null);
 
   const fetchNewsletters = useCallback(async () => {
     setIsLoading(true);
@@ -135,6 +136,36 @@ export function NewslettersManager({
     setPreviewClub(club);
     setPreviewPromo(promo);
     setPreviewNewsletter(newsletter);
+  };
+
+  const handleSend = async (newsletter: Newsletter) => {
+    const confirmed = confirm(
+      `Are you sure you want to send "${newsletter.subject}" to all subscribers?\n\nThis action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setSendingId(newsletter.id);
+    try {
+      const response = await fetch("/api/admin/newsletters/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newsletterId: newsletter.id }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Newsletter sent successfully to ${data.sentCount} subscribers!`);
+        fetchNewsletters();
+      } else {
+        alert(data.error || "Failed to send newsletter");
+      }
+    } catch (error) {
+      console.error("Error sending newsletter:", error);
+      alert("Failed to send newsletter");
+    } finally {
+      setSendingId(null);
+    }
   };
 
   const handleCloseForm = () => {
@@ -258,6 +289,25 @@ export function NewslettersManager({
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                           Edit
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleSend({
+                              ...newsletter,
+                              clubs: undefined,
+                              promo_codes: undefined,
+                            } as Newsletter)
+                          }
+                          disabled={sendingId === newsletter.id}
+                          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                          style={{ backgroundColor: "var(--craigies-olive)" }}
+                        >
+                          {sendingId === newsletter.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Send className="h-3.5 w-3.5" />
+                          )}
+                          Send
                         </button>
                         <button
                           onClick={() => handleDelete(newsletter.id)}
@@ -390,6 +440,30 @@ export function NewslettersManager({
                                   className="h-4 w-4"
                                   style={{ color: "var(--craigies-burnt-orange)" }}
                                 />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleSend({
+                                    ...newsletter,
+                                    clubs: undefined,
+                                    promo_codes: undefined,
+                                  } as Newsletter)
+                                }
+                                disabled={sendingId === newsletter.id}
+                                className="rounded-lg p-2 transition-colors hover:bg-green-50 disabled:opacity-50"
+                                title="Send to all subscribers"
+                              >
+                                {sendingId === newsletter.id ? (
+                                  <Loader2
+                                    className="h-4 w-4 animate-spin"
+                                    style={{ color: "var(--craigies-olive)" }}
+                                  />
+                                ) : (
+                                  <Send
+                                    className="h-4 w-4"
+                                    style={{ color: "var(--craigies-olive)" }}
+                                  />
+                                )}
                               </button>
                               <button
                                 onClick={() => handleDelete(newsletter.id)}
