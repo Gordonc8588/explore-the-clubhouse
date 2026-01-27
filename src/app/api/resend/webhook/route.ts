@@ -118,9 +118,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'email.clicked':
-        console.log(
-          `[Resend Webhook] Link clicked by ${event.data.to.join(', ')}: ${event.data.click?.link}`
-        );
+        await handleClick(event);
         break;
 
       default:
@@ -167,6 +165,61 @@ async function handleBounce(event: ResendWebhookEvent): Promise<void> {
     } else {
       console.log(
         `[Resend Webhook] Unsubscribed bounced email: ${email}`
+      );
+    }
+  }
+}
+
+/**
+ * Handle email clicks - store in newsletter_clicks for analytics
+ */
+async function handleClick(event: ResendWebhookEvent): Promise<void> {
+  const emails = event.data.to;
+  const clickedLink = event.data.click?.link;
+
+  if (!clickedLink) {
+    console.log('[Resend Webhook] Click event without link URL');
+    return;
+  }
+
+  console.log(
+    `[Resend Webhook] Link clicked by ${emails.join(', ')}: ${clickedLink}`
+  );
+
+  // Extract newsletter_id from utm_campaign parameter in the clicked URL
+  let newsletterId: string | null = null;
+  try {
+    const url = new URL(clickedLink);
+    newsletterId = url.searchParams.get('utm_campaign');
+  } catch {
+    console.log('[Resend Webhook] Could not parse clicked URL');
+  }
+
+  if (!newsletterId) {
+    console.log('[Resend Webhook] No newsletter_id found in clicked URL');
+    return;
+  }
+
+  const supabase = createAdminClient();
+
+  // Store click for each recipient (usually just one)
+  for (const email of emails) {
+    const { error } = await supabase
+      .from('newsletter_clicks')
+      .insert({
+        newsletter_id: newsletterId,
+        subscriber_email: email.toLowerCase(),
+        link_url: clickedLink,
+      });
+
+    if (error) {
+      console.error(
+        `[Resend Webhook] Failed to store click for ${email}:`,
+        error
+      );
+    } else {
+      console.log(
+        `[Resend Webhook] Stored click: newsletter=${newsletterId}, email=${email}`
       );
     }
   }
