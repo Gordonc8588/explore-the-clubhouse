@@ -193,7 +193,7 @@ export function PrintAdPreview({
                 color: BRAND_COLORS.olive,
               }}
             >
-              exploretheclubhouse.com • {clubData?.location || "Craigies Farm, Scottish Borders"}
+              exploretheclubhouse.com • {clubData?.location || "Craigies Farm, South Queensferry"}
             </p>
           </div>
         </div>

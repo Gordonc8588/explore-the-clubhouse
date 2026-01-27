@@ -58,7 +58,7 @@ function buildClubData(club: Club): PrintAdClubData {
     name: club.name,
     dates: formatDateRange(club.start_date, club.end_date),
     age_range: `${club.min_age}–${club.max_age}`,
-    location: "Craigies Farm, Scottish Borders",
+    location: "Craigies Farm, South Queensferry",
     prices,
   };
 }
@@ -259,7 +259,7 @@ export function ClubSelector({ selectedClubId, onSelect }: ClubSelectorProps) {
                 style={{ color: "var(--craigies-olive)" }}
               />
               <span style={{ color: "var(--craigies-dark-olive)" }}>
-                Craigies Farm, Scottish Borders
+                Craigies Farm, South Queensferry
               </span>
             </div>
           </div>

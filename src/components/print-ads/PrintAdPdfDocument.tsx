@@ -11,33 +11,15 @@ import {
   Text,
   Image,
   StyleSheet,
-  Font,
 } from '@react-pdf/renderer';
 import { TEMPLATES } from '@/lib/print-ads/templates';
 import { BRAND_COLORS, mmToPt } from '@/lib/print-ads/types';
 import type { PrintAdType, PrintAdClubData } from '@/types/database';
 
-// Register fonts (using Google Fonts URLs for now)
-// In production, you'd host these fonts locally
-Font.register({
-  family: 'Playfair Display',
-  src: 'https://fonts.gstatic.com/s/playfairdisplay/v36/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtY.ttf',
-  fontWeight: 700,
-});
-
-Font.register({
-  family: 'Nunito Sans',
-  fonts: [
-    {
-      src: 'https://fonts.gstatic.com/s/nunitosans/v15/pe0qMImSLYBIv1o4X1M8cceyI9tAcVwob5A.ttf',
-      fontWeight: 400,
-    },
-    {
-      src: 'https://fonts.gstatic.com/s/nunitosans/v15/pe0qMImSLYBIv1o4X1M8ccezI9tAcVwob5A.ttf',
-      fontWeight: 600,
-    },
-  ],
-});
+// Using built-in fonts for reliability
+// Helvetica-Bold for headings, Helvetica for body text
+const HEADING_FONT = 'Helvetica-Bold';
+const BODY_FONT = 'Helvetica';
 
 // Props interface
 interface PrintAdPdfDocumentProps {
@@ -68,7 +50,7 @@ function createStyles(adType: PrintAdType) {
       width: pageWidth,
       height: pageHeight,
       backgroundColor: BRAND_COLORS.cream,
-      fontFamily: 'Nunito Sans',
+      fontFamily: BODY_FONT,
     },
     container: {
       flex: 1,
@@ -91,18 +73,16 @@ function createStyles(adType: PrintAdType) {
     },
     // Headline zone
     headline: {
-      fontFamily: 'Playfair Display',
+      fontFamily: HEADING_FONT,
       fontSize: template.zones.headline.fontSize || 14,
-      fontWeight: 700,
       color: BRAND_COLORS.darkOlive,
       marginBottom: 8,
       lineHeight: template.zones.headline.lineHeight || 1.2,
     },
     // Body copy zone
     bodyCopy: {
-      fontFamily: 'Nunito Sans',
+      fontFamily: BODY_FONT,
       fontSize: template.zones.body.fontSize || 9,
-      fontWeight: 400,
       color: BRAND_COLORS.darkOlive,
       lineHeight: template.zones.body.lineHeight || 1.5,
       marginBottom: 12,
@@ -118,9 +98,8 @@ function createStyles(adType: PrintAdType) {
       marginBottom: 12,
     },
     ctaText: {
-      fontFamily: 'Nunito Sans',
+      fontFamily: HEADING_FONT,
       fontSize: template.zones.cta.fontSize || 10,
-      fontWeight: 600,
       color: BRAND_COLORS.white,
     },
     // Footer zone
@@ -134,21 +113,20 @@ function createStyles(adType: PrintAdType) {
       paddingTop: 6,
     },
     footerText: {
-      fontFamily: 'Nunito Sans',
+      fontFamily: BODY_FONT,
       fontSize: template.zones.footer.fontSize || 7,
       color: BRAND_COLORS.olive,
       textAlign: 'center',
     },
     // Club info
     clubInfo: {
-      fontFamily: 'Nunito Sans',
+      fontFamily: BODY_FONT,
       fontSize: (template.zones.body.fontSize || 9) - 1,
       color: BRAND_COLORS.olive,
       marginBottom: 8,
     },
     clubName: {
-      fontFamily: 'Playfair Display',
-      fontWeight: 700,
+      fontFamily: HEADING_FONT,
       color: BRAND_COLORS.darkOlive,
     },
     // Flyer image (optional)
