@@ -37,12 +37,6 @@ CREATE TABLE print_ads (
 -- Index for listing by status and recency
 CREATE INDEX idx_print_ads_status_created ON print_ads(status, created_at DESC);
 
--- Trigger to update updated_at timestamp
-CREATE TRIGGER update_print_ads_updated_at
-  BEFORE UPDATE ON print_ads
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
-
 -- Add comments for documentation
 COMMENT ON TABLE print_ads IS 'Print advertisements for newspapers and magazines';
 COMMENT ON COLUMN print_ads.club_data IS 'Cached club data: {name, dates, age_range, location, prices}';

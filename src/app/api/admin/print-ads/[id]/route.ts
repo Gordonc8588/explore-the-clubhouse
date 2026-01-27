@@ -118,7 +118,9 @@ export async function PATCH(
     const supabase = createAdminClient();
 
     // Build update object (only include provided fields)
-    const updateData: Record<string, unknown> = {};
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
     if (data.name !== undefined) updateData.name = data.name;
     if (data.ad_type !== undefined) updateData.ad_type = data.ad_type;
     if (data.club_id !== undefined) updateData.club_id = data.club_id;
