@@ -73,3 +73,97 @@
 # - [ ] Connect Brevo for newsletter subscriptions (need API key)
 # - [ ] Set up admin authentication with Supabase Auth
 # - [ ] Connect admin pages to real Supabase data
+
+# ===========================================
+# META ADS MANAGER FEATURE
+# Implementation Lead: Ralphy | Target: Q1 2026
+# PRD: PRD-meta-ads.md
+# ===========================================
+
+# PREREQUISITES (Before Development) - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create Meta Business Manager account at business.facebook.com
+- [✓] 2026-01-27 - Create Ad Account connected to Business Manager (ID: 4049380768676223)
+- [✓] 2026-01-27 - Create Meta App at developers.facebook.com (ID: 1569280018172357)
+- [✓] 2026-01-27 - Create System User in Business Manager (webintegration)
+- [✓] 2026-01-27 - Generate System User Token with ads_management, ads_read, business_management, pages_manage_ads, pages_read_engagement permissions
+- [✓] 2026-01-27 - Assign Facebook Page (555625597640254) and Instagram account (17841468253214742) to system user
+- [✓] 2026-01-27 - Add META_APP_ID, META_APP_SECRET, META_SYSTEM_USER_TOKEN, META_AD_ACCOUNT_ID, META_PAGE_ID, META_INSTAGRAM_ACTOR_ID to .env.local
+
+# PHASE 1: FOUNDATION - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create database migration for meta_ads, meta_ad_metrics, and meta_ad_images tables (supabase/migrations/20260127000000_add_meta_ads.sql)
+- [✓] 2026-01-27 - Update src/types/database.ts with MetaAd, MetaAdMetrics, MetaAdImage types and insert/update variants
+- [✓] 2026-01-27 - Install facebook-nodejs-business-sdk package
+- [✓] 2026-01-27 - Create Meta Marketing API client at src/lib/meta-ads.ts with authentication, campaign/adset/ad creation methods
+- [✓] 2026-01-27 - Create basic CRUD routes at src/app/api/admin/ads/route.ts (GET list, POST create)
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/[id]/route.ts (GET, PATCH, DELETE single ad)
+- [✓] 2026-01-27 - Create ad list page at src/app/admin/marketing/ads/page.tsx with status filters, thumbnail preview, quick actions
+- [✓] 2026-01-27 - Create AdsManager.tsx client component for the ad list with filtering and pagination
+- [✓] 2026-01-27 - Update admin sidebar to include Marketing > Meta Ads link
+
+# PHASE 2: AI CREATIVE GENERATION - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create AdForm.tsx component at src/app/admin/marketing/ads/create/ with Step 1: Upload & Configure (images, club select, promo code, objective, notes)
+- [✓] 2026-01-27 - Create AdImageUploader.tsx component with Cloudinary upload and image library browser tabs
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/generate/route.ts for AI content generation using Claude API with vision
+- [✓] 2026-01-27 - Build AI system prompt for ad copy (warm, parent-focused tone, Meta policy compliant, brand guidelines, character limits)
+- [✓] 2026-01-27 - Add Step 2: Generate & Edit UI in AdForm with primary text, headline, description fields and live char counts
+- [✓] 2026-01-27 - Implement regenerate individual fields functionality with AI
+- [✓] 2026-01-27 - Create image library routes at src/app/api/admin/ads/images/route.ts (GET/POST/PATCH/DELETE)
+- [✓] 2026-01-27 - Add image library browser tab in AdImageUploader for selecting from previously uploaded images
+
+# PHASE 3: PREVIEW SYSTEM - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create AdPreview.tsx component at src/app/admin/marketing/ads/create/ with multi-format preview support
+- [✓] 2026-01-27 - Implement Facebook Feed preview (1:1 ratio, desktop + mobile toggle, full engagement bar)
+- [✓] 2026-01-27 - Implement Instagram Feed preview (1:1 ratio, mobile view with action bar and CTA overlay)
+- [✓] 2026-01-27 - Implement Instagram Stories preview (9:16 ratio, mobile view with progress bar and swipe-up CTA)
+- [✓] 2026-01-27 - Implement Facebook Stories preview (9:16 ratio, mobile view with progress bar and CTA button)
+- [✓] 2026-01-27 - Add character count warnings (amber if over recommended, with detailed breakdown)
+- [✓] 2026-01-27 - Show brand/page name and CTA button in all preview formats
+- [✓] 2026-01-27 - Add Step 3: Preview & Save to AdForm with ad summary and save draft button
+- [✓] 2026-01-27 - Add image selector for previewing different images when multiple are uploaded
+
+# PHASE 4: PUBLISHING - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create TargetingSelector.tsx component with preset options (Local Parents, School Holiday, Retargeting, Lookalike)
+- [✓] 2026-01-27 - Create BudgetSchedule.tsx component with daily/lifetime budget, date/time scheduling, campaign summary
+- [✓] 2026-01-27 - Add Step 4: Targeting & Budget UI in AdForm with 4-step progress indicator
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/publish/route.ts to publish ads to Meta API
+- [✓] 2026-01-27 - Implement Campaign creation in Meta API with configurable objective
+- [✓] 2026-01-27 - Implement Ad Set creation with geo-targeting, age/gender, budget, schedule
+- [✓] 2026-01-27 - Implement image upload to Meta Ad Library and store image hash
+- [✓] 2026-01-27 - Implement Ad Creative and Ad creation with proper linking
+- [✓] 2026-01-27 - Handle Meta API errors with user-friendly error messages
+- [✓] 2026-01-27 - Update database types and migration for meta_creative_id and meta_image_hash
+- [✓] 2026-01-27 - Add publish success state with redirect to ad detail page
+
+# PHASE 5: MANAGEMENT - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create ad detail page at src/app/admin/marketing/ads/[id]/page.tsx with full creative preview, performance metrics placeholder, edit/duplicate options
+- [✓] 2026-01-27 - Create AdDetailClient.tsx client component with pause/resume/duplicate/delete actions
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/[id]/pause/route.ts to pause active ads in Meta API and database
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/[id]/resume/route.ts to resume paused ads in Meta API and database
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/[id]/duplicate/route.ts to duplicate ad as new draft (resets Meta IDs and schedule)
+- [✓] 2026-01-27 - Add status badges in AdsManager.tsx (Draft, Publishing, Pending Review, Active, Paused, Rejected, Completed)
+- [✓] 2026-01-27 - Implement rejection handling UI in AdDetailClient - shows rejection reason with warning and edit link
+- [✓] 2026-01-27 - Add quick actions in AdsManager dropdown (view, pause/resume, duplicate, delete, view in Meta Ads Manager)
+- [✓] 2026-01-27 - Update AdsManager status filter dropdown to include all statuses
+
+# PHASE 6: ANALYTICS - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create src/lib/meta-ads-queries.ts with aggregation functions (getAdsWithMetrics, getPerformanceSummary, getDailyMetrics, getTopPerformingAds, getAdAttributedBookings)
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/metrics/sync/route.ts to sync metrics from Meta Reporting API (POST sync, GET status)
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/[id]/metrics/route.ts to get single ad performance with daily breakdown
+- [✓] 2026-01-27 - Create src/app/api/admin/ads/analytics/route.ts to serve dashboard data
+- [✓] 2026-01-27 - Create analytics dashboard at src/app/admin/analytics/ads/page.tsx with AdsAnalyticsDashboard client component
+- [✓] 2026-01-27 - Build KPI cards showing total spend, impressions, clicks, conversions, ROAS
+- [✓] 2026-01-27 - Build secondary metrics row with CTR, CPC, CPM, attributed revenue
+- [✓] 2026-01-27 - Build performance chart (spend vs conversions over time with daily bars)
+- [✓] 2026-01-27 - Build ad comparison table with all metrics (name, status, impressions, reach, clicks, CTR, CPC, spend, conversions)
+- [✓] 2026-01-27 - Add sync button to refresh metrics from Meta API
+- [✓] 2026-01-27 - Implement UTM tracking on ad destination URLs in publish route (utm_source=facebook, utm_medium=paid, utm_campaign={ad_id}, utm_content={ad_name})
+- [✓] 2026-01-27 - Add booking attribution logic in meta-ads-queries.ts - matches utm_campaign to ad_id in bookings
+- [✓] 2026-01-27 - Calculate and display ROAS (revenue attributed / ad spend) in dashboard and single ad metrics
+- [✓] 2026-01-27 - Add Analytics > Ads link to admin sidebar navigation
+
+# OPTIONAL ENHANCEMENTS (Future)
+# - [ ] A/B Testing - auto-generate variants, let Meta optimize
+# - [ ] Carousel Ads - multiple images in single ad
+# - [ ] Video Ads - video upload and preview support
+# - [ ] Budget approval workflow - spending limits requiring approval
+# - [ ] Webhook at src/app/api/meta/webhook/route.ts for real-time ad status updates

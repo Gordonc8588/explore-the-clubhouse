@@ -625,6 +625,226 @@ export interface StoredNewsletterImageUpdate {
 }
 
 // =============================================================================
+// META ADS TYPES
+// =============================================================================
+
+/** Ad objective type */
+export type AdObjective = 'awareness' | 'traffic' | 'conversions';
+
+/** Ad status - tracks lifecycle from draft to completion */
+export type AdStatus = 'draft' | 'pending' | 'active' | 'paused' | 'rejected' | 'completed';
+
+/** Ad CTA button types supported by Meta */
+export type AdCtaType = 'LEARN_MORE' | 'BOOK_NOW' | 'SHOP_NOW' | 'SIGN_UP' | 'CONTACT_US' | 'GET_OFFER';
+
+/** Budget type for ad spend */
+export type BudgetType = 'daily' | 'lifetime';
+
+/** Targeting preset options */
+export type TargetingPreset = 'local_parents' | 'school_holiday' | 'retargeting' | 'lookalike';
+
+/**
+ * MetaAd - Facebook/Instagram ad campaigns managed from admin panel
+ */
+export interface MetaAd {
+  id: string;
+  name: string;
+  club_id: string | null;
+  promo_code_id: string | null;
+
+  // Ad Content
+  objective: string;
+  primary_text: string | null;
+  headline: string | null;
+  description: string | null;
+  cta_type: string;
+  cta_url: string | null;
+  image_urls: string[];
+
+  // Targeting
+  targeting_preset: string | null;
+  custom_targeting: Record<string, unknown> | null;
+
+  // Budget & Schedule
+  budget_type: string;
+  budget_amount: number | null;  // In pence
+  schedule_start: string | null;
+  schedule_end: string | null;
+
+  // Status
+  status: string;
+
+  // Meta API IDs
+  meta_campaign_id: string | null;
+  meta_adset_id: string | null;
+  meta_creative_id: string | null;
+  meta_ad_id: string | null;
+  meta_image_hash: string | null;
+  meta_review_status: string | null;
+  meta_rejection_reason: string | null;
+
+  // Timestamps
+  created_at: string;
+  updated_at: string;
+  published_at: string | null;
+}
+
+export interface MetaAdInsert {
+  id?: string;
+  name: string;
+  club_id?: string | null;
+  promo_code_id?: string | null;
+  objective?: string;
+  primary_text?: string | null;
+  headline?: string | null;
+  description?: string | null;
+  cta_type?: string;
+  cta_url?: string | null;
+  image_urls?: string[];
+  targeting_preset?: string | null;
+  custom_targeting?: Record<string, unknown> | null;
+  budget_type?: string;
+  budget_amount?: number | null;
+  schedule_start?: string | null;
+  schedule_end?: string | null;
+  status?: string;
+  meta_campaign_id?: string | null;
+  meta_adset_id?: string | null;
+  meta_creative_id?: string | null;
+  meta_ad_id?: string | null;
+  meta_image_hash?: string | null;
+  meta_review_status?: string | null;
+  meta_rejection_reason?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  published_at?: string | null;
+}
+
+export interface MetaAdUpdate {
+  id?: string;
+  name?: string;
+  club_id?: string | null;
+  promo_code_id?: string | null;
+  objective?: string;
+  primary_text?: string | null;
+  headline?: string | null;
+  description?: string | null;
+  cta_type?: string;
+  cta_url?: string | null;
+  image_urls?: string[];
+  targeting_preset?: string | null;
+  custom_targeting?: Record<string, unknown> | null;
+  budget_type?: string;
+  budget_amount?: number | null;
+  schedule_start?: string | null;
+  schedule_end?: string | null;
+  status?: string;
+  meta_campaign_id?: string | null;
+  meta_adset_id?: string | null;
+  meta_creative_id?: string | null;
+  meta_ad_id?: string | null;
+  meta_image_hash?: string | null;
+  meta_review_status?: string | null;
+  meta_rejection_reason?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  published_at?: string | null;
+}
+
+/**
+ * MetaAdMetrics - Daily performance metrics for Meta ads
+ */
+export interface MetaAdMetrics {
+  id: string;
+  ad_id: string;
+  date: string;  // DATE as ISO string
+  impressions: number;
+  reach: number;
+  clicks: number;
+  spend: number;  // In pence
+  conversions: number;
+  ctr: number | null;
+  cpc: number | null;
+  cpm: number | null;
+  created_at: string;
+}
+
+export interface MetaAdMetricsInsert {
+  id?: string;
+  ad_id: string;
+  date: string;
+  impressions?: number;
+  reach?: number;
+  clicks?: number;
+  spend?: number;
+  conversions?: number;
+  ctr?: number | null;
+  cpc?: number | null;
+  cpm?: number | null;
+  created_at?: string;
+}
+
+export interface MetaAdMetricsUpdate {
+  id?: string;
+  ad_id?: string;
+  date?: string;
+  impressions?: number;
+  reach?: number;
+  clicks?: number;
+  spend?: number;
+  conversions?: number;
+  ctr?: number | null;
+  cpc?: number | null;
+  cpm?: number | null;
+  created_at?: string;
+}
+
+/**
+ * MetaAdImage - Library of reusable images for Meta ads
+ */
+export interface MetaAdImage {
+  id: string;
+  url: string;
+  public_id: string | null;
+  label: string | null;
+  description: string | null;
+  tags: string[];
+  width: number | null;
+  height: number | null;
+  aspect_ratio: string | null;
+  meta_image_hash: string | null;
+  created_at: string;
+}
+
+export interface MetaAdImageInsert {
+  id?: string;
+  url: string;
+  public_id?: string | null;
+  label?: string | null;
+  description?: string | null;
+  tags?: string[];
+  width?: number | null;
+  height?: number | null;
+  aspect_ratio?: string | null;
+  meta_image_hash?: string | null;
+  created_at?: string;
+}
+
+export interface MetaAdImageUpdate {
+  id?: string;
+  url?: string;
+  public_id?: string | null;
+  label?: string | null;
+  description?: string | null;
+  tags?: string[];
+  width?: number | null;
+  height?: number | null;
+  aspect_ratio?: string | null;
+  meta_image_hash?: string | null;
+  created_at?: string;
+}
+
+// =============================================================================
 // ANALYTICS TYPES
 // =============================================================================
 
@@ -750,6 +970,21 @@ export interface Database {
         Row: NewsletterClick;
         Insert: NewsletterClickInsert;
         Update: Partial<NewsletterClickInsert>;
+      };
+      meta_ads: {
+        Row: MetaAd;
+        Insert: MetaAdInsert;
+        Update: MetaAdUpdate;
+      };
+      meta_ad_metrics: {
+        Row: MetaAdMetrics;
+        Insert: MetaAdMetricsInsert;
+        Update: MetaAdMetricsUpdate;
+      };
+      meta_ad_images: {
+        Row: MetaAdImage;
+        Insert: MetaAdImageInsert;
+        Update: MetaAdImageUpdate;
       };
     };
     Functions: {
