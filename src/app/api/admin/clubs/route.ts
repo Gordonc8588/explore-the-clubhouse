@@ -1,5 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+
+// Check if user is admin
+async function isAdmin() {
+  const cookieStore = await cookies();
+  return cookieStore.get("admin-session")?.value === "authenticated";
+}
+
+/**
+ * GET /api/admin/clubs
+ * List all clubs with booking options
+ */
+export async function GET() {
+  try {
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const supabase = createAdminClient();
+
+    const { data: clubs, error } = await supabase
+      .from("clubs")
+      .select(`
+        *,
+        booking_options (
+          id,
+          name,
+          price_per_child,
+          option_type,
+          time_slot,
+          is_active
+        )
+      `)
+      .order("start_date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching clubs:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch clubs" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ clubs });
+  } catch (error) {
+    console.error("Error in GET /api/admin/clubs:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
