@@ -631,6 +631,27 @@ function hasEmbeddedImages(bodyHtml: string): boolean {
 }
 
 /**
+ * Check if a CTA button is already embedded in the HTML body
+ * This detects AI-generated CTA buttons to avoid duplication
+ */
+function hasEmbeddedCTA(bodyHtml: string): boolean {
+  // Check for button-styled table cells (email-safe button pattern)
+  // The AI generates buttons with background-color: #D4843E or similar CTA styling
+  const tableButtonRegex = /<td[^>]+background-color:\s*#D4843E[^>]*>/i;
+  if (tableButtonRegex.test(bodyHtml)) return true;
+
+  // Check for anchor tags with button-like inline styling (inline-block + padding)
+  const inlineButtonRegex = /<a[^>]+style\s*=\s*["'][^"']*display:\s*inline-block[^"']*padding[^"']*["'][^>]*>/i;
+  if (inlineButtonRegex.test(bodyHtml)) return true;
+
+  // Check for anchor tags with href="#" (AI placeholder pattern) inside styled containers
+  const placeholderButtonRegex = /<a[^>]+href\s*=\s*["']#["'][^>]+style[^>]*>/i;
+  if (placeholderButtonRegex.test(bodyHtml)) return true;
+
+  return false;
+}
+
+/**
  * Add UTM parameters to a URL for newsletter tracking
  */
 function addNewsletterUTMParams(url: string, newsletterId: string): string {
@@ -725,9 +746,9 @@ export function buildNewsletterEmail(
     );
   }
 
-  // Build CTA section with UTM tracking
+  // Build CTA section with UTM tracking - SKIP if AI has embedded a CTA in the body
   let ctaSection = '';
-  if (newsletter.cta_text && newsletter.cta_url) {
+  if (newsletter.cta_text && newsletter.cta_url && !imagesEmbedded && !hasEmbeddedCTA(newsletter.body_html)) {
     const trackedCtaUrl = addNewsletterUTMParams(newsletter.cta_url, newsletter.id);
     ctaSection = ctaButton(newsletter.cta_text, trackedCtaUrl);
   }

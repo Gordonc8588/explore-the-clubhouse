@@ -47,6 +47,26 @@ function hasEmbeddedImages(bodyHtml: string): boolean {
   return imgRegex.test(bodyHtml);
 }
 
+/**
+ * Check if a CTA button is already embedded in the HTML body
+ * This detects AI-generated CTA buttons to avoid duplication
+ */
+function hasEmbeddedCTA(bodyHtml: string): boolean {
+  // Check for button-styled table cells (email-safe button pattern)
+  const tableButtonRegex = /<td[^>]+background-color:\s*#D4843E[^>]*>/i;
+  if (tableButtonRegex.test(bodyHtml)) return true;
+
+  // Check for anchor tags with button-like inline styling (inline-block + padding)
+  const inlineButtonRegex = /<a[^>]+style\s*=\s*["'][^"']*display:\s*inline-block[^"']*padding[^"']*["'][^>]*>/i;
+  if (inlineButtonRegex.test(bodyHtml)) return true;
+
+  // Check for anchor tags with href="#" (AI placeholder pattern) inside styled containers
+  const placeholderButtonRegex = /<a[^>]+href\s*=\s*["']#["'][^>]+style[^>]*>/i;
+  if (placeholderButtonRegex.test(bodyHtml)) return true;
+
+  return false;
+}
+
 function buildPreviewHtml(
   newsletter: Newsletter,
   club?: Club | null,
@@ -110,9 +130,9 @@ function buildPreviewHtml(
     `;
   }
 
-  // Build CTA section
+  // Build CTA section - SKIP if AI has embedded a CTA in the body
   let ctaSection = "";
-  if (newsletter.cta_text && newsletter.cta_url) {
+  if (newsletter.cta_text && newsletter.cta_url && !imagesEmbedded && !hasEmbeddedCTA(newsletter.body_html)) {
     ctaSection = `
       <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
         <tr>
