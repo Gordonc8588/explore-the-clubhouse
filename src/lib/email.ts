@@ -732,9 +732,20 @@ export function buildNewsletterEmail(
     ctaSection = ctaButton(newsletter.cta_text, trackedCtaUrl);
   }
 
+  // Build whitelist reminder section (helps with deliverability)
+  const whitelistSection = `
+    <div style="margin-top: 24px; padding: 16px; background-color: #F5F4ED; border-radius: 8px; text-align: center;">
+      <p style="margin: 0; font-size: 13px; color: #5A5C3A; line-height: 1.5;">
+        <strong>Want to make sure you never miss our updates?</strong><br>
+        Add <span style="color: #7A7C4A; font-weight: 600;">hello@exploretheclubhouse.co.uk</span> to your contacts,
+        or move this email to your Primary inbox.
+      </p>
+    </div>
+  `;
+
   // Build unsubscribe link
   const unsubscribeSection = `
-    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #E5E7EB; text-align: center;">
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #E5E7EB; text-align: center;">
       <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
         You received this email because you subscribed to The Clubhouse newsletter.<br>
         <a href="${siteUrl}/unsubscribe?email={{email}}" style="color: #7A7C4A; text-decoration: underline;">Unsubscribe</a>
@@ -753,10 +764,72 @@ export function buildNewsletterEmail(
     ${clubSection}
     ${promoSection}
     ${ctaSection}
+    ${whitelistSection}
     ${unsubscribeSection}
   `;
 
   return emailTemplate(content);
+}
+
+/**
+ * Convert HTML newsletter to plain text version
+ * This improves email deliverability by providing a text alternative
+ */
+export function buildNewsletterPlainText(
+  newsletter: Newsletter,
+  club?: Club | null,
+  promoCode?: PromoCode | null
+): string {
+  // Strip HTML tags and convert to plain text
+  let text = newsletter.body_html
+    // Replace common block elements with newlines
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    // Remove all remaining HTML tags
+    .replace(/<[^>]+>/g, '')
+    // Decode common HTML entities
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    // Clean up whitespace
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    .trim();
+
+  // Add club info if present
+  if (club) {
+    text += `\n\n---\n${club.name}\nDates: ${formatDate(club.start_date)} - ${formatDate(club.end_date)}`;
+    text += `\nTimes: ${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)}`;
+    text += `\nAges: ${club.min_age} - ${club.max_age} years`;
+  }
+
+  // Add promo code if present
+  if (promoCode) {
+    text += `\n\n---\nUse code ${promoCode.code} for ${promoCode.discount_percent}% off!`;
+    text += `\nValid until ${formatDate(promoCode.valid_until)}`;
+  }
+
+  // Add CTA
+  if (newsletter.cta_text && newsletter.cta_url) {
+    text += `\n\n${newsletter.cta_text}: ${newsletter.cta_url}`;
+  }
+
+  // Add whitelist reminder
+  text += '\n\n---';
+  text += '\nTo make sure you receive our updates, add hello@exploretheclubhouse.co.uk to your contacts.';
+
+  // Add footer
+  text += '\n\n---';
+  text += '\nThe Clubhouse | Fun-filled farm experiences for children aged 5-11';
+  text += '\nUnsubscribe: {{unsubscribe_url}}';
+
+  return text;
 }
 
 /**
@@ -781,8 +854,9 @@ export async function sendNewsletter(
   const errors: string[] = [];
   let sentCount = 0;
 
-  // Build the email HTML template
+  // Build the email HTML and plain text templates
   const htmlTemplate = buildNewsletterEmail(newsletter, club, promoCode);
+  const textTemplate = buildNewsletterPlainText(newsletter, club, promoCode);
 
   // Batch size for Resend API
   const BATCH_SIZE = 100;
@@ -798,6 +872,7 @@ export async function sendNewsletter(
         to: email,
         subject: newsletter.subject,
         html: htmlTemplate.replace(/{{email}}/g, encodeURIComponent(email)),
+        text: textTemplate.replace(/{{unsubscribe_url}}/g, `${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}`),
         headers: {
           'List-Unsubscribe': `<${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}>`,
         },
@@ -841,12 +916,14 @@ export async function sendTestNewsletter(
 
   try {
     const html = buildNewsletterEmail(newsletter, club, promoCode);
+    const text = buildNewsletterPlainText(newsletter, club, promoCode);
 
     const { data, error } = await resend.emails.send({
       from: `The Clubhouse <${fromEmail}>`,
       to: testEmail,
       subject: `[TEST] ${newsletter.subject}`,
       html: html.replace(/{{email}}/g, encodeURIComponent(testEmail)),
+      text: text.replace(/{{unsubscribe_url}}/g, `${siteUrl}/unsubscribe?email=${encodeURIComponent(testEmail)}`),
     });
 
     if (error) {

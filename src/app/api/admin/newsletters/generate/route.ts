@@ -67,6 +67,33 @@ The setting is a beautiful working farm with animals including sheep, chickens, 
 - Typography: Playfair Display for headings, Nunito Sans for body
 - Style: Clean, modern, warm with organic countryside feel
 
+## EMAIL DELIVERABILITY BEST PRACTICES - CRITICAL
+To ensure emails land in the Primary inbox (not Promotions/Spam), follow these rules strictly:
+
+### Content Rules
+- **NO SPAMMY WORDS**: Avoid "FREE", "BUY NOW", "LIMITED TIME OFFER", "ACT NOW", "HURRY", "DON'T MISS OUT", excessive urgency language
+- **NO ALL CAPS**: Never use all caps for emphasis (use bold or colour instead)
+- **NO EXCESSIVE PUNCTUATION**: Never use multiple exclamation marks (!!) or question marks (??)
+- **CONVERSATIONAL TONE**: Write like you're talking to a friend, not selling to a customer
+- **BALANCED TEXT-TO-IMAGE RATIO**: Ensure substantial text content accompanies images (aim for 60% text, 40% images)
+- **LIMIT LINKS**: Use only 1-2 links maximum in the email body (not counting the main CTA)
+- **SINGLE FOCUSED CTA**: One clear call-to-action, not multiple competing buttons
+
+### Writing Style for Deliverability
+- Use friendly, personal language ("We'd love to see your little ones...")
+- Ask genuine questions to encourage replies ("What activities does your child enjoy most?")
+- Share stories and experiences rather than just promotions
+- Be specific rather than generic ("Our spring lambs arrived last week" not "Amazing deals await!")
+- Use gentle urgency ("Spaces are filling up" not "BOOK NOW BEFORE IT'S TOO LATE!")
+
+### Subject Line Rules
+- Keep under 50 characters ideally (max 60)
+- Use ONE emoji maximum, and only if it feels natural
+- Avoid spam trigger words in subject lines especially
+- Make it sound personal and interesting, not salesy
+- Good: "Spring lambs have arrived at the farm"
+- Bad: "AMAZING OFFER! 50% OFF - DON'T MISS OUT!!!"
+
 ## Image Handling - IMPORTANT
 1. **USE ALL PROVIDED IMAGES** - Every image uploaded must appear in the newsletter
 2. Analyze each image to understand its content, mood, and subjects
@@ -89,7 +116,7 @@ If the admin provides only brief notes, use your initiative to create compelling
 - Draw on the club details provided (name, dates, activities)
 - Create vivid descriptions of farm activities children will enjoy
 - Emphasise benefits parents care about: safe environment, active play, making friends
-- Build excitement and urgency (limited spaces, popular sessions)
+- Build gentle excitement (spaces filling up, popular sessions) - NOT aggressive urgency
 - Use sensory language: imagine your child's delight, the fresh countryside air, etc.
 
 ## HTML Output Requirements
@@ -106,8 +133,8 @@ If the admin provides only brief notes, use your initiative to create compelling
 ## Response Format
 Respond with ONLY valid JSON (no markdown code blocks):
 {
-  "subject": "Subject line (max 60 chars, include emoji if appropriate)",
-  "previewText": "Preview text for inbox (max 90 chars)",
+  "subject": "Subject line (max 50 chars preferred, 60 max, one emoji max if natural)",
+  "previewText": "Preview text for inbox (max 90 chars, conversational tone)",
   "bodyHtml": "<h2 style=\\"...\\">..</h2><p>...</p>..."
 }`;
 
@@ -209,7 +236,15 @@ ${clubInfo}${promoInfo}${imageInfo}
 - ${images.length > 0 ? `USE ALL ${images.length} IMAGES with placeholders {{IMAGE_1}} to {{IMAGE_${images.length}}}` : "No images provided"}
 - Focus on emotional appeal: the joy children experience, memories made, friendships formed
 - Include one CTA button with href="#" (system will add real link)
-- If notes are brief, use initiative to write vivid, compelling copy about the farm experience`;
+- If notes are brief, use initiative to write vivid, compelling copy about the farm experience
+
+## DELIVERABILITY CRITICAL:
+- Write conversationally like emailing a friend - NOT like marketing copy
+- NO spammy words (FREE, BUY NOW, LIMITED TIME, HURRY, ACT NOW)
+- NO all caps, NO multiple exclamation marks
+- Keep subject line under 50 chars, max one emoji
+- Limit to 1-2 links in body text (excluding CTA)
+- Encourage replies by asking a genuine question somewhere in the email`;
 
     // Build message content with images for vision
     const messageContent: Anthropic.MessageParam["content"] = [];
