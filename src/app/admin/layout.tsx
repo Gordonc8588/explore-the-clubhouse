@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Target,
   Megaphone,
+  FileText,
   type LucideIcon,
 } from "lucide-react";
 
@@ -54,6 +55,7 @@ const sidebarLinks: NavItem[] = [
       { href: "/admin/marketing/subscribers", label: "Subscribers", icon: Users },
       { href: "/admin/marketing/newsletters", label: "Newsletters", icon: Send },
       { href: "/admin/marketing/ads", label: "Meta Ads", icon: Megaphone },
+      { href: "/admin/marketing/print-ads", label: "Print Ads", icon: FileText },
     ],
   },
   {

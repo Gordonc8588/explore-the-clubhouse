@@ -167,3 +167,56 @@
 # - [ ] Video Ads - video upload and preview support
 # - [ ] Budget approval workflow - spending limits requiring approval
 # - [ ] Webhook at src/app/api/meta/webhook/route.ts for real-time ad status updates
+
+# ===========================================
+# PRINT ADS CREATOR FEATURE
+# Implementation Lead: Ralphy | Target: Q1 2026
+# PRD: PRD-print-ads.md
+# ===========================================
+
+# PHASE 1: FOUNDATION - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create database migration at supabase/migrations/20260127140000_add_print_ads.sql with print_ads table (id, name, ad_type enum, headline, body_copy, cta_text, main_image_url, flyer_image_url, club_id FK, club_data JSONB, status enum, timestamps)
+- [✓] 2026-01-27 - Add PrintAdStatus, PrintAdType enums and PrintAd, PrintAdInsert, PrintAdUpdate interfaces to src/types/database.ts
+- [✓] 2026-01-27 - Install @react-pdf/renderer package (npm install @react-pdf/renderer)
+- [✓] 2026-01-27 - Create src/lib/print-ads/types.ts with template configuration types and brand color constants
+- [✓] 2026-01-27 - Create src/lib/print-ads/templates.ts with TEMPLATES object defining magazine_quarter_page (105mm x 148mm) and newsletter_digital (600x800px) dimensions, margins, and zones
+
+# PHASE 2: API ROUTES - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create src/app/api/admin/print-ads/route.ts with GET (list with status filter) and POST (create draft) endpoints using isAdmin() auth check
+- [✓] 2026-01-27 - Create src/app/api/admin/print-ads/[id]/route.ts with GET (single), PATCH (update), DELETE endpoints
+- [✓] 2026-01-27 - Create src/app/api/admin/print-ads/generate/route.ts for AI copy generation using Claude API with third-person editorial system prompt (80+ words)
+- [✓] 2026-01-27 - Create src/app/api/admin/print-ads/pdf/route.ts for PDF generation returning file stream with Content-Type: application/pdf headers
+
+# PHASE 3: PDF GENERATION - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Register Playfair Display and Nunito Sans fonts via Google Fonts URLs in PDF component
+- [✓] 2026-01-27 - Create src/components/print-ads/PrintAdPdfDocument.tsx using @react-pdf/renderer with registered fonts, brand colors, and template zones (image, headline, body, cta, footer)
+- [✓] 2026-01-27 - Implement magazine_quarter_page template (105mm x 148mm, 8mm margins, 300 DPI)
+- [✓] 2026-01-27 - Implement newsletter_digital template (600x800px for digital distribution)
+- [✓] 2026-01-27 - Add image embedding from Cloudinary URLs with base64 conversion for PDF
+
+# PHASE 4: UI COMPONENTS - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create src/components/print-ads/ClubSelector.tsx dropdown that fetches active clubs and populates club_data (name, dates, age_range, location, prices)
+- [✓] 2026-01-27 - Create src/components/print-ads/PrintAdImagePicker.tsx using existing Cloudinary library pattern from AdImageUploader (main image + optional flyer image)
+- [✓] 2026-01-27 - Create src/components/print-ads/PrintAdPreview.tsx with HTML preview at correct aspect ratio, real-time updates, and dimension label
+- [✓] 2026-01-27 - Add word count indicator for body copy (target: 80+ words, warning if under) - integrated into PrintAdPreview
+
+# PHASE 5: PAGES - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Create src/app/admin/marketing/print-ads/page.tsx (server component) fetching print_ads list with stats (draft count, final count)
+- [✓] 2026-01-27 - Create src/app/admin/marketing/print-ads/PrintAdsManager.tsx (client component) with card grid, status filter, and actions (edit, download PDF, duplicate, delete)
+- [✓] 2026-01-27 - Create src/app/admin/marketing/print-ads/create/page.tsx (server component) fetching clubs for dropdown
+- [✓] 2026-01-27 - Create src/app/admin/marketing/print-ads/create/PrintAdForm.tsx (client component) with club selector, image picker, copy editor with AI generate button, live preview, and save draft/download PDF buttons
+- [✓] 2026-01-27 - Create src/app/admin/marketing/print-ads/[id]/page.tsx for editing existing print ads
+
+# PHASE 6: INTEGRATION - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Add "Print Ads" link to Marketing group in src/app/admin/layout.tsx sidebar navigation (import FileText icon from lucide-react)
+- [✓] 2026-01-27 - Wire up AI copy generation button to /api/admin/print-ads/generate endpoint (implemented in PrintAdForm.tsx)
+- [✓] 2026-01-27 - Wire up Download PDF button to /api/admin/print-ads/pdf endpoint with file download (implemented in PrintAdForm.tsx and PrintAdsManager.tsx)
+- [✓] 2026-01-27 - Add duplicate functionality (creates new draft with copied content) (implemented in PrintAdsManager.tsx)
+- [✓] 2026-01-27 - Add Mark as Final button to change status from draft to final (implemented in PrintAdForm.tsx)
+
+# PHASE 7: TESTING & VERIFICATION - COMPLETED 2026-01-27
+- [✓] 2026-01-27 - Run npm run build to verify no TypeScript errors
+- [ ] Test complete flow: create ad, select club, select image, generate copy, preview, download PDF (manual testing required)
+- [ ] Verify PDF dimensions are exactly 105mm x 148mm when printed/measured (manual testing required)
+- [ ] Verify AI generates 80+ words in third person editorial style (manual testing required)
+- [ ] Verify brand colors and fonts render correctly in PDF (manual testing required)

@@ -860,6 +860,76 @@ export interface MetaAdImageUpdate {
 }
 
 // =============================================================================
+// PRINT ADS TYPES
+// =============================================================================
+
+/** Print ad status - tracks draft vs finalized state */
+export type PrintAdStatus = 'draft' | 'final';
+
+/** Print ad type - determines output format and dimensions */
+export type PrintAdType = 'newsletter_digital' | 'magazine_quarter_page';
+
+/** Cached club data stored with print ad for historical reference */
+export interface PrintAdClubData {
+  name: string;
+  dates: string;
+  age_range: string;
+  location: string;
+  prices: { option: string; price: number }[];
+}
+
+/**
+ * PrintAd - Print advertisements for newspapers and magazines
+ */
+export interface PrintAd {
+  id: string;
+  name: string;
+  ad_type: PrintAdType;
+  headline: string | null;
+  body_copy: string | null;
+  cta_text: string | null;
+  main_image_url: string | null;
+  flyer_image_url: string | null;
+  club_id: string | null;
+  club_data: PrintAdClubData | null;
+  status: PrintAdStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PrintAdInsert {
+  id?: string;
+  name: string;
+  ad_type?: PrintAdType;
+  headline?: string | null;
+  body_copy?: string | null;
+  cta_text?: string | null;
+  main_image_url?: string | null;
+  flyer_image_url?: string | null;
+  club_id?: string | null;
+  club_data?: PrintAdClubData | null;
+  status?: PrintAdStatus;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PrintAdUpdate {
+  id?: string;
+  name?: string;
+  ad_type?: PrintAdType;
+  headline?: string | null;
+  body_copy?: string | null;
+  cta_text?: string | null;
+  main_image_url?: string | null;
+  flyer_image_url?: string | null;
+  club_id?: string | null;
+  club_data?: PrintAdClubData | null;
+  status?: PrintAdStatus;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// =============================================================================
 // ANALYTICS TYPES
 // =============================================================================
 
@@ -1000,6 +1070,11 @@ export interface Database {
         Row: MetaAdImage;
         Insert: MetaAdImageInsert;
         Update: MetaAdImageUpdate;
+      };
+      print_ads: {
+        Row: PrintAd;
+        Insert: PrintAdInsert;
+        Update: PrintAdUpdate;
       };
     };
     Functions: {

@@ -20,5 +20,12 @@ rules:
   - "Meta Ads: Use existing admin auth (cookie-based admin-session) for all ad routes"
   - "Meta Ads: Follow Meta Ad Specs - Primary text 125 chars, Headline 40 chars,
     Description 30 chars recommended"
+  - "Print Ads: Mirror the existing newsletter/Meta Ads pattern (ImagePicker, AI generation,
+    Preview) for consistent UX"
+  - "Print Ads: Use @react-pdf/renderer for PDF generation with exact print dimensions"
+  - "Print Ads: Magazine quarter page = 105mm x 148mm, Newsletter/Digital = 600x800px"
+  - "Print Ads: AI-generated copy must be 80+ words in third person for print editorial style"
+  - "Print Ads: Auto-populate club data (dates, prices, age range) when club is selected"
+  - "Print Ads: Use existing Cloudinary image libraries (newsletter_images, meta_ad_images)"
 boundaries:
   never_touch: []
