@@ -21,6 +21,10 @@ interface AdImage {
   description?: string;
 }
 
+interface LibraryImage extends MetaAdImage {
+  source: "ads" | "newsletter";
+}
+
 interface AdImageUploaderProps {
   images: AdImage[];
   onChange: (images: AdImage[]) => void;
@@ -48,9 +52,10 @@ export function AdImageUploader({
   const [activeTab, setActiveTab] = useState<TabType>("upload");
 
   // Library state
-  const [libraryImages, setLibraryImages] = useState<MetaAdImage[]>([]);
+  const [libraryImages, setLibraryImages] = useState<LibraryImage[]>([]);
   const [isLoadingLibrary, setIsLoadingLibrary] = useState(false);
   const [libraryError, setLibraryError] = useState<string | null>(null);
+  const [importingId, setImportingId] = useState<string | null>(null);
 
   // Use ref to accumulate uploads during a batch
   const pendingUploadsRef = useRef<CloudinaryResult["info"][]>([]);
@@ -136,7 +141,7 @@ export function AdImageUploader({
     }
   }, [onChange]);
 
-  const handleSelectFromLibrary = (libraryImage: MetaAdImage) => {
+  const handleSelectFromLibrary = async (libraryImage: LibraryImage) => {
     if (images.some((img) => img.url === libraryImage.url)) {
       // Deselect
       const newImages = images.filter((img) => img.url !== libraryImage.url);
@@ -145,15 +150,48 @@ export function AdImageUploader({
         label: `Image ${i + 1}`,
       }));
       onChange(relabeled);
-    } else if (images.length < maxImages) {
-      // Select
-      const newImage: AdImage = {
-        url: libraryImage.url,
-        label: `Image ${images.length + 1}`,
-        description: libraryImage.description || "",
-      };
-      onChange([...images, newImage]);
+      return;
     }
+
+    if (images.length >= maxImages) return;
+
+    // If it's a newsletter image, import it to ads library first
+    if (libraryImage.source === "newsletter") {
+      setImportingId(libraryImage.id);
+      try {
+        const response = await fetch("/api/admin/ads/images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            importFromNewsletter: true,
+            newsletterImageId: libraryImage.id,
+            url: libraryImage.url,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to import image");
+
+        // Update the library image to show it's now in ads
+        setLibraryImages((prev) =>
+          prev.map((img) =>
+            img.id === libraryImage.id ? { ...img, source: "ads" as const } : img
+          )
+        );
+      } catch (error) {
+        console.error("Error importing newsletter image:", error);
+        setLibraryError("Failed to import image from newsletter library");
+        setImportingId(null);
+        return;
+      }
+      setImportingId(null);
+    }
+
+    // Select the image
+    const newImage: AdImage = {
+      url: libraryImage.url,
+      label: `Image ${images.length + 1}`,
+      description: libraryImage.description || "",
+    };
+    onChange([...images, newImage]);
   };
 
   const handleRemove = (index: number) => {
@@ -359,22 +397,24 @@ export function AdImageUploader({
           ) : (
             <>
               <p className="text-xs text-gray-500">
-                Click to select images ({images.length}/{maxImages} selected)
+                Click to select images ({images.length}/{maxImages} selected).
+                Newsletter images will be imported automatically.
               </p>
               <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
                 {libraryImages.map((libImg) => {
                   const selected = isImageSelected(libImg.url);
                   const canSelect = images.length < maxImages || selected;
+                  const isImporting = importingId === libImg.id;
                   return (
                     <button
                       key={libImg.id}
                       type="button"
-                      onClick={() => canSelect && handleSelectFromLibrary(libImg)}
-                      disabled={!canSelect}
+                      onClick={() => canSelect && !isImporting && handleSelectFromLibrary(libImg)}
+                      disabled={!canSelect || isImporting}
                       className={`group relative aspect-square overflow-hidden rounded-lg border-2 transition-all ${
                         selected
                           ? "border-[var(--craigies-olive)] ring-2 ring-[var(--craigies-olive)] ring-offset-2"
-                          : canSelect
+                          : canSelect && !isImporting
                           ? "border-gray-200 hover:border-gray-300"
                           : "cursor-not-allowed border-gray-100 opacity-50"
                       }`}
@@ -386,11 +426,28 @@ export function AdImageUploader({
                         className="object-cover"
                         sizes="150px"
                       />
+                      {/* Source badge */}
+                      <span
+                        className={`absolute left-1 top-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                          libImg.source === "newsletter"
+                            ? "bg-blue-500 text-white"
+                            : "bg-[var(--craigies-olive)] text-white"
+                        }`}
+                      >
+                        {libImg.source === "newsletter" ? "Newsletter" : "Ads"}
+                      </span>
+                      {/* Selected state */}
                       {selected && (
                         <div className="absolute inset-0 flex items-center justify-center bg-[var(--craigies-olive)]/20">
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--craigies-olive)]">
                             <Check className="h-4 w-4 text-white" />
                           </div>
+                        </div>
+                      )}
+                      {/* Importing state */}
+                      {isImporting && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+                          <Loader2 className="h-6 w-6 animate-spin text-[var(--craigies-olive)]" />
                         </div>
                       )}
                     </button>
