@@ -426,6 +426,199 @@ export async function getAdReviewStatus(adId: string): Promise<{
 }
 
 /**
+ * Fetch all ads from the Meta Ad Account
+ */
+export interface MetaAdData {
+  id: string;
+  name: string;
+  status: string;
+  effective_status: string;
+  campaign_id: string;
+  adset_id: string;
+  creative_id?: string;
+  created_time: string;
+  updated_time: string;
+  preview_shareable_link?: string;
+}
+
+export interface MetaCampaignData {
+  id: string;
+  name: string;
+  status: string;
+  objective: string;
+  created_time: string;
+}
+
+export interface MetaAdSetData {
+  id: string;
+  name: string;
+  status: string;
+  campaign_id: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  start_time?: string;
+  end_time?: string;
+  targeting?: Record<string, unknown>;
+}
+
+export interface MetaCreativeData {
+  id: string;
+  name: string;
+  object_story_spec?: {
+    page_id?: string;
+    link_data?: {
+      message?: string;
+      name?: string;
+      description?: string;
+      link?: string;
+      image_hash?: string;
+      call_to_action?: {
+        type?: string;
+      };
+    };
+  };
+  image_url?: string;
+  thumbnail_url?: string;
+}
+
+export async function getAllAdsFromMeta(): Promise<MetaAdData[]> {
+  initializeApi();
+
+  const fields = [
+    'id',
+    'name',
+    'status',
+    'effective_status',
+    'campaign_id',
+    'adset_id',
+    'creative{id,name,object_story_spec,image_url,thumbnail_url}',
+    'created_time',
+    'updated_time',
+  ].join(',');
+
+  // Use the Graph API directly via fetch
+  const url = `https://graph.facebook.com/v21.0/act_${META_AD_ACCOUNT_ID}/ads?fields=${fields}&limit=100&access_token=${META_SYSTEM_USER_TOKEN}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || 'Meta API error');
+    }
+
+    return (data.data || []).map((ad: Record<string, unknown>) => ({
+      id: ad.id as string,
+      name: ad.name as string,
+      status: ad.status as string,
+      effective_status: ad.effective_status as string,
+      campaign_id: ad.campaign_id as string,
+      adset_id: ad.adset_id as string,
+      creative_id: (ad.creative as { id?: string })?.id,
+      created_time: ad.created_time as string,
+      updated_time: ad.updated_time as string,
+    })) as MetaAdData[];
+  } catch (error) {
+    console.error('Error fetching ads from Meta:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all campaigns from the Meta Ad Account
+ */
+export async function getAllCampaignsFromMeta(): Promise<MetaCampaignData[]> {
+  initializeApi();
+
+  const fields = 'id,name,status,objective,created_time';
+  const url = `https://graph.facebook.com/v21.0/act_${META_AD_ACCOUNT_ID}/campaigns?fields=${fields}&limit=100&access_token=${META_SYSTEM_USER_TOKEN}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || 'Meta API error');
+    }
+
+    return (data.data || []).map((campaign: Record<string, unknown>) => ({
+      id: campaign.id as string,
+      name: campaign.name as string,
+      status: campaign.status as string,
+      objective: campaign.objective as string,
+      created_time: campaign.created_time as string,
+    }));
+  } catch (error) {
+    console.error('Error fetching campaigns from Meta:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch ad set details
+ */
+export async function getAdSetFromMeta(adSetId: string): Promise<MetaAdSetData | null> {
+  initializeApi();
+
+  const adSet = new AdSet(adSetId);
+  const fields = [
+    'id',
+    'name',
+    'status',
+    'campaign_id',
+    'daily_budget',
+    'lifetime_budget',
+    'start_time',
+    'end_time',
+    'targeting',
+  ];
+
+  try {
+    const result = await adSet.get(fields);
+    const data = result._data as Record<string, unknown>;
+
+    return {
+      id: data.id as string,
+      name: data.name as string,
+      status: data.status as string,
+      campaign_id: data.campaign_id as string,
+      daily_budget: data.daily_budget as string | undefined,
+      lifetime_budget: data.lifetime_budget as string | undefined,
+      start_time: data.start_time as string | undefined,
+      end_time: data.end_time as string | undefined,
+      targeting: data.targeting as Record<string, unknown> | undefined,
+    };
+  } catch (error) {
+    console.error('Error fetching ad set from Meta:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch creative details
+ */
+export async function getCreativeFromMeta(creativeId: string): Promise<MetaCreativeData | null> {
+  initializeApi();
+
+  const creative = new AdCreative(creativeId);
+  const fields = [
+    'id',
+    'name',
+    'object_story_spec',
+    'image_url',
+    'thumbnail_url',
+  ];
+
+  try {
+    const result = await creative.get(fields);
+    return result._data as unknown as MetaCreativeData;
+  } catch (error) {
+    console.error('Error fetching creative from Meta:', error);
+    return null;
+  }
+}
+
+/**
  * Check if Meta Ads API is configured
  */
 export function isMetaAdsConfigured(): boolean {

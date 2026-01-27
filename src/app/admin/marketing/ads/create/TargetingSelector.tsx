@@ -28,19 +28,23 @@ interface TargetingSelectorProps {
   onChange: (config: TargetingConfig) => void;
 }
 
+// Craigies Farm, South Queensferry, Scotland
+const CRAIGIES_FARM_LAT = 55.983;
+const CRAIGIES_FARM_LNG = -3.402;
+
 const TARGETING_PRESETS = [
   {
     id: "local_parents",
     name: "Local Parents",
-    description: "Parents aged 25-45 within 20 miles of Farnham",
+    description: "Parents aged 25-45 within 20 miles of South Queensferry",
     icon: Users,
     config: {
       ageMin: 25,
       ageMax: 45,
       genders: [],
       radius: 32, // ~20 miles in km
-      latitude: 51.2548,
-      longitude: -0.7507,
+      latitude: CRAIGIES_FARM_LAT,
+      longitude: CRAIGIES_FARM_LNG,
     },
   },
   {
@@ -53,8 +57,8 @@ const TARGETING_PRESETS = [
       ageMax: 50,
       genders: [],
       radius: 48, // ~30 miles in km
-      latitude: 51.2548,
-      longitude: -0.7507,
+      latitude: CRAIGIES_FARM_LAT,
+      longitude: CRAIGIES_FARM_LNG,
     },
   },
   {
@@ -67,8 +71,8 @@ const TARGETING_PRESETS = [
       ageMax: 65,
       genders: [],
       radius: 100,
-      latitude: 51.2548,
-      longitude: -0.7507,
+      latitude: CRAIGIES_FARM_LAT,
+      longitude: CRAIGIES_FARM_LNG,
     },
   },
   {
@@ -81,8 +85,8 @@ const TARGETING_PRESETS = [
       ageMax: 50,
       genders: [],
       radius: 100,
-      latitude: 51.2548,
-      longitude: -0.7507,
+      latitude: CRAIGIES_FARM_LAT,
+      longitude: CRAIGIES_FARM_LNG,
     },
   },
 ];
@@ -288,7 +292,7 @@ export function TargetingSelector({ value, onChange }: TargetingSelectorProps) {
               style={{ color: "var(--craigies-dark-olive)" }}
             >
               <MapPin className="mr-1 inline h-4 w-4" />
-              Radius from Farnham
+              Radius from Craigies Farm
             </label>
             <div className="flex items-center gap-3">
               <input

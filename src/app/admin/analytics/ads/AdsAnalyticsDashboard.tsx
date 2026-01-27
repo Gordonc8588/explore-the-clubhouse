@@ -11,6 +11,9 @@ import {
   RefreshCw,
   BarChart3,
   ExternalLink,
+  Download,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { KPICard } from "@/components/admin/analytics/KPICard";
 
@@ -82,10 +85,24 @@ const STATUS_BADGES: Record<string, { label: string; className: string }> = {
   completed: { label: "Completed", className: "bg-purple-100 text-purple-700" },
 };
 
+interface ImportResult {
+  success: boolean;
+  message: string;
+  stats?: {
+    total: number;
+    imported: number;
+    updated: number;
+    skipped: number;
+    errors: number;
+  };
+}
+
 export function AdsAnalyticsDashboard() {
   const [dateRange, setDateRange] = useState<DateRange>("30d");
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [summary, setSummary] = useState<PerformanceSummary | null>(null);
   const [dailyMetrics, setDailyMetrics] = useState<DailyMetric[]>([]);
   const [adsComparison, setAdsComparison] = useState<AdComparison[]>([]);
@@ -126,6 +143,40 @@ export function AdsAnalyticsDashboard() {
     }
   };
 
+  const handleImportFromMeta = async () => {
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const res = await fetch("/api/admin/ads/import", {
+        method: "POST",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setImportResult({
+          success: true,
+          message: data.message,
+          stats: data.stats,
+        });
+        // Refresh data after import
+        await fetchData();
+      } else {
+        setImportResult({
+          success: false,
+          message: data.error || "Failed to import ads",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to import from Meta:", error);
+      setImportResult({
+        success: false,
+        message: "Failed to connect to server",
+      });
+    } finally {
+      setImporting(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [dateRange]);
@@ -157,7 +208,19 @@ export function AdsAnalyticsDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Sync Button */}
+          {/* Import from Meta Button */}
+          <button
+            onClick={handleImportFromMeta}
+            disabled={importing}
+            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+          >
+            <Download
+              className={`h-4 w-4 ${importing ? "animate-pulse" : ""}`}
+            />
+            {importing ? "Importing..." : "Import from Meta"}
+          </button>
+
+          {/* Sync Metrics Button */}
           <button
             onClick={handleSyncMetrics}
             disabled={syncing}
@@ -194,6 +257,38 @@ export function AdsAnalyticsDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Import Result Message */}
+      {importResult && (
+        <div
+          className={`flex items-start gap-3 rounded-xl p-4 ${
+            importResult.success
+              ? "bg-green-50 text-green-800"
+              : "bg-red-50 text-red-800"
+          }`}
+        >
+          {importResult.success ? (
+            <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600" />
+          ) : (
+            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
+          )}
+          <div className="flex-1">
+            <p className="font-medium">{importResult.message}</p>
+            {importResult.stats && (
+              <p className="mt-1 text-sm opacity-80">
+                {importResult.stats.imported} imported, {importResult.stats.updated} updated
+                {importResult.stats.errors > 0 && `, ${importResult.stats.errors} errors`}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => setImportResult(null)}
+            className="text-current opacity-60 hover:opacity-100"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">

@@ -155,6 +155,16 @@ export function AdDetailClient({ ad, metrics }: AdDetailClientProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {ad.status === "draft" && (
+            <Link
+              href={`/admin/marketing/ads/${ad.id}/publish`}
+              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
+            >
+              <Play className="h-4 w-4" />
+              Continue to Publish
+            </Link>
+          )}
           {ad.status === "active" && (
             <button
               onClick={() => handleAction("pause")}

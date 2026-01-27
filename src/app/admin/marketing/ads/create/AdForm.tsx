@@ -87,15 +87,15 @@ export function AdForm({ clubs, promoCodes }: AdFormProps) {
   });
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  // Step 4: Targeting & Budget
+  // Step 4: Targeting & Budget - Craigies Farm, South Queensferry
   const [targeting, setTargeting] = useState<TargetingConfig>({
     preset: "local_parents",
     ageMin: 25,
     ageMax: 45,
     genders: [],
     radius: 32,
-    latitude: 51.2548,
-    longitude: -0.7507,
+    latitude: 55.983,
+    longitude: -3.402,
   });
 
   // Get default dates (tomorrow to 2 weeks from now)

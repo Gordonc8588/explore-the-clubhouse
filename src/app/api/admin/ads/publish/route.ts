@@ -282,7 +282,9 @@ export async function POST(request: Request) {
         const message = metaError.message;
 
         // Common Meta API errors
-        if (message.includes("OAuthException")) {
+        if (message.includes("(#3)") || message.includes("does not have the capability")) {
+          errorMessage = "Your Facebook App doesn't have ads_management permission. Please go to developers.facebook.com, select your app, and request the 'ads_management' permission under App Review.";
+        } else if (message.includes("OAuthException")) {
           errorMessage = "Authentication failed. Please check your Meta API token.";
         } else if (message.includes("budget")) {
           errorMessage = "Budget is too low. Please increase your budget.";
