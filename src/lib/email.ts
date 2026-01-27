@@ -26,6 +26,7 @@ function cleanEnvVar(value: string): string {
 }
 
 const fromEmail = cleanEnvVar(process.env.RESEND_FROM_EMAIL || 'hello@exploretheclubhouse.co.uk');
+const newsletterFromEmail = cleanEnvVar(process.env.NEWSLETTER_FROM_EMAIL || fromEmail);
 const siteUrl = cleanEnvVar(process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk');
 const adminEmail = cleanEnvVar(process.env.ADMIN_EMAIL || 'admin@exploretheclubhouse.co.uk');
 
@@ -889,8 +890,9 @@ export async function sendNewsletter(
     try {
       // Resend's batch API
       const batchEmails = batch.map((email) => ({
-        from: `The Clubhouse <${fromEmail}>`,
+        from: `Nicole from The Clubhouse <${newsletterFromEmail}>`,
         to: email,
+        replyTo: newsletterFromEmail,
         subject: newsletter.subject,
         html: htmlTemplate.replace(/{{email}}/g, encodeURIComponent(email)),
         text: textTemplate.replace(/{{unsubscribe_url}}/g, `${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}`),
@@ -940,8 +942,9 @@ export async function sendTestNewsletter(
     const text = buildNewsletterPlainText(newsletter, club, promoCode);
 
     const { data, error } = await resend.emails.send({
-      from: `The Clubhouse <${fromEmail}>`,
+      from: `Nicole from The Clubhouse <${newsletterFromEmail}>`,
       to: testEmail,
+      replyTo: newsletterFromEmail,
       subject: `[TEST] ${newsletter.subject}`,
       html: html.replace(/{{email}}/g, encodeURIComponent(testEmail)),
       text: text.replace(/{{unsubscribe_url}}/g, `${siteUrl}/unsubscribe?email=${encodeURIComponent(testEmail)}`),
@@ -1002,8 +1005,9 @@ export async function sendNewsletterConfirmationEmail(
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `The Clubhouse <${fromEmail}>`,
+      from: `Nicole from The Clubhouse <${newsletterFromEmail}>`,
       to: email,
+      replyTo: newsletterFromEmail,
       subject: 'Please confirm your newsletter subscription',
       html: emailTemplate(content),
     });
@@ -1071,8 +1075,9 @@ export async function sendNewsletterWelcomeEmail(
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `The Clubhouse <${fromEmail}>`,
+      from: `Nicole from The Clubhouse <${newsletterFromEmail}>`,
       to: email,
+      replyTo: newsletterFromEmail,
       subject: 'Welcome to The Clubhouse Newsletter!',
       html: emailTemplate(content),
     });
