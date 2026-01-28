@@ -27,5 +27,12 @@ rules:
   - "Print Ads: AI-generated copy must be 80+ words in third person for print editorial style"
   - "Print Ads: Auto-populate club data (dates, prices, age range) when club is selected"
   - "Print Ads: Use existing Cloudinary image libraries (newsletter_images, meta_ad_images)"
+  - "Survey: Multi-page wizard with 7 steps matching section groupings, progress bar at top"
+  - "Survey: Auto-save partial responses to survey_sessions table on each step navigation"
+  - "Survey: Use Clubhouse brand colors (Craigies palette) but NO company name or branding"
+  - "Survey: Q12 has strict max 3 selection enforcement with disabled state after limit"
+  - "Survey: Free text questions (Q9, Q14) are optional, not required"
+  - "Survey: Collect full postcode and email with GDPR consent checkbox"
+  - "Survey: Admin analytics integrated into existing /admin area with charts and CSV export"
 boundaries:
   never_touch: []

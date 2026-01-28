@@ -220,3 +220,70 @@
 - [ ] Verify PDF dimensions are exactly 105mm x 148mm when printed/measured (manual testing required)
 - [ ] Verify AI generates 80+ words in third person editorial style (manual testing required)
 - [ ] Verify brand colors and fonts render correctly in PDF (manual testing required)
+
+# ===========================================
+# PARENT SURVEY FEATURE
+# Implementation Lead: Ralphy | Target: Q1 2026
+# PRD: PRD-survey.md
+# Purpose: Market research survey for partner org
+# URL: /survey/holiday-club-survey
+# ===========================================
+
+# PHASE 1: DATABASE & TYPES - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - Create database migration at supabase/migrations/20260128094608_add_survey.sql with survey_sessions and survey_responses tables, indexes, RLS policies
+- [✓] 2026-01-28 - Add SurveySession, SurveyResponse types and insert/update variants to src/types/database.ts, update Database interface
+
+# PHASE 2: API ROUTES - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - Create src/app/api/survey/session/route.ts with POST (create session) and PATCH (update session for auto-save)
+- [✓] 2026-01-28 - Create src/app/api/survey/submit/route.ts with POST to finalize response with validation
+- [✓] 2026-01-28 - Create src/app/api/admin/survey/responses/route.ts with GET (list with pagination, filters)
+- [✓] 2026-01-28 - Create src/app/api/admin/survey/analytics/route.ts with GET returning aggregated stats for all questions
+- [✓] 2026-01-28 - Create src/app/api/admin/survey/export/route.ts with GET returning CSV file download
+
+# PHASE 3: SURVEY UI COMPONENTS - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - Create src/components/survey/SurveyProgress.tsx - progress bar with step indicators, responsive design
+- [✓] 2026-01-28 - Create src/components/survey/questions/SingleSelect.tsx - styled radio button group
+- [✓] 2026-01-28 - Create src/components/survey/questions/MultiSelect.tsx - styled checkbox group with selection counter
+- [✓] 2026-01-28 - Create src/components/survey/questions/MultiSelectLimited.tsx - strict max 3 enforcement with counter and disabled state
+- [✓] 2026-01-28 - Create src/components/survey/questions/TextArea.tsx - optional free text with character counter
+- [✓] 2026-01-28 - Create src/components/survey/questions/DaySelector.tsx - Mon-Fri day picker buttons
+- [✓] 2026-01-28 - Create src/components/survey/questions/EmailConsent.tsx - Yes/No toggle, email input, GDPR checkbox
+- [✓] 2026-01-28 - Create src/components/survey/questions/PostcodeInput.tsx - UK postcode validation and formatting
+
+# PHASE 4: SURVEY STEP PAGES - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - Create src/app/survey/holiday-club-survey/page.tsx server component with SEO metadata (noindex)
+- [✓] 2026-01-28 - Create src/app/survey/holiday-club-survey/SurveyWizard.tsx client component with full state management, auto-save, navigation
+- [✓] 2026-01-28 - Create src/components/survey/steps/IntroStep.tsx - welcome screen with start button
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step1AboutChildren.tsx - Q1, Q2
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step2Demand.tsx - Q3, Q4
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step3DaysTimes.tsx - Q5 with conditional day selector, Q6, Q7
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step4Activities.tsx - Q8, Q9
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step5Structure.tsx - Q10, Q11
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step6Practical.tsx - Q12 (max 3), Q13, Postcode
+- [✓] 2026-01-28 - Create src/components/survey/steps/Step7Final.tsx - Q14, Q15, Q16 with email consent
+- [✓] 2026-01-28 - Create src/components/survey/steps/ThankYouStep.tsx - success message with next steps
+
+# PHASE 5: ADMIN ANALYTICS DASHBOARD - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - Create src/app/admin/survey/page.tsx server component
+- [✓] 2026-01-28 - Create src/app/admin/survey/SurveyAnalytics.tsx client component with summary cards, tabs, refresh, export
+- [✓] 2026-01-28 - Create src/components/admin/survey/ResponsesTable.tsx - paginated table with status badges
+- [✓] 2026-01-28 - Create src/components/admin/survey/QuestionChart.tsx - horizontal bar charts with percentages
+- [✓] 2026-01-28 - Create src/app/admin/survey/[id]/page.tsx - single response detail view with all answer sections
+- [✓] 2026-01-28 - Add CSV Export button to analytics page
+- [✓] 2026-01-28 - Add "Research > Survey Results" link to admin sidebar navigation (ClipboardList icon)
+
+# PHASE 6: STYLING & UX - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - Applied Craigies palette throughout survey (olive #7a7c4a, cream #f5f4ed, burnt-orange #d4843e)
+- [✓] 2026-01-28 - Responsive design with mobile-first approach, touch-friendly tap targets
+- [✓] 2026-01-28 - Loading states for session creation, auto-save, and submit
+- [✓] 2026-01-28 - Error handling with user-friendly messages
+- [✓] 2026-01-28 - Back button on all steps except intro
+
+# PHASE 7: TESTING & VERIFICATION - COMPLETED 2026-01-28
+- [✓] 2026-01-28 - npm run build passes with no TypeScript errors
+- [ ] Test complete survey flow end-to-end (manual testing required after migration)
+- [ ] Test partial save functionality (manual testing required after migration)
+- [ ] Test Q12 max 3 enforcement in browser (manual testing required)
+- [ ] Test admin analytics charts and CSV export (manual testing required after migration)
+- [ ] Test mobile responsiveness (manual testing required)
+- [✓] 2026-01-28 - No Clubhouse branding visible on survey pages (verified in code)

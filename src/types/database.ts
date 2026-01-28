@@ -980,6 +980,151 @@ export interface NewsletterClickInsert {
 }
 
 // =============================================================================
+// SURVEY TYPES
+// =============================================================================
+
+/**
+ * SurveySession - Tracks survey progress for auto-save functionality
+ */
+export interface SurveySession {
+  id: string;
+  started_at: string;
+  completed_at: string | null;
+  current_step: number;
+  responses: Record<string, unknown>;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SurveySessionInsert {
+  id?: string;
+  started_at?: string;
+  completed_at?: string | null;
+  current_step?: number;
+  responses?: Record<string, unknown>;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SurveySessionUpdate {
+  id?: string;
+  started_at?: string;
+  completed_at?: string | null;
+  current_step?: number;
+  responses?: Record<string, unknown>;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * SurveyResponse - Completed and partial survey responses for analytics
+ */
+export interface SurveyResponse {
+  id: string;
+  session_id: string | null;
+  submitted_at: string;
+  is_complete: boolean;
+
+  // Q1-2: About Children
+  num_children: string | null;
+  children_ages: string[] | null;
+
+  // Q3-4: Demand
+  interest_level: string | null;
+  holiday_periods: string[] | null;
+
+  // Q5-7: Days & Times
+  preferred_days: string | null;
+  specific_days: string[] | null;
+  preferred_times: string[] | null;
+  days_per_week: string | null;
+
+  // Q8-9: Activities
+  activities: string[] | null;
+  activities_notes: string | null;
+
+  // Q10-11: Structure
+  age_group_preference: string | null;
+  structure_preference: string | null;
+
+  // Q12-13 + Postcode: Practical
+  important_factors: string[] | null;
+  additional_services: string[] | null;
+  postcode: string | null;
+
+  // Q14-16: Final
+  other_feedback: string | null;
+  next_holiday_interest: string | null;
+  contact_consent: boolean;
+  email: string | null;
+  gdpr_consent: boolean;
+
+  created_at: string;
+}
+
+export interface SurveyResponseInsert {
+  id?: string;
+  session_id?: string | null;
+  submitted_at?: string;
+  is_complete?: boolean;
+  num_children?: string | null;
+  children_ages?: string[] | null;
+  interest_level?: string | null;
+  holiday_periods?: string[] | null;
+  preferred_days?: string | null;
+  specific_days?: string[] | null;
+  preferred_times?: string[] | null;
+  days_per_week?: string | null;
+  activities?: string[] | null;
+  activities_notes?: string | null;
+  age_group_preference?: string | null;
+  structure_preference?: string | null;
+  important_factors?: string[] | null;
+  additional_services?: string[] | null;
+  postcode?: string | null;
+  other_feedback?: string | null;
+  next_holiday_interest?: string | null;
+  contact_consent?: boolean;
+  email?: string | null;
+  gdpr_consent?: boolean;
+  created_at?: string;
+}
+
+export interface SurveyResponseUpdate {
+  id?: string;
+  session_id?: string | null;
+  submitted_at?: string;
+  is_complete?: boolean;
+  num_children?: string | null;
+  children_ages?: string[] | null;
+  interest_level?: string | null;
+  holiday_periods?: string[] | null;
+  preferred_days?: string | null;
+  specific_days?: string[] | null;
+  preferred_times?: string[] | null;
+  days_per_week?: string | null;
+  activities?: string[] | null;
+  activities_notes?: string | null;
+  age_group_preference?: string | null;
+  structure_preference?: string | null;
+  important_factors?: string[] | null;
+  additional_services?: string[] | null;
+  postcode?: string | null;
+  other_feedback?: string | null;
+  next_holiday_interest?: string | null;
+  contact_consent?: boolean;
+  email?: string | null;
+  gdpr_consent?: boolean;
+  created_at?: string;
+}
+
+// =============================================================================
 // DATABASE TYPE (for Supabase client)
 // =============================================================================
 
@@ -1075,6 +1220,16 @@ export interface Database {
         Row: PrintAd;
         Insert: PrintAdInsert;
         Update: PrintAdUpdate;
+      };
+      survey_sessions: {
+        Row: SurveySession;
+        Insert: SurveySessionInsert;
+        Update: SurveySessionUpdate;
+      };
+      survey_responses: {
+        Row: SurveyResponse;
+        Insert: SurveyResponseInsert;
+        Update: SurveyResponseUpdate;
       };
     };
     Functions: {

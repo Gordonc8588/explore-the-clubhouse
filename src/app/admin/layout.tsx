@@ -21,6 +21,7 @@ import {
   Target,
   Megaphone,
   FileText,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 
@@ -69,6 +70,15 @@ const sidebarLinks: NavItem[] = [
       { href: "/admin/analytics/campaigns", label: "Campaigns", icon: Megaphone },
       { href: "/admin/analytics/newsletters", label: "Newsletters", icon: Mail },
       { href: "/admin/analytics/ads", label: "Ads", icon: Megaphone },
+    ],
+  },
+  {
+    label: "Research",
+    icon: ClipboardList,
+    isGroup: true,
+    defaultExpanded: false,
+    items: [
+      { href: "/admin/survey", label: "Survey Results", icon: ClipboardList },
     ],
   },
 ];
