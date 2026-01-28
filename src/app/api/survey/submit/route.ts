@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 // Validation schema for survey submission
@@ -42,7 +42,7 @@ const submitSurveySchema = z.object({
   other_feedback: z.string().max(1000).nullable().optional(),
   next_holiday_interest: z.string().nullable().optional(),
   contact_consent: z.boolean().default(false),
-  email: z.string().email().nullable().optional(),
+  email: z.string().email().or(z.literal('')).nullable().optional(),
   gdpr_consent: z.boolean().default(false),
 });
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = validationResult.data;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Validate email/GDPR consent logic
     if (data.contact_consent && data.email && !data.gdpr_consent) {
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error creating survey response:', error);
       return NextResponse.json(
-        { error: 'Failed to submit survey response' },
+        { error: 'Failed to submit survey response', details: error.message },
         { status: 500 }
       );
     }

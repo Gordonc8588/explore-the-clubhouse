@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 // Schema for creating a session
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const ip_address = forwardedFor ? forwardedFor.split(',')[0].trim() : null;
     const user_agent = validationResult.data.user_agent || request.headers.get('user-agent');
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: session, error } = await supabase
       .from('survey_sessions')
@@ -91,7 +91,7 @@ export async function PATCH(request: NextRequest) {
 
     const { session_id, current_step, responses, completed } = validationResult.data;
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const updateData: Record<string, unknown> = {
       current_step,
