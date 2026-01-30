@@ -55,10 +55,10 @@ export interface Club {
   image_url: string | null;
   start_date: string; // DATE as ISO string
   end_date: string; // DATE as ISO string
-  morning_start: string; // TIME as string (HH:MM:SS)
-  morning_end: string;
-  afternoon_start: string;
-  afternoon_end: string;
+  morning_start: string | null; // TIME as string (HH:MM:SS), null if no morning session
+  morning_end: string | null;
+  afternoon_start: string | null; // null if no afternoon session
+  afternoon_end: string | null;
   min_age: number;
   max_age: number;
   is_active: boolean;
@@ -74,10 +74,10 @@ export interface ClubInsert {
   image_url?: string | null;
   start_date: string;
   end_date: string;
-  morning_start?: string;
-  morning_end?: string;
-  afternoon_start?: string;
-  afternoon_end?: string;
+  morning_start?: string | null;
+  morning_end?: string | null;
+  afternoon_start?: string | null;
+  afternoon_end?: string | null;
   min_age?: number;
   max_age?: number;
   is_active?: boolean;
@@ -93,10 +93,10 @@ export interface ClubUpdate {
   image_url?: string | null;
   start_date?: string;
   end_date?: string;
-  morning_start?: string;
-  morning_end?: string;
-  afternoon_start?: string;
-  afternoon_end?: string;
+  morning_start?: string | null;
+  morning_end?: string | null;
+  afternoon_start?: string | null;
+  afternoon_end?: string | null;
   min_age?: number;
   max_age?: number;
   is_active?: boolean;

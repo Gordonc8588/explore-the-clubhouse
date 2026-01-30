@@ -201,8 +201,8 @@ function generateBookingConfirmation(): string {
     </div>
 
     ${infoBox('Club Times', `
-      <strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}<br>
-      <strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
+      ${club.morning_start ? `<strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end!)}<br>` : ''}
+      ${club.afternoon_start ? `<strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end!)}` : ''}
     `)}
 
     ${infoBox('What to Bring', `
@@ -373,8 +373,8 @@ function generateBookingComplete(): string {
     </div>
 
     ${infoBox('Club Times', `
-      <strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}<br>
-      <strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
+      ${club.morning_start ? `<strong>Morning Session:</strong> ${formatTime(club.morning_start)} - ${formatTime(club.morning_end!)}<br>` : ''}
+      ${club.afternoon_start ? `<strong>Afternoon Session:</strong> ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end!)}` : ''}
     `)}
 
     ${infoBox('Reminder: What to Bring', `

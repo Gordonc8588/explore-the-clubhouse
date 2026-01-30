@@ -293,8 +293,8 @@ export async function POST(request: Request) {
 - Name: ${club.name}
 - Dates: ${formatDate(club.start_date)} to ${formatDate(club.end_date)}
 - Age Range: ${club.min_age} to ${club.max_age} years
-- Morning Session: ${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}
-- Afternoon Session: ${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}
+- Morning Session: ${club.morning_start ? `${formatTime(club.morning_start)} - ${formatTime(club.morning_end!)}` : 'N/A'}
+- Afternoon Session: ${club.afternoon_start ? `${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end!)}` : 'N/A'}
 - Description: ${club.description || "Fun-filled farm activities for children"}
 `;
       }

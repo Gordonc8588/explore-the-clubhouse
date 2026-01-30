@@ -109,11 +109,11 @@ export function ReviewStep({
     if (!selectedOption) return "";
     switch (selectedOption.time_slot) {
       case "full_day":
-        return `Full Day (${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)})`;
+        return `Full Day (${formatTime(club.morning_start!)} - ${formatTime(club.afternoon_end!)})`;
       case "morning":
-        return `Morning (${formatTime(club.morning_start)} - ${formatTime(club.morning_end)})`;
+        return `Morning (${formatTime(club.morning_start!)} - ${formatTime(club.morning_end!)})`;
       case "afternoon":
-        return `Afternoon (${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)})`;
+        return `Afternoon (${formatTime(club.afternoon_start!)} - ${formatTime(club.afternoon_end!)})`;
       default:
         return "";
     }

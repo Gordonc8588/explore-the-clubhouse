@@ -114,7 +114,7 @@ export async function sendReminderSMS(
   booking: Booking,
   club: Club
 ): Promise<SendSMSResult> {
-  const dropOffTime = formatTime(club.morning_start);
+  const dropOffTime = formatTime(club.morning_start ?? club.afternoon_start!);
   const firstName = booking.parent_name.split(' ')[0];
 
   const message = `Hi ${firstName}! Reminder: ${club.name} starts today. Drop-off from ${dropOffTime}. Please bring packed lunch, water & outdoor clothes. See you soon! - The Clubhouse`;

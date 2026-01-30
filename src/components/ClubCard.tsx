@@ -36,14 +36,26 @@ function formatTime(timeStr: string): string {
   return `${displayHours}:${minutes.toString().padStart(2, "0")}${period}`;
 }
 
-function formatTimeRange(morningStart: string, afternoonEnd: string): string {
-  return `${formatTime(morningStart)} - ${formatTime(afternoonEnd)}`;
+function formatTimeRange(club: Club): string {
+  const hasMorning = club.morning_start && club.morning_end;
+  const hasAfternoon = club.afternoon_start && club.afternoon_end;
+
+  if (hasMorning && hasAfternoon) {
+    return `${formatTime(club.morning_start!)} - ${formatTime(club.afternoon_end!)}`;
+  }
+  if (hasMorning) {
+    return `${formatTime(club.morning_start!)} - ${formatTime(club.morning_end!)}`;
+  }
+  if (hasAfternoon) {
+    return `${formatTime(club.afternoon_start!)} - ${formatTime(club.afternoon_end!)}`;
+  }
+  return "";
 }
 
 export function ClubCard({ club, isSoldOut = false }: ClubCardProps) {
   const dateRange = formatDateRange(club.start_date, club.end_date);
   const ageRange = formatAgeRange(club.min_age, club.max_age);
-  const timeRange = formatTimeRange(club.morning_start, club.afternoon_end);
+  const timeRange = formatTimeRange(club);
 
   return (
     <article className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow hover:shadow-lg">

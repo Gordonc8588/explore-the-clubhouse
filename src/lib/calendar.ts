@@ -50,12 +50,12 @@ function getTimesForSlot(
 ): { startTime: string; endTime: string } {
   switch (timeSlot) {
     case 'morning':
-      return { startTime: club.morning_start, endTime: club.morning_end };
+      return { startTime: club.morning_start!, endTime: club.morning_end! };
     case 'afternoon':
-      return { startTime: club.afternoon_start, endTime: club.afternoon_end };
+      return { startTime: club.afternoon_start!, endTime: club.afternoon_end! };
     case 'full_day':
     default:
-      return { startTime: club.morning_start, endTime: club.afternoon_end };
+      return { startTime: club.morning_start!, endTime: club.afternoon_end! };
   }
 }
 

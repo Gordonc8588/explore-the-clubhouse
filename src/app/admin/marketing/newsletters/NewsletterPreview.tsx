@@ -107,7 +107,7 @@ function buildPreviewHtml(
           </tr>
           <tr>
             <td style="padding: 6px 0; font-size: 14px; color: #6B7280;">Times</td>
-            <td style="padding: 6px 0; font-size: 14px; font-weight: 500; color: #3D3D3D;">${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)}</td>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: 500; color: #3D3D3D;">${club.morning_start && club.afternoon_end ? `${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)}` : club.morning_start && club.morning_end ? `${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}` : club.afternoon_start && club.afternoon_end ? `${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}` : 'TBC'}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; font-size: 14px; color: #6B7280;">Ages</td>

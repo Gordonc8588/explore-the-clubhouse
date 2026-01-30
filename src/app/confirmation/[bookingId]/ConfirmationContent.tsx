@@ -53,18 +53,18 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
   const getSessionTimes = () => {
     switch (bookingOption.time_slot) {
       case "morning":
-        return formatTime(club.morning_start) + " - " + formatTime(club.morning_end);
+        return formatTime(club.morning_start!) + " - " + formatTime(club.morning_end!);
       case "afternoon":
-        return formatTime(club.afternoon_start) + " - " + formatTime(club.afternoon_end);
+        return formatTime(club.afternoon_start!) + " - " + formatTime(club.afternoon_end!);
       default:
-        return formatTime(club.morning_start) + " - " + formatTime(club.afternoon_end);
+        return formatTime(club.morning_start!) + " - " + formatTime(club.afternoon_end!);
     }
   };
 
   const getDropOffTime = () => {
     return bookingOption.time_slot === "afternoon"
-      ? formatTime(club.afternoon_start)
-      : formatTime(club.morning_start);
+      ? formatTime(club.afternoon_start!)
+      : formatTime(club.morning_start!);
   };
 
   const isAfternoonOnly = bookingOption.time_slot === "afternoon";

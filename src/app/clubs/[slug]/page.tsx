@@ -181,8 +181,10 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
   const { club, bookingOptions, clubDays } = data;
 
   const dateRange = formatDateRange(club.start_date, club.end_date);
-  const morningTime = `${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}`;
-  const afternoonTime = `${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}`;
+  const hasMorning = club.morning_start && club.morning_end;
+  const hasAfternoon = club.afternoon_start && club.afternoon_end;
+  const morningTime = hasMorning ? `${formatTime(club.morning_start!)} - ${formatTime(club.morning_end!)}` : null;
+  const afternoonTime = hasAfternoon ? `${formatTime(club.afternoon_start!)} - ${formatTime(club.afternoon_end!)}` : null;
 
   return (
     <div style={{ backgroundColor: "var(--craigies-cream)" }} className="min-h-screen">
@@ -338,18 +340,22 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                     </svg>
                   </div>
                   <div>
-                    <p
-                      className="font-semibold"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      Morning: {morningTime}
-                    </p>
-                    <p
-                      className="font-semibold"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      Afternoon: {afternoonTime}
-                    </p>
+                    {morningTime && (
+                      <p
+                        className="font-semibold"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        Morning: {morningTime}
+                      </p>
+                    )}
+                    {afternoonTime && (
+                      <p
+                        className="font-semibold"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        Afternoon: {afternoonTime}
+                      </p>
+                    )}
                   </div>
                 </div>
 

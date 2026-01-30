@@ -25,10 +25,10 @@ interface ClubData {
   image_url: string | null;
   start_date: string;
   end_date: string;
-  morning_start: string;
-  morning_end: string;
-  afternoon_start: string;
-  afternoon_end: string;
+  morning_start: string | null;
+  morning_end: string | null;
+  afternoon_start: string | null;
+  afternoon_end: string | null;
   min_age: number;
   max_age: number;
   is_active: boolean;
@@ -84,6 +84,8 @@ interface ClubFormData {
   imageUrl: string;
   startDate: string;
   endDate: string;
+  hasMorningSessions: boolean;
+  hasAfternoonSessions: boolean;
   morningStart: string;
   morningEnd: string;
   afternoonStart: string;
@@ -211,6 +213,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         imageUrl: initialData.image_url || "",
         startDate: initialData.start_date,
         endDate: initialData.end_date,
+        hasMorningSessions: initialData.morning_start !== null,
+        hasAfternoonSessions: initialData.afternoon_start !== null,
         morningStart: initialData.morning_start?.slice(0, 5) || "08:30",
         morningEnd: initialData.morning_end?.slice(0, 5) || "12:00",
         afternoonStart: initialData.afternoon_start?.slice(0, 5) || "12:00",
@@ -230,6 +234,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
       imageUrl: "",
       startDate: "",
       endDate: "",
+      hasMorningSessions: true,
+      hasAfternoonSessions: true,
       morningStart: "08:30",
       morningEnd: "12:00",
       afternoonStart: "12:00",
@@ -273,6 +279,8 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
   const startDate = watch("startDate");
   const endDate = watch("endDate");
   const name = watch("name");
+  const hasMorningSessions = watch("hasMorningSessions");
+  const hasAfternoonSessions = watch("hasAfternoonSessions");
 
   // Auto-generate days when dates change
   const regenerateDays = useCallback(() => {
@@ -306,6 +314,11 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
   }, [name, isNew, setValue]);
 
   const onSubmit = async (data: ClubFormData) => {
+    if (!data.hasMorningSessions && !data.hasAfternoonSessions) {
+      alert("At least one session type (Morning or Afternoon) must be enabled.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const payload = {
@@ -316,10 +329,10 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
         imageUrl: data.imageUrl,
         startDate: data.startDate,
         endDate: data.endDate,
-        morningStart: data.morningStart,
-        morningEnd: data.morningEnd,
-        afternoonStart: data.afternoonStart,
-        afternoonEnd: data.afternoonEnd,
+        morningStart: data.hasMorningSessions ? data.morningStart : null,
+        morningEnd: data.hasMorningSessions ? data.morningEnd : null,
+        afternoonStart: data.hasAfternoonSessions ? data.afternoonStart : null,
+        afternoonEnd: data.hasAfternoonSessions ? data.afternoonEnd : null,
         minAge: data.minAge,
         maxAge: data.maxAge,
         isActive: data.isActive,
@@ -643,98 +656,143 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
             Session Times
           </h3>
 
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 space-y-6">
+            {/* Morning Session */}
             <div>
-              <label className="mb-2 block text-sm font-medium"
-                style={{ color: "var(--craigies-dark-olive)" }}>
-                Morning Start
+              <label className="flex cursor-pointer items-center gap-3 mb-4">
+                <input
+                  type="checkbox"
+                  {...register("hasMorningSessions")}
+                  className="h-5 w-5 rounded"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-olive)",
+                  }}
+                />
+                <span className="font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
+                  Morning Session
+                </span>
               </label>
-              <input
-                type="time"
-                {...register("morningStart")}
-                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: "#D1D5DB",
-                  color: "var(--craigies-dark-olive)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "#D1D5DB";
-                  e.target.style.boxShadow = "none";
-                }}
-              />
+              {hasMorningSessions && (
+                <div className="grid gap-6 sm:grid-cols-2 pl-8">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium"
+                      style={{ color: "var(--craigies-dark-olive)" }}>
+                      Morning Start
+                    </label>
+                    <input
+                      type="time"
+                      {...register("morningStart")}
+                      className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: "#D1D5DB",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                        e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "#D1D5DB";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium"
+                      style={{ color: "var(--craigies-dark-olive)" }}>
+                      Morning End
+                    </label>
+                    <input
+                      type="time"
+                      {...register("morningEnd")}
+                      className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: "#D1D5DB",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                        e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "#D1D5DB";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Afternoon Session */}
             <div>
-              <label className="mb-2 block text-sm font-medium"
-                style={{ color: "var(--craigies-dark-olive)" }}>
-                Morning End
+              <label className="flex cursor-pointer items-center gap-3 mb-4">
+                <input
+                  type="checkbox"
+                  {...register("hasAfternoonSessions")}
+                  className="h-5 w-5 rounded"
+                  style={{
+                    borderColor: "#D1D5DB",
+                    color: "var(--craigies-olive)",
+                  }}
+                />
+                <span className="font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}>
+                  Afternoon Session
+                </span>
               </label>
-              <input
-                type="time"
-                {...register("morningEnd")}
-                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: "#D1D5DB",
-                  color: "var(--craigies-dark-olive)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "#D1D5DB";
-                  e.target.style.boxShadow = "none";
-                }}
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium"
-                style={{ color: "var(--craigies-dark-olive)" }}>
-                Afternoon Start
-              </label>
-              <input
-                type="time"
-                {...register("afternoonStart")}
-                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: "#D1D5DB",
-                  color: "var(--craigies-dark-olive)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "#D1D5DB";
-                  e.target.style.boxShadow = "none";
-                }}
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium"
-                style={{ color: "var(--craigies-dark-olive)" }}>
-                Afternoon End
-              </label>
-              <input
-                type="time"
-                {...register("afternoonEnd")}
-                className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
-                style={{
-                  borderColor: "#D1D5DB",
-                  color: "var(--craigies-dark-olive)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "var(--craigies-burnt-orange)";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "#D1D5DB";
-                  e.target.style.boxShadow = "none";
-                }}
-              />
+              {hasAfternoonSessions && (
+                <div className="grid gap-6 sm:grid-cols-2 pl-8">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium"
+                      style={{ color: "var(--craigies-dark-olive)" }}>
+                      Afternoon Start
+                    </label>
+                    <input
+                      type="time"
+                      {...register("afternoonStart")}
+                      className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: "#D1D5DB",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                        e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "#D1D5DB";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium"
+                      style={{ color: "var(--craigies-dark-olive)" }}>
+                      Afternoon End
+                    </label>
+                    <input
+                      type="time"
+                      {...register("afternoonEnd")}
+                      className="w-full rounded-lg border px-4 py-3 transition-colors focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: "#D1D5DB",
+                        color: "var(--craigies-dark-olive)",
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = "var(--craigies-burnt-orange)";
+                        e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)";
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = "#D1D5DB";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -444,11 +444,11 @@ export default function AddDaysPage({ params }: AddDaysPageProps) {
   const formatTimeSlot = (slot: string) => {
     switch (slot) {
       case "full_day":
-        return `${formatTime(club.morning_start)} - ${formatTime(club.afternoon_end)}`;
+        return `${formatTime(club.morning_start!)} - ${formatTime(club.afternoon_end!)}`;
       case "morning":
-        return `${formatTime(club.morning_start)} - ${formatTime(club.morning_end)}`;
+        return `${formatTime(club.morning_start!)} - ${formatTime(club.morning_end!)}`;
       case "afternoon":
-        return `${formatTime(club.afternoon_start)} - ${formatTime(club.afternoon_end)}`;
+        return `${formatTime(club.afternoon_start!)} - ${formatTime(club.afternoon_end!)}`;
       default:
         return "";
     }
