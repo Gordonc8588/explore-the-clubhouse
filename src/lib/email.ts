@@ -5,6 +5,7 @@
 
 import { Resend } from 'resend';
 import type { Booking, Club, Child, Newsletter, PromoCode, TimeSlot } from '@/types/database';
+import { getProxiedImageUrl } from '@/lib/cloudinary';
 
 // Lazy initialize Resend client to avoid errors when API key is not set
 let resendClient: Resend | null = null;
@@ -700,7 +701,7 @@ export function buildNewsletterEmail(
     const images = newsletter.image_urls
       .map(
         (url) => `
-        <img src="${url}" alt="The Clubhouse" style="width: 100%; max-width: 560px; height: auto; border-radius: 12px; margin-bottom: 16px; display: block;" />
+        <img src="${getProxiedImageUrl(url)}" alt="The Clubhouse" style="width: 100%; max-width: 560px; height: auto; border-radius: 12px; margin-bottom: 16px; display: block;" />
       `
       )
       .join('');

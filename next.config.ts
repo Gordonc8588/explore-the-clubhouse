@@ -71,6 +71,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        // Proxy Cloudinary newsletter images through our domain for email deliverability
+        source: "/img/cloudinary/:path*",
+        destination: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dqicgqgmx"}/:path*`,
+      },
+    ];
+  },
   async redirects() {
     return [
       {

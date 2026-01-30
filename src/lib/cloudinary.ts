@@ -83,6 +83,25 @@ export const galleryPhotos: GalleryPhoto[] = [
   { id: '15', publicId: '54c29f9e-752f-4cb1-ac2e-712e9206a2df_berynp', alt: 'Clubhouse activity', category: 'Activities' },
 ];
 
+/**
+ * Convert a Cloudinary URL to a proxied URL on our own domain.
+ * Used for newsletter emails where image domain alignment improves deliverability.
+ * e.g. https://res.cloudinary.com/dqicgqgmx/image/upload/v123/newsletters/photo.jpg
+ *   -> https://exploretheclubhouse.co.uk/img/cloudinary/image/upload/v123/newsletters/photo.jpg
+ */
+export function getProxiedImageUrl(cloudinaryUrl: string): string {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://exploretheclubhouse.co.uk';
+  const cloudinaryBase = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME || 'dqicgqgmx'}/`;
+
+  if (cloudinaryUrl.startsWith(cloudinaryBase)) {
+    const path = cloudinaryUrl.slice(cloudinaryBase.length);
+    return `${siteUrl}/img/cloudinary/${path}`;
+  }
+
+  // If it's a generic res.cloudinary.com URL with a different cloud name, leave it as-is
+  return cloudinaryUrl;
+}
+
 // Get photos by category
 export function getPhotosByCategory(category: string): GalleryPhoto[] {
   return galleryPhotos.filter(photo => photo.category === category);

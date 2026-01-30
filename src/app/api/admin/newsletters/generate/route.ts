@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ConversationRole } from "@/types/database";
+import { getProxiedImageUrl } from "@/lib/cloudinary";
 
 // Check if user is admin
 async function isAdmin() {
@@ -540,11 +541,11 @@ Respond with ONLY valid JSON (no markdown code blocks):
       throw new Error("Failed to parse AI response");
     }
 
-    // Replace image placeholders with actual URLs
+    // Replace image placeholders with proxied URLs (own domain for email deliverability)
     let bodyHtml = generated.bodyHtml || "";
     for (let i = 0; i < images.length; i++) {
       const placeholder = `{{IMAGE_${i + 1}}}`;
-      bodyHtml = bodyHtml.replace(new RegExp(placeholder, "g"), images[i].url);
+      bodyHtml = bodyHtml.replace(new RegExp(placeholder, "g"), getProxiedImageUrl(images[i].url));
     }
 
     // Calculate estimated tokens for the response
