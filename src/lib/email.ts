@@ -182,7 +182,7 @@ export async function sendBookingConfirmation(
   club: Club,
   timeSlot?: TimeSlot
 ): Promise<SendEmailResult> {
-  const childInfoUrl = `${siteUrl}/booking/${booking.id}/children`;
+  const childInfoUrl = `${siteUrl}/complete/${booking.id}`;
 
   const content = `
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
@@ -531,7 +531,7 @@ export async function sendIncompleteReminder(
   booking: Booking,
   club: Club
 ): Promise<SendEmailResult> {
-  const childInfoUrl = `${siteUrl}/booking/${booking.id}/children`;
+  const childInfoUrl = `${siteUrl}/complete/${booking.id}`;
 
   const content = `
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
