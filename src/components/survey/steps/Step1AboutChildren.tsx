@@ -11,7 +11,7 @@ interface Step1Props {
 }
 
 const NUM_CHILDREN_OPTIONS = ['1', '2', '3', '4+'];
-const AGE_OPTIONS = ['5-6', '7-8', '9-10', '11-12'];
+const AGE_OPTIONS = ['5-6', '7-8', '9-10', '11-12', '12-14'];
 
 export default function Step1AboutChildren({
   numChildren,
@@ -26,13 +26,13 @@ export default function Step1AboutChildren({
           About Your Children
         </h2>
         <p className="text-[#6b7280]">
-          Tell us about your children aged 5-12
+          Tell us about your children aged 5-14
         </p>
       </div>
 
       <SingleSelect
         name="num_children"
-        label="How many children aged 5-12 do you have?"
+        label="How many children aged 5-14 do you have?"
         options={NUM_CHILDREN_OPTIONS}
         value={numChildren}
         onChange={onNumChildrenChange}

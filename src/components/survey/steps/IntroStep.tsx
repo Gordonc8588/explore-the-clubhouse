@@ -29,7 +29,7 @@ export default function IntroStep({ onStart, isLoading }: IntroStepProps) {
           Greenfields Survey
         </h1>
         <p className="text-lg text-[#6b7280] max-w-md mx-auto leading-relaxed">
-          For parents and carers of children aged 5-12
+          For parents and carers of children aged 5-14
         </p>
       </div>
 
