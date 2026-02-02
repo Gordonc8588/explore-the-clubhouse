@@ -26,7 +26,7 @@ export default function IntroStep({ onStart, isLoading }: IntroStepProps) {
         </div>
 
         <h1 className="text-3xl md:text-4xl font-bold text-[#5a5c3a] mb-4 font-heading">
-          Holiday Club Survey
+          Greenfields Survey
         </h1>
         <p className="text-lg text-[#6b7280] max-w-md mx-auto leading-relaxed">
           For parents and carers of children aged 5-12

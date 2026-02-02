@@ -60,7 +60,7 @@ const initialData: SurveyData = {
   postcode: '',
   other_feedback: '',
   next_holiday_interest: null,
-  contact_consent: false,
+  contact_consent: true,
   email: '',
   gdpr_consent: false,
 };
