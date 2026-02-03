@@ -1034,6 +1034,8 @@ export interface SurveyResponse {
   // Q1-2: About Children
   num_children: string | null;
   children_ages: string[] | null;
+  has_younger_children: string | null;
+  younger_children_open_play: string | null;
 
   // Q3-4: Demand
   interest_level: string | null;
@@ -1075,6 +1077,8 @@ export interface SurveyResponseInsert {
   is_complete?: boolean;
   num_children?: string | null;
   children_ages?: string[] | null;
+  has_younger_children?: string | null;
+  younger_children_open_play?: string | null;
   interest_level?: string | null;
   holiday_periods?: string[] | null;
   preferred_days?: string | null;
@@ -1103,6 +1107,8 @@ export interface SurveyResponseUpdate {
   is_complete?: boolean;
   num_children?: string | null;
   children_ages?: string[] | null;
+  has_younger_children?: string | null;
+  younger_children_open_play?: string | null;
   interest_level?: string | null;
   holiday_periods?: string[] | null;
   preferred_days?: string | null;

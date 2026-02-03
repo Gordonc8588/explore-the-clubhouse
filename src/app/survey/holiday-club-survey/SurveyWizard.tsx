@@ -16,6 +16,8 @@ interface SurveyData {
   // Q1-2: About Children
   num_children: string | null;
   children_ages: string[];
+  has_younger_children: string | null;
+  younger_children_open_play: string | null;
   // Q3-4: Demand
   interest_level: string | null;
   holiday_periods: string[];
@@ -45,6 +47,8 @@ interface SurveyData {
 const initialData: SurveyData = {
   num_children: null,
   children_ages: [],
+  has_younger_children: null,
+  younger_children_open_play: null,
   interest_level: null,
   holiday_periods: [],
   preferred_days: null,
@@ -221,8 +225,12 @@ export default function SurveyWizard() {
           <Step1AboutChildren
             numChildren={data.num_children}
             childrenAges={data.children_ages}
+            hasYoungerChildren={data.has_younger_children}
+            youngerChildrenOpenPlay={data.younger_children_open_play}
             onNumChildrenChange={(v) => updateData('num_children', v)}
             onChildrenAgesChange={(v) => updateData('children_ages', v)}
+            onHasYoungerChildrenChange={(v) => updateData('has_younger_children', v)}
+            onYoungerChildrenOpenPlayChange={(v) => updateData('younger_children_open_play', v)}
           />
         );
 

@@ -111,6 +111,30 @@ export default async function ResponseDetailPage({ params }: ResponseDetailPageP
               <dt className="text-sm font-medium text-gray-500">Children&apos;s Ages</dt>
               <dd className="mt-1">{renderArrayField(response.children_ages)}</dd>
             </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Has Children Aged 2-4</dt>
+              <dd className="mt-1 text-gray-900">{renderField(response.has_younger_children)}</dd>
+            </div>
+            {response.has_younger_children === 'Yes' && (
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Open Play Interest (2-4s)</dt>
+                <dd className="mt-1">
+                  <span
+                    className={`inline-flex px-2 py-1 text-sm font-medium rounded-full ${
+                      response.younger_children_open_play === 'Yes, definitely'
+                        ? 'bg-green-100 text-green-700'
+                        : response.younger_children_open_play === 'Possibly'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : response.younger_children_open_play === 'No'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {renderField(response.younger_children_open_play)}
+                  </span>
+                </dd>
+              </div>
+            )}
           </dl>
         </div>
 

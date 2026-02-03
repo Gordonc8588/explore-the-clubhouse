@@ -15,6 +15,8 @@ interface AnalyticsData {
   };
   numChildren: Record<string, number>;
   childrenAges: Record<string, number>;
+  hasYoungerChildren: Record<string, number>;
+  youngerChildrenOpenPlay: Record<string, number>;
   interestLevel: Record<string, number>;
   holidayPeriods: Record<string, number>;
   preferredDays: Record<string, number>;
@@ -213,6 +215,13 @@ export default function SurveyAnalytics() {
             <QuestionChart title="Number of Children" data={analytics.numChildren} type="bar" />
             <QuestionChart title="Children&apos;s Ages" data={analytics.childrenAges} />
             <QuestionChart title="Postcode Areas" data={analytics.postcodeAreas} />
+          </div>
+
+          {/* Younger Children (2-4) */}
+          <h3 className="text-lg font-semibold text-gray-800 mt-8">Younger Children (2-4 year olds)</h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            <QuestionChart title="Has Children Aged 2-4" data={analytics.hasYoungerChildren} />
+            <QuestionChart title="Interest in Open Play Mornings (2-4s)" data={analytics.youngerChildrenOpenPlay} />
           </div>
 
           {/* Timing Preferences */}

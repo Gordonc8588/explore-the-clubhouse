@@ -14,6 +14,8 @@ const submitSurveySchema = z.object({
   // Q1-2: About Children
   num_children: z.string().nullable().optional(),
   children_ages: z.array(z.string()).nullable().optional(),
+  has_younger_children: z.string().nullable().optional(),
+  younger_children_open_play: z.string().nullable().optional(),
 
   // Q3-4: Demand
   interest_level: z.string().nullable().optional(),
@@ -96,6 +98,8 @@ export async function POST(request: NextRequest) {
         is_complete: true,
         num_children: data.num_children,
         children_ages: data.children_ages,
+        has_younger_children: data.has_younger_children,
+        younger_children_open_play: data.younger_children_open_play,
         interest_level: data.interest_level,
         holiday_periods: data.holiday_periods,
         preferred_days: data.preferred_days,

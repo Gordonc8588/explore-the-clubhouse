@@ -119,6 +119,12 @@ export async function GET(request: NextRequest) {
       // Q2: Children ages
       childrenAges: countArrayValues(typedResponses, 'children_ages'),
 
+      // Has younger children (2-4)
+      hasYoungerChildren: countSingleValues(typedResponses, 'has_younger_children'),
+
+      // Younger children open play interest
+      youngerChildrenOpenPlay: countSingleValues(typedResponses, 'younger_children_open_play'),
+
       // Q3: Interest level
       interestLevel: countSingleValues(typedResponses, 'interest_level'),
 
