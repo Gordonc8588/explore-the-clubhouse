@@ -44,3 +44,4 @@ supabase/.temp/
 
 # email previews
 /email-previews/
+.env*.local
