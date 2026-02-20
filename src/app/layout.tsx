@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito, Nunito_Sans } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/Navigation";
+import { ConditionalNavigation } from "@/components/ConditionalNavigation";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { UTMCapture } from "@/components/UTMCapture";
@@ -172,7 +172,7 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${nunito.variable} ${nunitoSans.variable} antialiased`}>
-        <Navigation />
+        <ConditionalNavigation />
         {children}
         <CookieConsent />
         <GoogleAnalytics />
