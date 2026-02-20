@@ -31,11 +31,11 @@ export const metadata: Metadata = {
 
 const activities = [
   {
-    title: 'Farm Animals',
+    title: 'Animal Care',
     description:
       'Feed lambs, hold chicks, collect eggs and learn about animal care on our working farm.',
     image:
-      'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,h_400,c_fill/v1768924052/IMG_8406_ejjgwy.jpg',
+      'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-11-45_nwgwh5.jpg',
     alt: 'Children caring for farm animals',
   },
   {
@@ -43,16 +43,16 @@ const activities = [
     description:
       'Explore woodland trails, build dens, discover wildlife and enjoy the great outdoors.',
     image:
-      'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,h_400,c_fill/v1768924052/043917ba-162f-4160-8072-97e389e93b92-2_aswr8s.jpg',
+      'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-12-46_vonx6d.jpg',
     alt: 'Children exploring the forest',
   },
   {
-    title: 'Creative Learning',
+    title: 'Workshops',
     description:
       'Nature crafts, outdoor cooking, science experiments and hands-on seasonal projects.',
     image:
-      'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,h_400,c_fill/v1768924052/IMG_1176-scaled_pemded.jpg',
-    alt: 'Children doing creative activities',
+      'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-11-14_mj2ndq.jpg',
+    alt: 'Children in a workshop activity',
   },
 ];
 
@@ -99,14 +99,6 @@ const testimonials = [
       'Over the course of the week they fed lambs, looked after baby chickens, got involved in all sorts of arts and crafts. They could not wait to go back each morning!',
     author: 'Tom Malone',
   },
-];
-
-const reasons = [
-  'Small groups (max 30 children) for personalised attention',
-  'All staff DBS-checked and first-aid trained',
-  'Beautiful farm setting at Craigies Farm, South Queensferry',
-  'Daily photo updates sent to parents',
-  'Flexible drop-off between 8:30-9:30am, pick-up at 3:00pm',
 ];
 
 export default function EasterLandingPage() {
@@ -173,7 +165,7 @@ export default function EasterLandingPage() {
                   alt={activity.alt}
                   width={600}
                   height={400}
-                  className="h-48 w-full object-cover"
+                  className="w-full"
                 />
                 <div className="p-6">
                   <h3 className="font-display text-xl font-bold" style={{ color: 'var(--craigies-dark-olive)' }}>
@@ -215,12 +207,11 @@ export default function EasterLandingPage() {
           </h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 text-left">
             {[
-              { label: 'Dates', value: 'Easter school holidays 2026' },
+              { label: 'Dates', value: '13-17 April 2026' },
               { label: 'Times', value: 'Drop-off 8:30-9:30am, Pick-up 3:00pm' },
               { label: 'Ages', value: '5 to 12 years' },
               { label: 'Location', value: 'Craigies Farm, South Queensferry' },
               { label: 'Includes', value: 'All activities & outdoor adventures' },
-              { label: 'Group Size', value: 'Max 30 children per session' },
             ].map((detail) => (
               <div key={detail.label} className="rounded-lg bg-white p-4 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--craigies-burnt-orange)' }}>
@@ -274,27 +265,6 @@ export default function EasterLandingPage() {
               </blockquote>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-display text-center text-3xl font-bold sm:text-4xl" style={{ color: 'var(--craigies-dark-olive)' }}>
-            Why Choose The Clubhouse
-          </h2>
-          <ul className="mt-10 space-y-4">
-            {reasons.map((reason) => (
-              <li key={reason} className="flex items-start gap-3">
-                <svg className="mt-1 h-5 w-5 flex-shrink-0" style={{ color: 'var(--craigies-burnt-orange)' }} fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="font-body text-lg" style={{ color: 'var(--craigies-dark-olive)' }}>
-                  {reason}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
