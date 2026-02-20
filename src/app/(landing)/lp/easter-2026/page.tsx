@@ -33,7 +33,7 @@ const activities = [
   {
     title: 'Animal Care',
     description:
-      'Feed lambs, hold chicks, collect eggs and learn about animal care on our working farm.',
+      'Feed lambs, hold chicks, collect eggs and learn about animal care on a working farm.',
     image:
       'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-11-45_nwgwh5.jpg',
     alt: 'Children caring for farm animals',
