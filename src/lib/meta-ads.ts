@@ -318,14 +318,12 @@ export async function createAd(params: CreateAdParams): Promise<string> {
 }
 
 /**
- * Get ad insights/metrics
+ * Get ad insights/metrics via Graph API (raw fetch, not SDK)
  */
 export async function getAdInsights(params: AdInsightsParams): Promise<AdInsights | null> {
-  initializeApi();
+  validateConfig();
 
-  const ad = new Ad(params.adId);
-
-  const fields = params.fields || [
+  const fields = (params.fields || [
     'impressions',
     'reach',
     'clicks',
@@ -334,24 +332,35 @@ export async function getAdInsights(params: AdInsightsParams): Promise<AdInsight
     'cpc',
     'cpm',
     'actions',
-  ];
+  ]).join(',');
 
-  const insightsParams: Record<string, unknown> = {};
+  const queryParams = new URLSearchParams({
+    fields,
+    access_token: META_SYSTEM_USER_TOKEN!,
+  });
 
   if (params.datePreset) {
-    insightsParams.date_preset = params.datePreset;
+    queryParams.set('date_preset', params.datePreset);
   } else if (params.timeRange) {
-    insightsParams.time_range = params.timeRange;
+    queryParams.set('time_range', JSON.stringify(params.timeRange));
   }
 
-  try {
-    const insights = await ad.getInsights(fields, insightsParams);
+  const url = `https://graph.facebook.com/v21.0/${params.adId}/insights?${queryParams}`;
 
-    if (!insights || insights.length === 0) {
+  try {
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (result.error) {
+      console.error('Meta API error fetching insights:', result.error.message);
       return null;
     }
 
-    const data = insights[0]._data as {
+    if (!result.data || result.data.length === 0) {
+      return null;
+    }
+
+    const data = result.data[0] as {
       impressions?: string;
       reach?: string;
       clicks?: string;
