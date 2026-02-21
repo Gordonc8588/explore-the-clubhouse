@@ -74,7 +74,7 @@ export default async function BookingsPage() {
   // Calculate summary stats
   const totalBookings = transformedBookings.length;
   const totalRevenue = transformedBookings
-    .filter((b) => b.status !== "cancelled")
+    .filter((b) => b.status === "paid" || b.status === "complete")
     .reduce((sum, b) => sum + b.amount, 0);
 
   // Get club names for filter
