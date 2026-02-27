@@ -20,7 +20,7 @@ export default function CTASection() {
             >
               Date
             </h3>
-            <p style={{ color: 'var(--craigies-dark-olive)' }}>13-17 April 2026</p>
+            <p style={{ color: 'var(--craigies-dark-olive)' }}>6-10 &amp; 13-17 April 2026</p>
           </div>
 
           {/* Time Card */}

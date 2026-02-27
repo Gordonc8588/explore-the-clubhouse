@@ -59,7 +59,7 @@ export default function HeroSection() {
                     Easter 2026
                   </h2>
                   <p className="text-lg" style={{ color: 'var(--craigies-dark-olive)' }}>
-                    13-17 April
+                    6-10 &amp; 13-17 April
                   </p>
                 </div>
               </div>

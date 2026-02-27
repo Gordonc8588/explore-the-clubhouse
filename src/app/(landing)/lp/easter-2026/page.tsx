@@ -207,7 +207,7 @@ export default function EasterLandingPage() {
           </h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 text-left">
             {[
-              { label: 'Dates', value: '13-17 April 2026' },
+              { label: 'Dates', value: '6-10 & 13-17 April 2026' },
               { label: 'Times', value: 'Drop-off 8:30-9:30am, Pick-up 3:00pm' },
               { label: 'Ages', value: '5 to 12 years' },
               { label: 'Location', value: 'Craigies Farm, South Queensferry' },
