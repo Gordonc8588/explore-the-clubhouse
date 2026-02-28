@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { DailyAttendanceView } from "./DailyAttendanceView";
 
 interface DailyPageProps {
@@ -7,7 +7,7 @@ interface DailyPageProps {
 }
 
 async function getAttendanceData(date: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get all booking_days for this date with related data
   const { data: bookingDays, error } = await supabase
