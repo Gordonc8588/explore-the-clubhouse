@@ -153,12 +153,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
       }
     }
   } else if (bookingOption?.option_type === 'full_week') {
-    // For full week, insert all available club days
+    // For full week, insert ALL club days (including days marked unavailable for standalone booking)
     const { data: allClubDays } = await supabase
       .from('club_days')
       .select('id')
-      .eq('club_id', clubId)
-      .eq('is_available', true);
+      .eq('club_id', clubId);
 
     if (allClubDays && allClubDays.length > 0) {
       const bookingDaysToInsert = allClubDays.map((day) => ({
