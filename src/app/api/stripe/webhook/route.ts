@@ -179,6 +179,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
     }
   }
 
+  // 3b. Query the actual booked dates for emails
+  const { data: bookedDays } = await supabase
+    .from('booking_days')
+    .select('club_days(date)')
+    .eq('booking_id', bookingId);
+
+  const bookedDates: string[] = (bookedDays || [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((bd: any) => bd.club_days?.date)
+    .filter((d: unknown): d is string => typeof d === 'string')
+    .sort();
+
   // 4. Update promo code usage if applicable
   if (promoCodeId) {
     const { error: promoError } = await supabase
@@ -210,7 +222,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
   if (club) {
     console.log(`[Webhook] Found club: ${club.name}, sending emails...`);
     // Send customer confirmation email
-    const confirmationResult = await sendBookingConfirmation(booking, club, timeSlot);
+    const confirmationResult = await sendBookingConfirmation(booking, club, timeSlot, bookedDates);
     if (confirmationResult.success) {
       console.log(`[Webhook] Sent confirmation email to ${booking.parent_email} (messageId: ${confirmationResult.messageId})`);
     } else {
@@ -218,7 +230,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
     }
 
     // Send admin notification email
-    const adminResult = await sendAdminNotification(booking, club);
+    const adminResult = await sendAdminNotification(booking, club, bookedDates);
     if (adminResult.success) {
       console.log(`[Webhook] Sent admin notification email (messageId: ${adminResult.messageId})`);
     } else {

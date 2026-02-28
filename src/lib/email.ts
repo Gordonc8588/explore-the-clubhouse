@@ -56,6 +56,18 @@ function formatDate(dateString: string): string {
 }
 
 /**
+ * Format date to short readable string (e.g., "Friday 10th April")
+ */
+function formatDateShort(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
+/**
  * Format time string (e.g., "08:30:00" to "8:30am")
  */
 function formatTime(timeString: string): string {
@@ -180,7 +192,8 @@ export interface SendEmailResult {
 export async function sendBookingConfirmation(
   booking: Booking,
   club: Club,
-  timeSlot?: TimeSlot
+  timeSlot?: TimeSlot,
+  bookedDates?: string[]
 ): Promise<SendEmailResult> {
   const childInfoUrl = `${siteUrl}/complete/${booking.id}`;
 
@@ -205,9 +218,13 @@ export async function sendBookingConfirmation(
           <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${club.name}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Dates</td>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Club Week</td>
           <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${formatDate(club.start_date)} - ${formatDate(club.end_date)}</td>
         </tr>
+        ${bookedDates && bookedDates.length > 0 ? `<tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Booked Day${bookedDates.length > 1 ? 's' : ''}</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${bookedDates.map(d => formatDateShort(d)).join('<br>')}</td>
+        </tr>` : ''}
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Number of Children</td>
           <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${booking.num_children}</td>
@@ -423,7 +440,8 @@ export async function sendBookingComplete(
  */
 export async function sendAdminNotification(
   booking: Booking,
-  club: Club
+  club: Club,
+  bookedDates?: string[]
 ): Promise<SendEmailResult> {
   const adminDashboardUrl = `${siteUrl}/admin/bookings/${booking.id}`;
 
@@ -448,9 +466,13 @@ export async function sendAdminNotification(
           <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${club.name}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Club Dates</td>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Club Week</td>
           <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${formatDate(club.start_date)} - ${formatDate(club.end_date)}</td>
         </tr>
+        ${bookedDates && bookedDates.length > 0 ? `<tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Booked Day${bookedDates.length > 1 ? 's' : ''}</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${bookedDates.map(d => formatDateShort(d)).join('<br>')}</td>
+        </tr>` : ''}
         <tr>
           <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Parent Name</td>
           <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${booking.parent_name}</td>
