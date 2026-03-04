@@ -100,6 +100,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate capacity for all booking types
+    {
+      let daysToCheck: { id: string; date: string; morning_capacity: number }[] = [];
+
+      if (bookingOption.option_type === "full_week") {
+        const { data: clubDays } = await supabase
+          .from('club_days')
+          .select('id, date, morning_capacity')
+          .eq('club_id', clubId)
+          .eq('is_available', true);
+        daysToCheck = clubDays || [];
+      } else {
+        // single_day or multi_day — check the specific selected dates
+        if (selectedDates && selectedDates.length > 0) {
+          const { data: clubDays } = await supabase
+            .from('club_days')
+            .select('id, date, morning_capacity')
+            .eq('club_id', clubId)
+            .eq('is_available', true)
+            .in('date', selectedDates);
+          daysToCheck = clubDays || [];
+        }
+      }
+
+      for (const day of daysToCheck) {
+        const { data: availability } = await supabase
+          .rpc('get_club_day_availability', { day_id: day.id });
+        const avail = availability?.[0];
+        if (avail) {
+          const morningRemaining = avail.morning_capacity - avail.morning_booked;
+          if (morningRemaining < childrenCount) {
+            // Format the date for a user-friendly error message
+            const [year, month, dayNum] = day.date.split('-').map(Number);
+            const dateObj = new Date(Date.UTC(year, month - 1, dayNum));
+            const dayName = dateObj.toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              timeZone: "UTC",
+            });
+
+            if (morningRemaining <= 0) {
+              return NextResponse.json(
+                { error: `${dayName} is fully booked. Please choose a different day.` },
+                { status: 400 }
+              );
+            } else {
+              return NextResponse.json(
+                { error: `${dayName} only has ${morningRemaining} ${morningRemaining === 1 ? "spot" : "spots"} remaining. Please reduce the number of children or choose a different day.` },
+                { status: 400 }
+              );
+            }
+          }
+        }
+      }
+    }
+
     // Calculate pricing
     let subtotal = 0;
     if (bookingOption.option_type === "full_week") {

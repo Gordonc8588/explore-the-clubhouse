@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { ClubDay } from "@/types/database";
+import type { ClubDayWithAvailability } from "@/types/database";
 import type { BookingFormData } from "./OptionSelect";
 
 interface DateSelectProps {
-  clubDays: ClubDay[];
+  clubDays: ClubDayWithAvailability[];
   startDate: string;
   endDate: string;
   formData: BookingFormData;
@@ -34,7 +34,7 @@ export function DateSelect({
 
   // Create a map of dates to club day data
   const clubDayMap = useMemo(() => {
-    const map = new Map<string, ClubDay>();
+    const map = new Map<string, ClubDayWithAvailability>();
     clubDays.forEach((day) => {
       map.set(day.date, day);
     });
@@ -128,6 +128,10 @@ export function DateSelect({
     const clubDay = clubDayMap.get(dateStr);
 
     if (!clubDay || !clubDay.is_available) return;
+
+    // Block fully booked days
+    const morningRemaining = clubDay.morning_capacity - clubDay.morning_booked;
+    if (morningRemaining <= 0) return;
 
     let newDates: string[];
     if (isSingleDay) {
@@ -281,7 +285,28 @@ export function DateSelect({
             const clubDay = clubDayMap.get(dateKey);
             const inRange = isDateInRange(date);
             const isSelected = selectedDates.includes(dateKey);
-            const isClickable = inRange && clubDay?.is_available;
+            const morningRemaining = clubDay
+              ? clubDay.morning_capacity - clubDay.morning_booked
+              : 0;
+            const isFull = clubDay ? morningRemaining <= 0 : false;
+            const isClickable = inRange && clubDay?.is_available && !isFull;
+
+            // Color coding: green >25%, orange <=25%, red = full
+            const percentRemaining = clubDay && clubDay.morning_capacity > 0
+              ? morningRemaining / clubDay.morning_capacity
+              : 0;
+
+            let availabilityLabel = "";
+            let labelColor = "";
+            if (clubDay && inRange && clubDay.is_available) {
+              if (isFull) {
+                availabilityLabel = "Full";
+                labelColor = "#EF4444";
+              } else {
+                availabilityLabel = `${morningRemaining} left`;
+                labelColor = percentRemaining <= 0.25 ? "#F59E0B" : "#22C55E";
+              }
+            }
 
             return (
               <button
@@ -290,14 +315,14 @@ export function DateSelect({
                 onClick={(e) => isClickable && handleDayClick(date, e)}
                 disabled={!isClickable}
                 className={`
-                  aspect-square p-1 rounded-lg flex items-center justify-center transition-all
+                  aspect-square p-1 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all
                   ${
                     isClickable
                       ? "hover:bg-[rgba(122,124,74,0.1)] cursor-pointer"
                       : "cursor-default"
                   }
                   ${!inRange ? "opacity-30" : ""}
-                  ${inRange && !clubDay?.is_available ? "opacity-50" : ""}
+                  ${inRange && (!clubDay?.is_available || isFull) ? "opacity-50" : ""}
                 `}
                 style={
                   isSelected
@@ -311,7 +336,9 @@ export function DateSelect({
                   weekday: "long",
                   day: "numeric",
                   month: "long",
-                })}${isSelected ? " (selected)" : ""}`}
+                })}${isSelected ? " (selected)" : ""}${
+                  availabilityLabel ? `, ${availabilityLabel}` : ""
+                }`}
               >
                 <span
                   className="text-sm font-semibold"
@@ -323,6 +350,16 @@ export function DateSelect({
                 >
                   {date.getDate()}
                 </span>
+                {availabilityLabel && inRange && (
+                  <span
+                    className="text-[9px] font-bold leading-none"
+                    style={{
+                      color: isSelected ? "white" : labelColor,
+                    }}
+                  >
+                    {availabilityLabel}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -339,12 +376,16 @@ export function DateSelect({
               <span>Selected</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-lg bg-cloud border border-pebble" />
+              <span className="font-bold" style={{ color: "#22C55E" }}>X left</span>
               <span>Available</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-lg bg-cloud opacity-30" />
-              <span>Unavailable</span>
+              <span className="font-bold" style={{ color: "#F59E0B" }}>X left</span>
+              <span>Low</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold" style={{ color: "#EF4444" }}>Full</span>
+              <span>Sold out</span>
             </div>
           </div>
         </div>

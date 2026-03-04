@@ -1131,6 +1131,23 @@ export interface SurveyResponseUpdate {
 }
 
 // =============================================================================
+// AVAILABILITY TYPES
+// =============================================================================
+
+/**
+ * ClubDayWithAvailability - Club day enriched with current booking counts
+ */
+export interface ClubDayWithAvailability {
+  id: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  morning_capacity: number;
+  afternoon_capacity: number;
+  morning_booked: number;
+  afternoon_booked: number;
+  is_available: boolean;
+}
+
+// =============================================================================
 // DATABASE TYPE (for Supabase client)
 // =============================================================================
 

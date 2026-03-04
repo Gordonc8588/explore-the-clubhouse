@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
-import type { Club, ClubDay, BookingOption, PromoCode as PromoCodeType } from "@/types/database";
+import type { Club, ClubDayWithAvailability, BookingOption, PromoCode as PromoCodeType } from "@/types/database";
 import { OptionSelect, type BookingFormData } from "@/components/booking-form/OptionSelect";
 import { DateSelect } from "@/components/booking-form/DateSelect";
 import { ParentDetails } from "@/components/booking-form/ParentDetails";
@@ -31,10 +31,11 @@ function formatPrice(priceInPence: number): string {
 interface BookingFormProps {
   club: Club;
   bookingOptions: BookingOption[];
-  clubDays: ClubDay[];
+  clubDays: ClubDayWithAvailability[];
+  fullWeekAvailable: boolean;
 }
 
-export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps) {
+export function BookingForm({ club, bookingOptions, clubDays, fullWeekAvailable }: BookingFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
     selectedOption: null,
@@ -59,6 +60,35 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
       });
     }
   }, [club.id, club.name, club.slug]);
+
+  // Compute max children based on remaining capacity of relevant days
+  const maxChildrenByCapacity = useMemo(() => {
+    const optionType = formData.selectedOption?.option_type;
+    let relevantDays: ClubDayWithAvailability[];
+
+    if (optionType === 'full_week') {
+      relevantDays = clubDays;
+    } else if (optionType === 'single_day' || optionType === 'multi_day') {
+      relevantDays = clubDays.filter(d => formData.selectedDates.includes(d.date));
+    } else {
+      return 5; // No option selected yet
+    }
+
+    if (relevantDays.length === 0) return 5;
+
+    const minRemaining = Math.min(
+      ...relevantDays.map(d => d.morning_capacity - d.morning_booked)
+    );
+
+    return Math.max(1, Math.min(5, minRemaining));
+  }, [formData.selectedOption, formData.selectedDates, clubDays]);
+
+  // Auto-reduce children count if it exceeds capacity
+  useEffect(() => {
+    if (formData.childrenCount > maxChildrenByCapacity) {
+      setFormData(prev => ({ ...prev, childrenCount: maxChildrenByCapacity }));
+    }
+  }, [maxChildrenByCapacity, formData.childrenCount]);
 
   const canProceed = useMemo(() => {
     switch (currentStep) {
@@ -223,11 +253,11 @@ export function BookingForm({ club, bookingOptions, clubDays }: BookingFormProps
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <OptionSelect options={bookingOptions} formData={formData} onNext={handleFormUpdate} />;
+        return <OptionSelect options={bookingOptions} formData={formData} onNext={handleFormUpdate} fullWeekAvailable={fullWeekAvailable} />;
       case 2:
         return <DateSelect clubDays={clubDays} startDate={club.start_date} endDate={club.end_date} formData={formData} onNext={handleFormUpdate} />;
       case 3:
-        return <ChildrenCount formData={formData} onNext={handleFormUpdate} />;
+        return <ChildrenCount formData={formData} onNext={handleFormUpdate} maxChildren={maxChildrenByCapacity} />;
       case 4:
         return <ParentDetails formData={formData} onNext={handleFormUpdate} />;
       case 5:

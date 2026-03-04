@@ -160,6 +160,32 @@ export function ChildrenCount({
         </p>
       </div>
 
+      {maxChildren < 5 && (
+        <div
+          className="rounded-2xl p-4 flex items-start gap-3"
+          style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.3)" }}
+        >
+          <svg
+            className="w-5 h-5 flex-shrink-0 mt-0.5"
+            style={{ color: "#F59E0B" }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
+          </svg>
+          <p className="text-sm" style={{ color: "#92400E" }}>
+            Only <strong>{maxChildren}</strong> {maxChildren === 1 ? "spot" : "spots"} remaining on your selected day{maxChildren === 1 ? "" : "s"}.
+          </p>
+        </div>
+      )}
+
       <div
         className="rounded-2xl p-4"
         style={{ backgroundColor: "var(--craigies-olive)" }}

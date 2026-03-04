@@ -16,9 +16,10 @@ interface OptionSelectProps {
   options: BookingOption[];
   formData: BookingFormData;
   onNext: (data: Partial<BookingFormData>) => void;
+  fullWeekAvailable: boolean;
 }
 
-export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
+export function OptionSelect({ options, formData, onNext, fullWeekAvailable }: OptionSelectProps) {
   const handleSelect = (option: BookingOption, event: React.MouseEvent<HTMLButtonElement>) => {
     // Prevent scroll jump on mobile when state updates
     event.currentTarget.blur();
@@ -32,8 +33,8 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
   const singleDayOptions = options.filter((o) => o.option_type === "single_day");
   const multiDayOptions = options.filter((o) => o.option_type === "multi_day");
 
-  const renderOptionCard = (option: BookingOption) => {
-    const isSelected = selectedId === option.id;
+  const renderOptionCard = (option: BookingOption, disabled = false) => {
+    const isSelected = !disabled && selectedId === option.id;
     const priceLabel =
       option.option_type === "multi_day"
         ? `${formatPrice(option.price_per_child)}/day`
@@ -43,8 +44,13 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
       <button
         key={option.id}
         type="button"
-        onClick={(e) => handleSelect(option, e)}
-        className="w-full p-6 rounded-2xl text-left transition-all bg-white hover:shadow-lg shadow-md"
+        onClick={(e) => !disabled && handleSelect(option, e)}
+        disabled={disabled}
+        className={`w-full p-6 rounded-2xl text-left transition-all shadow-md ${
+          disabled
+            ? "opacity-60 cursor-not-allowed bg-gray-50"
+            : "bg-white hover:shadow-lg"
+        }`}
         style={
           isSelected
             ? {
@@ -58,20 +64,27 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
       >
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
-            <h4
-              className="text-lg font-bold"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: isSelected ? "white" : "var(--craigies-dark-olive)",
-              }}
-            >
-              {option.name}
-            </h4>
+            <div className="flex items-center gap-2">
+              <h4
+                className="text-lg font-bold"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  color: disabled ? "#9CA3AF" : isSelected ? "white" : "var(--craigies-dark-olive)",
+                }}
+              >
+                {option.name}
+              </h4>
+              {disabled && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
+                  Fully Booked
+                </span>
+              )}
+            </div>
             {option.description && (
               <p
                 className="mt-1 text-sm"
                 style={{
-                  color: isSelected ? "rgba(255, 255, 255, 0.8)" : "#6B7280",
+                  color: disabled ? "#9CA3AF" : isSelected ? "rgba(255, 255, 255, 0.8)" : "#6B7280",
                 }}
               >
                 {option.description}
@@ -82,7 +95,7 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
             className="text-xl font-bold whitespace-nowrap"
             style={{
               fontFamily: "'Playfair Display', serif",
-              color: isSelected
+              color: disabled ? "#9CA3AF" : isSelected
                 ? "white"
                 : "var(--craigies-burnt-orange)",
             }}
@@ -111,7 +124,7 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
     );
   };
 
-  const renderOptionGroup = (title: string, groupOptions: BookingOption[]) => {
+  const renderOptionGroup = (title: string, groupOptions: BookingOption[], disabled = false) => {
     if (groupOptions.length === 0) return null;
 
     return (
@@ -128,8 +141,13 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
         <div className="grid gap-3">
           {groupOptions
             .sort((a, b) => a.sort_order - b.sort_order)
-            .map(renderOptionCard)}
+            .map((option) => renderOptionCard(option, disabled))}
         </div>
+        {disabled && (
+          <p className="text-sm" style={{ color: "#6B7280" }}>
+            Some days are fully booked. Individual days may still be available below.
+          </p>
+        )}
       </div>
     );
   };
@@ -152,7 +170,7 @@ export function OptionSelect({ options, formData, onNext }: OptionSelectProps) {
       </div>
 
       <div className="space-y-6">
-        {renderOptionGroup("Full Week", fullWeekOptions)}
+        {renderOptionGroup("Full Week", fullWeekOptions, !fullWeekAvailable)}
         {renderOptionGroup("Single Day", singleDayOptions)}
         {renderOptionGroup("Multiple Days", multiDayOptions)}
       </div>

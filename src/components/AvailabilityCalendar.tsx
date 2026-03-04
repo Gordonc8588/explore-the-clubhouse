@@ -1,16 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import type { ClubDayWithAvailability } from "@/types/database";
 
-export interface ClubDayWithAvailability {
-  id: string;
-  date: string; // ISO date string (YYYY-MM-DD)
-  morning_capacity: number;
-  afternoon_capacity: number;
-  morning_booked: number;
-  afternoon_booked: number;
-  is_available: boolean;
-}
+export type { ClubDayWithAvailability };
 
 interface AvailabilityCalendarProps {
   clubDays: ClubDayWithAvailability[];
