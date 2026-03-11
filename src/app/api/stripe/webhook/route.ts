@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { sendBookingConfirmation, sendAdminNotification } from '@/lib/email';
+import { sendBookingConfirmation, sendAdminNotification, type SendEmailResult } from '@/lib/email';
 import { trackPurchaseConversion } from '@/lib/meta-conversions';
 
 interface SessionMetadata {
@@ -72,6 +72,27 @@ export async function POST(request: NextRequest) {
     console.error(`[Webhook] Error processing event ${event.type}: ${errorMessage}`);
     return NextResponse.json({ error: `Webhook handler failed` }, { status: 500 });
   }
+}
+
+/**
+ * Retry an email send once after a short delay if the first attempt fails.
+ */
+async function sendWithRetry(
+  sendFn: () => Promise<SendEmailResult>,
+  emailType: string,
+  recipient: string,
+): Promise<SendEmailResult> {
+  const result = await sendFn();
+  if (result.success) return result;
+
+  console.warn(`[Webhook] ${emailType} email to ${recipient} failed (${result.error}), retrying in 1s...`);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const retryResult = await sendFn();
+  if (!retryResult.success) {
+    console.error(`[Webhook] ${emailType} email to ${recipient} failed after retry: ${retryResult.error}`);
+  }
+  return retryResult;
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
@@ -190,7 +211,49 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
     .filter((d: unknown): d is string => typeof d === 'string')
     .sort();
 
-  // 4. Update promo code usage if applicable
+  // 4. Get club details for email (moved earlier to send emails before analytics)
+  console.log(`[Webhook] Fetching club with id: ${clubId}`);
+  const { data: club, error: clubError } = await supabase
+    .from('clubs')
+    .select('*')
+    .eq('id', clubId)
+    .single();
+
+  if (clubError) {
+    console.error(`[Webhook] Failed to fetch club ${clubId}:`, clubError);
+  }
+
+  // 5. Send confirmation emails (prioritised before analytics/promo tracking)
+  if (club) {
+    console.log(`[Webhook] Found club: ${club.name}, sending emails...`);
+    // Send customer confirmation email with retry
+    const confirmationResult = await sendWithRetry(
+      () => sendBookingConfirmation(booking, club, timeSlot, bookedDates),
+      'confirmation',
+      booking.parent_email,
+    );
+    if (confirmationResult.success) {
+      console.log(`[Webhook] Sent confirmation email to ${booking.parent_email} (messageId: ${confirmationResult.messageId})`);
+    } else {
+      console.error(`[Webhook] Failed to send confirmation email to ${booking.parent_email} after retries: ${confirmationResult.error}`);
+    }
+
+    // Send admin notification email with retry
+    const adminResult = await sendWithRetry(
+      () => sendAdminNotification(booking, club, bookedDates),
+      'admin notification',
+      'admin',
+    );
+    if (adminResult.success) {
+      console.log(`[Webhook] Sent admin notification email (messageId: ${adminResult.messageId})`);
+    } else {
+      console.error(`[Webhook] Failed to send admin notification after retries: ${adminResult.error}`);
+    }
+  } else {
+    console.error(`[Webhook] Club not found for id ${clubId}, skipping confirmation emails`);
+  }
+
+  // 6. Update promo code usage if applicable
   if (promoCodeId) {
     const { error: promoError } = await supabase
       .rpc('increment_promo_usage', { promo_id: promoCodeId });
@@ -203,40 +266,6 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
         .eq('id', promoCodeId);
     }
     console.log(`[Webhook] Updated promo code usage for ${promoCodeId}`);
-  }
-
-  // 5. Get club details for email
-  console.log(`[Webhook] Fetching club with id: ${clubId}`);
-  const { data: club, error: clubError } = await supabase
-    .from('clubs')
-    .select('*')
-    .eq('id', clubId)
-    .single();
-
-  if (clubError) {
-    console.error(`[Webhook] Failed to fetch club ${clubId}:`, clubError);
-  }
-
-  // 6. Send confirmation emails
-  if (club) {
-    console.log(`[Webhook] Found club: ${club.name}, sending emails...`);
-    // Send customer confirmation email
-    const confirmationResult = await sendBookingConfirmation(booking, club, timeSlot, bookedDates);
-    if (confirmationResult.success) {
-      console.log(`[Webhook] Sent confirmation email to ${booking.parent_email} (messageId: ${confirmationResult.messageId})`);
-    } else {
-      console.error(`[Webhook] Failed to send confirmation email to ${booking.parent_email}: ${confirmationResult.error}`);
-    }
-
-    // Send admin notification email
-    const adminResult = await sendAdminNotification(booking, club, bookedDates);
-    if (adminResult.success) {
-      console.log(`[Webhook] Sent admin notification email (messageId: ${adminResult.messageId})`);
-    } else {
-      console.error(`[Webhook] Failed to send admin notification: ${adminResult.error}`);
-    }
-  } else {
-    console.error(`[Webhook] Club not found for id ${clubId}, skipping confirmation emails`);
   }
 
   // 7. Track purchase conversion via Meta Conversions API (server-side)
