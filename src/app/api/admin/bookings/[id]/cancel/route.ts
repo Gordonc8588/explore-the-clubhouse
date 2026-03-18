@@ -41,9 +41,16 @@ export async function POST(
       );
     }
 
-    if (booking.status === "cancelled" || booking.status === "refunded") {
+    if (booking.status === "refunded") {
       return NextResponse.json(
-        { error: `Booking is already ${booking.status}` },
+        { error: "Booking has already been refunded" },
+        { status: 400 }
+      );
+    }
+
+    if (booking.status === "cancelled" && !refund) {
+      return NextResponse.json(
+        { error: "Booking is already cancelled" },
         { status: 400 }
       );
     }
@@ -60,6 +67,31 @@ export async function POST(
       }
 
       try {
+        // Check payment intent status before attempting refund
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          booking.stripe_payment_intent_id
+        );
+
+        if (paymentIntent.status !== "succeeded") {
+          return NextResponse.json(
+            { error: `Payment cannot be refunded — status is "${paymentIntent.status}"` },
+            { status: 400 }
+          );
+        }
+
+        // Check if already fully refunded
+        if (paymentIntent.amount_received === paymentIntent.amount_received && paymentIntent.latest_charge) {
+          const charge = await stripe.charges.retrieve(
+            paymentIntent.latest_charge as string
+          );
+          if (charge.refunded) {
+            return NextResponse.json(
+              { error: "This payment has already been fully refunded in Stripe" },
+              { status: 400 }
+            );
+          }
+        }
+
         const stripeRefund = await stripe.refunds.create({
           payment_intent: booking.stripe_payment_intent_id,
         });

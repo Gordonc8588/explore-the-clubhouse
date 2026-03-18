@@ -50,8 +50,11 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
 
   // Transform booking data for the component
   const bookedDays = booking.booking_days?.map((bd: any) => ({
+    bookingDayId: bd.id,
+    clubDayId: bd.club_day_id,
     date: bd.club_days?.date,
     dayName: new Date(bd.club_days?.date).toLocaleDateString("en-GB", { weekday: "long" }),
+    timeSlot: bd.time_slot,
     sessionType: bd.club_days?.session_type,
   })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()) || [];
 
@@ -127,6 +130,7 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     id: booking.id,
     ref: `ETC-${booking.id.slice(0, 8).toUpperCase()}`,
     status: booking.status,
+    clubId: (booking.clubs as any)?.id || "",
     club: (booking.clubs as any)?.name || "—",
     option: (booking.booking_options as any)?.name || "—",
     startDate: bookedDays[0]?.date || booking.created_at,

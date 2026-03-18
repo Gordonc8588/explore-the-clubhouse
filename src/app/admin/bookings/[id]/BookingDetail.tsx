@@ -56,15 +56,28 @@ interface Child {
 }
 
 interface BookedDay {
+  bookingDayId: string;
+  clubDayId: string;
   date: string;
   dayName: string;
+  timeSlot: string;
   sessionType?: string;
+}
+
+interface AvailableDay {
+  id: string;
+  date: string;
+  morningCapacity: number;
+  afternoonCapacity: number;
+  morningBooked: number;
+  afternoonBooked: number;
 }
 
 interface BookingDetailData {
   id: string;
   ref: string;
   status: string;
+  clubId: string;
   club: string;
   option: string;
   startDate: string;
@@ -144,6 +157,10 @@ export function BookingDetail({ booking }: BookingDetailProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [changeDayTarget, setChangeDayTarget] = useState<BookedDay | null>(null);
+  const [availableDays, setAvailableDays] = useState<AvailableDay[]>([]);
+  const [loadingDays, setLoadingDays] = useState(false);
+  const [selectedNewDayId, setSelectedNewDayId] = useState<string>("");
 
   const handleCancelBooking = async () => {
     setIsProcessing(true);
@@ -195,6 +212,60 @@ export function BookingDetail({ booking }: BookingDetailProps) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsProcessing(false);
     alert("Reminder email sent successfully");
+  };
+
+  const openChangeDayModal = async (day: BookedDay) => {
+    setChangeDayTarget(day);
+    setSelectedNewDayId("");
+    setLoadingDays(true);
+    try {
+      const res = await fetch(
+        `/api/admin/bookings/${booking.id}/change-day?clubId=${booking.clubId}`
+      );
+      const data = await res.json();
+      if (res.ok) {
+        // Filter out days already booked in this booking
+        const bookedDayIds = new Set(booking.bookedDays.map((d) => d.clubDayId));
+        setAvailableDays(
+          (data.days || []).filter((d: AvailableDay) => !bookedDayIds.has(d.id))
+        );
+      }
+    } catch {
+      alert("Failed to load available days.");
+      setChangeDayTarget(null);
+    } finally {
+      setLoadingDays(false);
+    }
+  };
+
+  const handleChangeDay = async () => {
+    if (!changeDayTarget || !selectedNewDayId) return;
+    setIsProcessing(true);
+    try {
+      const res = await fetch(
+        `/api/admin/bookings/${booking.id}/change-day`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookingDayId: changeDayTarget.bookingDayId,
+            newClubDayId: selectedNewDayId,
+            timeSlot: changeDayTarget.timeSlot,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Failed to change day: ${data.error}`);
+        return;
+      }
+      setChangeDayTarget(null);
+      router.refresh();
+    } catch {
+      alert("Failed to change day. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -352,7 +423,7 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             Cancel Booking
           </button>
         )}
-        {(booking.status === "paid" || booking.status === "complete") && (
+        {(booking.status === "paid" || booking.status === "complete" || booking.status === "cancelled") && (
           <button
             onClick={() => setShowRefundModal(true)}
             className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
@@ -442,15 +513,29 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             ) : (
               booking.bookedDays.map((day) => (
                 <div
-                  key={day.date}
+                  key={day.bookingDayId}
                   className="flex items-center justify-between rounded-lg bg-cloud/50 px-4 py-2"
                 >
-                  <span className="font-medium"
-              style={{ color: "var(--craigies-dark-olive)" }}>{day.dayName}</span>
-                  <span className="text-sm"
-              style={{ color: "var(--craigies-dark-olive)" }}>
-                    {formatDate(day.date)}
-                  </span>
+                  <div>
+                    <span className="font-medium"
+                      style={{ color: "var(--craigies-dark-olive)" }}>{day.dayName}</span>
+                    <span className="ml-2 text-sm"
+                      style={{ color: "var(--craigies-dark-olive)" }}>
+                      {formatDate(day.date)}
+                    </span>
+                  </div>
+                  {booking.status !== "cancelled" && booking.status !== "refunded" && (
+                    <button
+                      onClick={() => openChangeDayModal(day)}
+                      className="rounded-md px-3 py-1 text-xs font-semibold transition-opacity hover:opacity-80"
+                      style={{
+                        backgroundColor: "rgba(122, 124, 74, 0.1)",
+                        color: "var(--craigies-olive)",
+                      }}
+                    >
+                      Change
+                    </button>
+                  )}
                 </div>
               ))
             )}
@@ -853,6 +938,124 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                 }}
               >
                 {isProcessing ? "Processing..." : "Confirm Refund"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Day Modal */}
+      {changeDayTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
+            <h3
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Change Booking Day
+            </h3>
+            <p
+              className="mt-2 text-sm"
+              style={{ color: "var(--craigies-dark-olive)" }}
+            >
+              Moving <strong>{changeDayTarget.dayName} {formatDate(changeDayTarget.date)}</strong> to:
+            </p>
+
+            {loadingDays ? (
+              <div className="mt-4 flex justify-center py-8">
+                <div
+                  className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+                  style={{ borderColor: "var(--craigies-olive)", borderTopColor: "transparent" }}
+                />
+              </div>
+            ) : availableDays.length === 0 ? (
+              <p className="mt-4 text-sm text-center" style={{ color: "var(--craigies-dark-olive)" }}>
+                No other available days for this club.
+              </p>
+            ) : (
+              <div className="mt-4 max-h-64 space-y-2 overflow-y-auto">
+                {availableDays.map((day) => {
+                  const dayDate = new Date(day.date);
+                  const dayName = dayDate.toLocaleDateString("en-GB", { weekday: "long" });
+                  const morningRemaining = day.morningCapacity - day.morningBooked;
+                  const afternoonRemaining = day.afternoonCapacity - day.afternoonBooked;
+                  const isFull = morningRemaining <= 0 && afternoonRemaining <= 0;
+                  const isSelected = selectedNewDayId === day.id;
+
+                  return (
+                    <button
+                      key={day.id}
+                      onClick={() => !isFull && setSelectedNewDayId(day.id)}
+                      disabled={isFull}
+                      className={`w-full rounded-lg px-4 py-3 text-left transition-all ${
+                        isFull
+                          ? "cursor-not-allowed opacity-50"
+                          : isSelected
+                            ? ""
+                            : "hover:opacity-80"
+                      }`}
+                      style={{
+                        backgroundColor: isSelected
+                          ? "rgba(122, 124, 74, 0.15)"
+                          : "rgba(122, 124, 74, 0.05)",
+                        outlineColor: isSelected ? "var(--craigies-olive)" : undefined,
+                        outline: isSelected ? "2px solid var(--craigies-olive)" : undefined,
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span
+                            className="font-medium"
+                            style={{ color: "var(--craigies-dark-olive)" }}
+                          >
+                            {dayName}
+                          </span>
+                          <span
+                            className="ml-2 text-sm"
+                            style={{ color: "var(--craigies-dark-olive)" }}
+                          >
+                            {formatDate(day.date)}
+                          </span>
+                        </div>
+                        <div className="text-right text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                          {isFull ? (
+                            <span className="font-medium text-red-500">Full</span>
+                          ) : (
+                            <span>{morningRemaining} AM / {afternoonRemaining} PM</span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setChangeDayTarget(null)}
+                className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "var(--craigies-dark-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangeDay}
+                disabled={isProcessing || !selectedNewDayId}
+                className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                style={{
+                  backgroundColor: "var(--craigies-olive)",
+                  fontFamily: "'Playfair Display', serif",
+                }}
+              >
+                {isProcessing ? "Changing..." : "Confirm Change"}
               </button>
             </div>
           </div>
