@@ -436,6 +436,85 @@ export async function sendBookingComplete(
 }
 
 /**
+ * Send cancellation/refund email to parent
+ */
+export async function sendCancellationEmail(
+  booking: Booking,
+  club: Club,
+  wasRefunded: boolean
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email client not configured' };
+  }
+
+  const firstName = booking.parent_name.split(' ')[0];
+  const refundText = wasRefunded
+    ? `A full refund of <strong>${formatPrice(booking.total_amount)}</strong> has been issued to your original payment method. Please allow 5–10 business days for the refund to appear.`
+    : `No refund has been issued. If you believe you are entitled to a refund, please contact us.`;
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Booking ${wasRefunded ? 'Refunded' : 'Cancelled'}
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      Hi ${firstName}, your booking has been ${wasRefunded ? 'refunded' : 'cancelled'}.
+    </p>
+
+    <!-- Booking Summary -->
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Booking Details</h3>
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 140px;">Club</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${club.name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Children</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${booking.num_children}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Amount</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${formatPrice(booking.total_amount)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Status</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${wasRefunded ? 'Refunded' : 'Cancelled'}</td>
+        </tr>
+      </table>
+    </div>
+
+    <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+      ${refundText}
+    </p>
+
+    <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+      If you have any questions, please don't hesitate to get in touch with us.
+    </p>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: booking.parent_email,
+      subject: `Booking ${wasRefunded ? 'Refunded' : 'Cancelled'} - ${club.name}`,
+      html: emailTemplate(content),
+    });
+
+    if (error) {
+      console.error('Failed to send cancellation email:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send cancellation email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
  * Send notification to admin when a new booking is made
  */
 export async function sendAdminNotification(

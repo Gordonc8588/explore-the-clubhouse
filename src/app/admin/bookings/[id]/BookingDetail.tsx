@@ -126,6 +126,11 @@ function getStatusBadgeStyles(status: string): { backgroundColor: string; color:
         backgroundColor: "#FEE2E2",
         color: "#DC2626",
       };
+    case "refunded":
+      return {
+        backgroundColor: "#FEF3C7",
+        color: "#D97706",
+      };
     default:
       return {
         backgroundColor: "#F3F4F6",
@@ -142,22 +147,46 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
   const handleCancelBooking = async () => {
     setIsProcessing(true);
-    // TODO: Implement actual cancel via API
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsProcessing(false);
-    setShowCancelModal(false);
-    alert("Booking cancelled successfully");
-    router.refresh();
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refund: false }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Failed to cancel: ${data.error}`);
+        return;
+      }
+      setShowCancelModal(false);
+      router.refresh();
+    } catch {
+      alert("Failed to cancel booking. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleRefund = async () => {
     setIsProcessing(true);
-    // TODO: Implement actual refund via API
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsProcessing(false);
-    setShowRefundModal(false);
-    alert("Refund processed successfully");
-    router.refresh();
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refund: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Failed to refund: ${data.error}`);
+        return;
+      }
+      setShowRefundModal(false);
+      router.refresh();
+    } catch {
+      alert("Failed to process refund. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleSendReminder = async () => {
@@ -309,7 +338,7 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        {booking.status !== "cancelled" && booking.status !== "complete" && (
+        {booking.status !== "cancelled" && booking.status !== "refunded" && (
           <button
             onClick={() => setShowCancelModal(true)}
             className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
@@ -323,7 +352,7 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             Cancel Booking
           </button>
         )}
-        {booking.status === "paid" && (
+        {(booking.status === "paid" || booking.status === "complete") && (
           <button
             onClick={() => setShowRefundModal(true)}
             className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
