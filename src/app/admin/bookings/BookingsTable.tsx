@@ -208,7 +208,7 @@ export function BookingsTable({ bookings, clubs }: BookingsTableProps) {
                 color: "var(--craigies-dark-olive)",
               }}
             >
-              {clubs.map((club) => (
+              {[...new Set(clubs)].map((club) => (
                 <option key={club} value={club}>
                   {club}
                 </option>
