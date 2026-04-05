@@ -50,6 +50,10 @@ const mockBookingsWithDetails: Record<
       landing_page: null,
       referrer: null,
       attributed_newsletter_id: null,
+      parent_address_line1: null,
+      parent_address_line2: null,
+      parent_address_city: null,
+      parent_address_postcode: null,
       created_at: "2025-01-15T10:00:00Z",
     },
     bookingOption: {
@@ -177,6 +181,10 @@ const mockBookingsWithDetails: Record<
       landing_page: null,
       referrer: null,
       attributed_newsletter_id: null,
+      parent_address_line1: null,
+      parent_address_line2: null,
+      parent_address_city: null,
+      parent_address_postcode: null,
       created_at: "2025-01-16T10:00:00Z",
     },
     bookingOption: {
@@ -271,6 +279,10 @@ const mockBookingsWithDetails: Record<
       landing_page: null,
       referrer: null,
       attributed_newsletter_id: null,
+      parent_address_line1: null,
+      parent_address_line2: null,
+      parent_address_city: null,
+      parent_address_postcode: null,
       created_at: "2025-01-17T10:00:00Z",
     },
     bookingOption: {

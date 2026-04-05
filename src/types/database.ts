@@ -244,6 +244,11 @@ export interface Booking {
   landing_page: string | null;
   referrer: string | null;
   attributed_newsletter_id: string | null;
+  // Parent address fields
+  parent_address_line1: string | null;
+  parent_address_line2: string | null;
+  parent_address_city: string | null;
+  parent_address_postcode: string | null;
   created_at: string;
 }
 
@@ -267,6 +272,11 @@ export interface BookingInsert {
   landing_page?: string | null;
   referrer?: string | null;
   attributed_newsletter_id?: string | null;
+  // Parent address fields
+  parent_address_line1?: string | null;
+  parent_address_line2?: string | null;
+  parent_address_city?: string | null;
+  parent_address_postcode?: string | null;
   created_at?: string;
 }
 
@@ -290,6 +300,11 @@ export interface BookingUpdate {
   landing_page?: string | null;
   referrer?: string | null;
   attributed_newsletter_id?: string | null;
+  // Parent address fields
+  parent_address_line1?: string | null;
+  parent_address_line2?: string | null;
+  parent_address_city?: string | null;
+  parent_address_postcode?: string | null;
   created_at?: string;
 }
 

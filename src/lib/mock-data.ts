@@ -297,6 +297,10 @@ export const mockBookings: Booking[] = [
     landing_page: null,
     referrer: null,
     attributed_newsletter_id: null,
+    parent_address_line1: null,
+    parent_address_line2: null,
+    parent_address_city: null,
+    parent_address_postcode: null,
     created_at: '2025-03-15T14:30:00Z',
   },
   {
@@ -318,6 +322,10 @@ export const mockBookings: Booking[] = [
     landing_page: null,
     referrer: null,
     attributed_newsletter_id: null,
+    parent_address_line1: null,
+    parent_address_line2: null,
+    parent_address_city: null,
+    parent_address_postcode: null,
     created_at: '2025-06-20T09:15:00Z',
   },
   {
@@ -339,6 +347,10 @@ export const mockBookings: Booking[] = [
     landing_page: null,
     referrer: null,
     attributed_newsletter_id: null,
+    parent_address_line1: null,
+    parent_address_line2: null,
+    parent_address_city: null,
+    parent_address_postcode: null,
     created_at: '2025-03-10T16:45:00Z',
   },
 ];

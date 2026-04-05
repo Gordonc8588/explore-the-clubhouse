@@ -230,6 +230,10 @@ export async function POST(request: NextRequest) {
       landing_page: null,
       referrer: null,
       attributed_newsletter_id: null,
+      parent_address_line1: null,
+      parent_address_line2: null,
+      parent_address_city: null,
+      parent_address_postcode: null,
       created_at: new Date().toISOString(),
     };
 

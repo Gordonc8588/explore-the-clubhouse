@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw, Loader2, Info } from "lucide-react";
+import { CheckCircle, Calendar, Users, CreditCard, AlertCircle, RefreshCw, Loader2, Info, MapPin } from "lucide-react";
 import { ChildInfoForm, type ChildInfoFormValues } from "@/components/ChildInfoForm";
 import type { Booking, BookingOption, Club, Child } from "@/types/database";
 
@@ -50,6 +50,12 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
     Array(booking.num_children).fill(null).map(() => ({ childName: "", dateOfBirth: "" }))
   );
   const [hasCompletedMainForms, setHasCompletedMainForms] = useState(true);
+
+  // Parent address state
+  const [addressLine1, setAddressLine1] = useState(booking.parent_address_line1 || "");
+  const [addressLine2, setAddressLine2] = useState(booking.parent_address_line2 || "");
+  const [addressCity, setAddressCity] = useState(booking.parent_address_city || "");
+  const [addressPostcode, setAddressPostcode] = useState(booking.parent_address_postcode || "");
 
   const isAlreadyComplete = booking.status === "complete" || existingChildren.length > 0;
 
@@ -174,6 +180,12 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
       return;
     }
 
+    // Validate address
+    if (!addressLine1.trim() || !addressCity.trim() || !addressPostcode.trim()) {
+      setError("Please fill in your address (line 1, city, and postcode are required)");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -184,6 +196,12 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
         body: JSON.stringify({
           bookingId: booking.id,
           children: childrenDataRef.current,
+          parentAddress: {
+            line1: addressLine1.trim(),
+            line2: addressLine2.trim(),
+            city: addressCity.trim(),
+            postcode: addressPostcode.trim(),
+          },
         }),
       });
 
@@ -591,6 +609,109 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
                 <p className="font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
                   {formatPrice(booking.total_amount)}
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Parent Address */}
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <MapPin className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
+            <h2
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Your Address
+            </h2>
+          </div>
+          <p className="text-stone text-sm mb-4">
+            Please provide your home address. This is required for our records.
+          </p>
+          <div className="grid gap-4">
+            <div>
+              <label
+                htmlFor="address-line1"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                Address Line 1 <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="address-line1"
+                type="text"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                placeholder="e.g. 12 High Street"
+                className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none focus:ring-2"
+                style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                onFocus={(e) => { e.target.style.borderColor = "var(--craigies-burnt-orange)"; e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)"; }}
+                onBlur={(e) => { e.target.style.borderColor = "#D1D5DB"; e.target.style.boxShadow = "none"; }}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="address-line2"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: "var(--craigies-dark-olive)" }}
+              >
+                Address Line 2
+              </label>
+              <input
+                id="address-line2"
+                type="text"
+                value={addressLine2}
+                onChange={(e) => setAddressLine2(e.target.value)}
+                placeholder="e.g. Flat 2, or leave blank"
+                className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none focus:ring-2"
+                style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                onFocus={(e) => { e.target.style.borderColor = "var(--craigies-burnt-orange)"; e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)"; }}
+                onBlur={(e) => { e.target.style.borderColor = "#D1D5DB"; e.target.style.boxShadow = "none"; }}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="address-city"
+                  className="block text-sm font-medium mb-1.5"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  City / Town <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="address-city"
+                  type="text"
+                  value={addressCity}
+                  onChange={(e) => setAddressCity(e.target.value)}
+                  placeholder="e.g. Edinburgh"
+                  className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none focus:ring-2"
+                  style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                  onFocus={(e) => { e.target.style.borderColor = "var(--craigies-burnt-orange)"; e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)"; }}
+                  onBlur={(e) => { e.target.style.borderColor = "#D1D5DB"; e.target.style.boxShadow = "none"; }}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="address-postcode"
+                  className="block text-sm font-medium mb-1.5"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  Postcode <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="address-postcode"
+                  type="text"
+                  value={addressPostcode}
+                  onChange={(e) => setAddressPostcode(e.target.value)}
+                  placeholder="e.g. EH1 1AB"
+                  className="w-full px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none focus:ring-2"
+                  style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                  onFocus={(e) => { e.target.style.borderColor = "var(--craigies-burnt-orange)"; e.target.style.boxShadow = "0 0 0 3px rgba(212, 132, 62, 0.1)"; }}
+                  onBlur={(e) => { e.target.style.borderColor = "#D1D5DB"; e.target.style.boxShadow = "none"; }}
+                />
               </div>
             </div>
           </div>

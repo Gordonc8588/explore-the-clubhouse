@@ -80,16 +80,25 @@ const childSchema = z.object({
   path: ["pickupPerson3Phone"],
 });
 
+const parentAddressSchema = z.object({
+  line1: z.string().min(1, "Address line 1 is required"),
+  line2: z.string().optional().default(""),
+  city: z.string().min(1, "City is required"),
+  postcode: z.string().min(1, "Postcode is required"),
+}).optional();
+
 const createChildrenRequestSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
   children: z.array(childSchema).min(1, "At least one child is required"),
   simplified: z.boolean().optional().default(false),
+  parentAddress: parentAddressSchema,
 });
 
 const simplifiedChildrenRequestSchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
   children: z.array(simplifiedChildSchema).min(1, "At least one child is required"),
   simplified: z.literal(true),
+  parentAddress: parentAddressSchema,
 });
 
 export async function POST(request: NextRequest) {
@@ -116,7 +125,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { bookingId, children } = validation.data;
+    const { bookingId, children, parentAddress } = validation.data;
     const supabase = createAdminClient();
 
     // Get booking with club and booking option details
@@ -246,10 +255,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save children information" }, { status: 500 });
     }
 
-    // Update booking status to 'complete'
+    // Update booking status to 'complete' and save parent address if provided
+    const bookingUpdate: Record<string, string> = { status: 'complete' };
+    if (parentAddress) {
+      bookingUpdate.parent_address_line1 = parentAddress.line1;
+      bookingUpdate.parent_address_line2 = parentAddress.line2 || "";
+      bookingUpdate.parent_address_city = parentAddress.city;
+      bookingUpdate.parent_address_postcode = parentAddress.postcode;
+    }
     const { error: updateError } = await supabase
       .from('bookings')
-      .update({ status: 'complete' })
+      .update(bookingUpdate)
       .eq('id', bookingId);
 
     if (updateError) {
