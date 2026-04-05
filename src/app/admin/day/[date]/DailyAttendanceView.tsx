@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Printer,
+  ClipboardList,
   AlertTriangle,
   Phone,
   Users,
@@ -61,6 +62,7 @@ function addDays(dateString: string, days: number): string {
 export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewProps) {
   const router = useRouter();
   const [isPrinting, setIsPrinting] = useState(false);
+  const [printMode, setPrintMode] = useState<"attendance" | "signoff">("attendance");
 
   // Calculate stats
   const totalAttendance = attendance.length;
@@ -78,6 +80,17 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
 
   // Handle print
   const handlePrint = () => {
+    setPrintMode("attendance");
+    setIsPrinting(true);
+    setTimeout(() => {
+      window.print();
+      setIsPrinting(false);
+    }, 100);
+  };
+
+  // Handle print sign-off sheet
+  const handlePrintSignOff = () => {
+    setPrintMode("signoff");
     setIsPrinting(true);
     setTimeout(() => {
       window.print();
@@ -121,7 +134,107 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
         }
       `}</style>
 
-      <div className={`space-y-6 ${isPrinting ? "print-area" : ""}`}>
+      {/* Sign-off sheet (only rendered when printing sign-off) */}
+      {isPrinting && printMode === "signoff" && (
+        <div className="print-area">
+          <h1
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            Sign-Off Sheet - {formatDateForDisplay(date)}
+          </h1>
+          <p className="mt-1 font-body text-stone">
+            The Clubhouse
+          </p>
+          <p className="mt-2 text-sm font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
+            Total Children: {totalAttendance}
+          </p>
+
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b-2" style={{ borderColor: "var(--craigies-olive)" }}>
+                  <th
+                    className="pb-3 pr-4 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)", width: "30%" }}
+                  >
+                    Child Name
+                  </th>
+                  <th
+                    className="pb-3 pr-4 text-left text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)", width: "25%" }}
+                  >
+                    Parent / Guardian
+                  </th>
+                  <th
+                    className="pb-3 pr-4 text-center text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)", width: "10%" }}
+                  >
+                    Session
+                  </th>
+                  <th
+                    className="pb-3 pr-4 text-center text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)", width: "15%" }}
+                  >
+                    Signed In
+                  </th>
+                  <th
+                    className="pb-3 text-center text-sm font-semibold"
+                    style={{ color: "var(--craigies-dark-olive)", width: "15%" }}
+                  >
+                    Signed Out
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendance.map((child) => (
+                  <tr key={child.id} className="border-b border-gray-200">
+                    <td
+                      className="py-4 pr-4 text-sm font-medium"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      {child.name}
+                    </td>
+                    <td
+                      className="py-4 pr-4 text-sm"
+                      style={{ color: "var(--craigies-dark-olive)" }}
+                    >
+                      {child.parentName}
+                    </td>
+                    <td className="py-4 pr-4 text-center text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                      {child.session === "Full" ? "Full Day" : child.session}
+                    </td>
+                    <td className="py-4 pr-4">
+                      <div
+                        className="mx-auto h-8 w-full rounded border border-dashed"
+                        style={{ borderColor: "#9CA3AF", minWidth: "80px" }}
+                      />
+                    </td>
+                    <td className="py-4">
+                      <div
+                        className="mx-auto h-8 w-full rounded border border-dashed"
+                        style={{ borderColor: "#9CA3AF", minWidth: "80px" }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8 border-t border-cloud pt-4">
+            <p className="font-body text-sm text-stone">
+              This document contains sensitive information. Please handle
+              appropriately.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className={`space-y-6 ${isPrinting && printMode === "attendance" ? "print-area" : ""} ${isPrinting && printMode === "signoff" ? "no-print" : ""}`}>
         {/* Header with navigation */}
         <div className="no-print flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
@@ -192,6 +305,19 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
             >
               <Printer className="h-5 w-5" />
               <span className="hidden sm:inline">Print</span>
+            </button>
+
+            <button
+              onClick={handlePrintSignOff}
+              className="flex items-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-opacity hover:opacity-90"
+              style={{
+                borderColor: "var(--craigies-olive)",
+                color: "var(--craigies-dark-olive)",
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
+              <ClipboardList className="h-5 w-5" />
+              <span className="hidden sm:inline">Sign-Off Sheet</span>
             </button>
           </div>
         </div>
