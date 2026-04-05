@@ -13,6 +13,8 @@ import {
   Users,
   Sun,
   Sunset,
+  Camera,
+  CameraOff,
 } from "lucide-react";
 
 interface EmergencyContact {
@@ -29,6 +31,8 @@ interface Child {
   session: "AM" | "PM" | "Full";
   allergies: string[];
   medicalNotes: string;
+  photoConsent: boolean | null;
+  parentNotes: string;
   emergencyContact: EmergencyContact;
   emergencyContact2: EmergencyContact;
 }
@@ -104,8 +108,8 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
             display: none !important;
           }
           @page {
-            size: A4;
-            margin: 15mm;
+            size: A4 landscape;
+            margin: 10mm;
           }
           table {
             font-size: 10pt;
@@ -318,7 +322,7 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
             </div>
           ) : (
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[900px]">
+              <table className="w-full min-w-[800px]">
                 <thead>
                   <tr className="border-b border-cloud">
                     <th
@@ -331,7 +335,7 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       className="pb-3 text-left text-sm font-semibold"
                       style={{ color: "var(--craigies-dark-olive)" }}
                     >
-                      Parent
+                      Parent / Guardian
                     </th>
                     <th
                       className="pb-3 text-left text-sm font-semibold"
@@ -340,16 +344,16 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       Session
                     </th>
                     <th
-                      className="pb-3 text-left text-sm font-semibold"
+                      className="pb-3 text-center text-sm font-semibold"
                       style={{ color: "var(--craigies-dark-olive)" }}
                     >
-                      Allergies
+                      Photo OK
                     </th>
                     <th
                       className="pb-3 text-left text-sm font-semibold"
                       style={{ color: "var(--craigies-dark-olive)" }}
                     >
-                      Medical Notes
+                      Allergies / Important Info
                     </th>
                     <th
                       className="pb-3 text-left text-sm font-semibold"
@@ -360,7 +364,13 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cloud">
-                  {attendance.map((child) => (
+                  {attendance.map((child) => {
+                    const hasAllergies = child.allergies.length > 0;
+                    const hasMedicalNotes = !!child.medicalNotes;
+                    const hasParentNotes = !!child.parentNotes;
+                    const hasImportantInfo = hasAllergies || hasMedicalNotes || hasParentNotes;
+
+                    return (
                     <tr key={child.id} className="hover:bg-cloud/50">
                       <td
                         className="py-4 text-sm font-medium"
@@ -370,7 +380,7 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                       </td>
                       <td className="py-4">
                         <p
-                          className="text-sm"
+                          className="text-sm font-medium"
                           style={{ color: "var(--craigies-dark-olive)" }}
                         >
                           {child.parentName}
@@ -407,13 +417,44 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                             : child.session}
                         </span>
                       </td>
-                      <td className="py-4">
-                        {child.allergies.length > 0 ? (
-                          <div className="flex items-start gap-1">
-                            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
-                            <span className="font-body text-sm font-medium text-red-700">
-                              {child.allergies.join(", ")}
-                            </span>
+                      <td className="py-4 text-center">
+                        {child.photoConsent === true ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                            <Camera className="h-3.5 w-3.5" />
+                            Yes
+                          </span>
+                        ) : child.photoConsent === false ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700">
+                            <CameraOff className="h-3.5 w-3.5" />
+                            No
+                          </span>
+                        ) : (
+                          <span className="font-body text-xs text-pebble">
+                            —
+                          </span>
+                        )}
+                      </td>
+                      <td className="max-w-[280px] py-4">
+                        {hasImportantInfo ? (
+                          <div className="space-y-1.5">
+                            {hasAllergies && (
+                              <div className="flex items-start gap-1">
+                                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
+                                <span className="font-body text-sm font-medium text-red-700">
+                                  {child.allergies.join(", ")}
+                                </span>
+                              </div>
+                            )}
+                            {hasMedicalNotes && (
+                              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                                {child.medicalNotes}
+                              </p>
+                            )}
+                            {hasParentNotes && (
+                              <p className="text-sm italic text-stone">
+                                {child.parentNotes}
+                              </p>
+                            )}
                           </div>
                         ) : (
                           <span className="font-body text-sm text-pebble">
@@ -421,23 +462,8 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                           </span>
                         )}
                       </td>
-                      <td className="max-w-[200px] py-4">
-                        {child.medicalNotes ? (
-                          <span
-                            className="text-sm"
-                            style={{ color: "var(--craigies-dark-olive)" }}
-                          >
-                            {child.medicalNotes}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-pebble">
-                            None
-                          </span>
-                        )}
-                      </td>
                       <td className="py-4">
                         <div className="space-y-2">
-                          {/* Emergency Contact 1 */}
                           {child.emergencyContact.name ? (
                             <div className="border-b border-cloud/50 pb-2">
                               <p
@@ -463,7 +489,6 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                               Not provided
                             </span>
                           )}
-                          {/* Emergency Contact 2 */}
                           {child.emergencyContact2?.name && (
                             <div>
                               <p
@@ -488,7 +513,8 @@ export function DailyAttendanceView({ date, attendance }: DailyAttendanceViewPro
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

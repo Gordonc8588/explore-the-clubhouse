@@ -30,6 +30,8 @@ async function getAttendanceData(date: string) {
           date_of_birth,
           allergies,
           medical_notes,
+          photo_consent,
+          parent_notes,
           emergency_contact_name,
           emergency_contact_phone,
           emergency_contact_relationship,
@@ -55,6 +57,8 @@ async function getAttendanceData(date: string) {
     session: "AM" | "PM" | "Full";
     allergies: string[];
     medicalNotes: string;
+    photoConsent: boolean | null;
+    parentNotes: string;
     emergencyContact: {
       name: string;
       phone: string;
@@ -101,6 +105,8 @@ async function getAttendanceData(date: string) {
         session,
         allergies: allergiesArray,
         medicalNotes: child.medical_notes || "",
+        photoConsent: child.photo_consent ?? null,
+        parentNotes: child.parent_notes || "",
         emergencyContact: {
           name: child.emergency_contact_name || "",
           phone: child.emergency_contact_phone || "",
