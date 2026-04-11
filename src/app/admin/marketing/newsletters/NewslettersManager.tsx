@@ -12,6 +12,9 @@ import {
   Loader2,
   FileText,
   CheckCircle2,
+  CalendarDays,
+  X,
+  Users,
 } from "lucide-react";
 import { NewsletterForm } from "./NewsletterForm";
 import { NewsletterPreview } from "./NewsletterPreview";
@@ -71,6 +74,13 @@ export function NewslettersManager({
   const [previewPromo, setPreviewPromo] = useState<PromoCode | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+
+  // Recap send modal state
+  const [recapNewsletter, setRecapNewsletter] = useState<Newsletter | null>(null);
+  const [recapDate, setRecapDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [recapPreview, setRecapPreview] = useState<{ recipients: string[]; weekStart: string; weekEnd: string } | null>(null);
+  const [recapPreviewing, setRecapPreviewing] = useState(false);
+  const [recapSending, setRecapSending] = useState(false);
 
   const fetchNewsletters = useCallback(async () => {
     setIsLoading(true);
@@ -165,6 +175,67 @@ export function NewslettersManager({
       alert("Failed to send newsletter");
     } finally {
       setSendingId(null);
+    }
+  };
+
+  const handleOpenRecap = (newsletter: Newsletter) => {
+    setRecapNewsletter(newsletter);
+    setRecapDate(new Date().toISOString().slice(0, 10));
+    setRecapPreview(null);
+  };
+
+  const handleCloseRecap = () => {
+    setRecapNewsletter(null);
+    setRecapPreview(null);
+  };
+
+  const handleRecapPreview = async () => {
+    if (!recapNewsletter) return;
+    setRecapPreviewing(true);
+    setRecapPreview(null);
+    try {
+      const res = await fetch(
+        `/api/admin/newsletters/send-recap?newsletterId=${recapNewsletter.id}&date=${recapDate}`
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to fetch recipients");
+        return;
+      }
+      setRecapPreview(data);
+    } catch {
+      alert("Failed to fetch recipients");
+    } finally {
+      setRecapPreviewing(false);
+    }
+  };
+
+  const handleRecapSend = async () => {
+    if (!recapNewsletter || !recapPreview) return;
+    const confirmed = confirm(
+      `Send "${recapNewsletter.subject}" to ${recapPreview.recipients.length} parents booked for the week of ${recapPreview.weekStart}?`
+    );
+    if (!confirmed) return;
+
+    setRecapSending(true);
+    try {
+      const res = await fetch("/api/admin/newsletters/send-recap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newsletterId: recapNewsletter.id, date: recapDate }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`Recap sent to ${data.sentCount} parents!`);
+        handleCloseRecap();
+        fetchNewsletters();
+      } else {
+        alert(data.error || "Failed to send recap");
+      }
+    } catch {
+      alert("Failed to send recap");
+    } finally {
+      setRecapSending(false);
     }
   };
 
@@ -292,6 +363,21 @@ export function NewslettersManager({
                         </button>
                         <button
                           onClick={() =>
+                            handleOpenRecap({
+                              ...newsletter,
+                              clubs: undefined,
+                              promo_codes: undefined,
+                            } as Newsletter)
+                          }
+                          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-100"
+                          style={{ color: "var(--craigies-olive)" }}
+                          title="Send as weekly recap to booked parents"
+                        >
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          Recap
+                        </button>
+                        <button
+                          onClick={() =>
                             handleSend({
                               ...newsletter,
                               clubs: undefined,
@@ -307,7 +393,7 @@ export function NewslettersManager({
                           ) : (
                             <Send className="h-3.5 w-3.5" />
                           )}
-                          Send
+                          Send All
                         </button>
                         <button
                           onClick={() => handleDelete(newsletter.id)}
@@ -437,6 +523,22 @@ export function NewslettersManager({
                                 title="Edit"
                               >
                                 <Edit2
+                                  className="h-4 w-4"
+                                  style={{ color: "var(--craigies-burnt-orange)" }}
+                                />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleOpenRecap({
+                                    ...newsletter,
+                                    clubs: undefined,
+                                    promo_codes: undefined,
+                                  } as Newsletter)
+                                }
+                                className="rounded-lg p-2 transition-colors hover:bg-amber-50"
+                                title="Send as weekly recap to booked parents"
+                              >
+                                <CalendarDays
                                   className="h-4 w-4"
                                   style={{ color: "var(--craigies-burnt-orange)" }}
                                 />
@@ -594,6 +696,115 @@ export function NewslettersManager({
           onSaved={handleSaved}
           onPreview={handlePreview}
         />
+      )}
+
+      {/* Recap Send Modal */}
+      {recapNewsletter && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={handleCloseRecap} />
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Send as Weekly Recap
+                </h2>
+                <p className="mt-1 text-sm text-gray-500 line-clamp-1">
+                  {recapNewsletter.subject}
+                </p>
+              </div>
+              <button
+                onClick={handleCloseRecap}
+                className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
+              >
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="recap-date"
+                  className="mb-1.5 block text-sm font-medium"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  Recap date
+                </label>
+                <input
+                  id="recap-date"
+                  type="date"
+                  value={recapDate}
+                  onChange={(e) => {
+                    setRecapDate(e.target.value);
+                    setRecapPreview(null);
+                  }}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                  style={{ colorScheme: "light" }}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Sends to all parents with a booking during the Mon–Fri week containing this date.
+                </p>
+              </div>
+
+              <button
+                onClick={handleRecapPreview}
+                disabled={recapPreviewing}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
+                style={{ borderColor: "var(--craigies-olive)", color: "var(--craigies-olive)" }}
+              >
+                {recapPreviewing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Users className="h-4 w-4" />
+                )}
+                Preview recipients
+              </button>
+
+              {recapPreview && (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="mb-2 text-xs font-medium text-gray-500">
+                    Week {recapPreview.weekStart} – {recapPreview.weekEnd} •{" "}
+                    <span style={{ color: "var(--craigies-olive)" }}>
+                      {recapPreview.recipients.length} parent{recapPreview.recipients.length !== 1 ? "s" : ""}
+                    </span>
+                  </p>
+                  {recapPreview.recipients.length === 0 ? (
+                    <p className="text-sm text-gray-500">No paid bookings found for this week.</p>
+                  ) : (
+                    <ul className="max-h-40 space-y-1 overflow-y-auto">
+                      {recapPreview.recipients.map((email) => (
+                        <li key={email} className="truncate text-xs text-gray-700">
+                          {email}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={handleCloseRecap}
+                className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRecapSend}
+                disabled={!recapPreview || recapPreview.recipients.length === 0 || recapSending}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-40"
+                style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
+              >
+                {recapSending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                Send recap
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Newsletter Preview Modal */}
