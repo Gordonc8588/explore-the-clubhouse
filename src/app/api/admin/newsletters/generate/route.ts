@@ -568,9 +568,30 @@ Respond with ONLY valid JSON (no markdown code blocks):
       },
     });
   } catch (error) {
-    console.error("Error generating newsletter content:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to generate content";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    // Log full error details for diagnostics
+    if (error && typeof error === "object") {
+      const err = error as Record<string, unknown>;
+      console.error("Error generating newsletter content:", {
+        name: err.name,
+        message: err.message,
+        status: err.status,
+        error: err.error,
+        stack: err.stack,
+      });
+    } else {
+      console.error("Error generating newsletter content:", error);
+    }
+
+    // Return detailed error to admin (this route is admin-only)
+    let errorMessage = "Failed to generate content";
+    let errorDetail: string | undefined;
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      const apiErr = error as Error & { status?: number; error?: unknown };
+      if (apiErr.status) {
+        errorDetail = `HTTP ${apiErr.status}: ${JSON.stringify(apiErr.error ?? error.message)}`;
+      }
+    }
+    return NextResponse.json({ error: errorMessage, detail: errorDetail }, { status: 500 });
   }
 }
