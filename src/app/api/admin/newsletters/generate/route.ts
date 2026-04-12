@@ -6,6 +6,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ConversationRole } from "@/types/database";
 import { getProxiedImageUrl } from "@/lib/cloudinary";
 
+export const maxDuration = 60;
+
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
@@ -110,7 +112,7 @@ async function summarizeConversationHistory(
   }).join("\n\n");
 
   const summaryResponse = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 1000,
     messages: [{
       role: "user",
@@ -509,7 +511,7 @@ Respond with ONLY valid JSON (no markdown code blocks):
 
     // Call Claude API
     const message = await anthropic.messages.create({
-      model: "claude-opus-4-5-20251101",
+      model: "claude-opus-4-6",
       max_tokens: 8000,
       messages,
       system: SYSTEM_PROMPT,
