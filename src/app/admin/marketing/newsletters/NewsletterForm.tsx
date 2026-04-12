@@ -175,7 +175,8 @@ export function NewsletterForm({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to generate content");
+        const msg = data.detail ? `${data.error} — ${data.detail}` : (data.error || "Failed to generate content");
+        throw new Error(msg);
       }
 
       const data = await response.json();
@@ -242,7 +243,8 @@ export function NewsletterForm({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to refine content");
+        const msg = data.detail ? `${data.error} — ${data.detail}` : (data.error || "Failed to refine content");
+        throw new Error(msg);
       }
 
       const data = await response.json();

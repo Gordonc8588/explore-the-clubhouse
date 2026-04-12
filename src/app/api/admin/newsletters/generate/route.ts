@@ -248,7 +248,8 @@ export async function POST(request: Request) {
   }
 
   // Check for API key
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  if (!anthropicApiKey) {
     return NextResponse.json(
       { error: "ANTHROPIC_API_KEY is not configured" },
       { status: 500 }
@@ -335,7 +336,7 @@ IMPORTANT: Include ALL ${images.length} images in the newsletter HTML using plac
 
     // Initialize Anthropic client early (needed for summarization)
     const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: anthropicApiKey,
     });
 
     // Handle token limits and summarization for follow-ups
