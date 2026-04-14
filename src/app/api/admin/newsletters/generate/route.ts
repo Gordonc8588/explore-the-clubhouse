@@ -414,11 +414,23 @@ Respond with ONLY valid JSON (no markdown code blocks):
     // Build message content with images for vision (for initial request)
     const imageContent: Anthropic.MessageParam["content"] = [];
 
+    // Insert Cloudinary transformations to resize images before fetching.
+    // Anthropic's API has a 5 MB limit on base64 images; a 1600px JPEG at
+    // q80 is typically well under 1 MB regardless of the original size.
+    function getResizedCloudinaryUrl(url: string): string {
+      const match = url.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+|[^v].*)$/);
+      if (match) {
+        return `${match[1]}w_1600,q_80,f_jpg/${match[2]}`;
+      }
+      return url;
+    }
+
     // Add images for vision analysis
     for (const image of images) {
       try {
-        // Fetch the image and convert to base64
-        const imageResponse = await fetch(image.url);
+        // Fetch a resized version to stay within Anthropic's 5 MB base64 limit
+        const fetchUrl = getResizedCloudinaryUrl(image.url);
+        const imageResponse = await fetch(fetchUrl);
         if (!imageResponse.ok) {
           console.warn(`Failed to fetch image ${image.label}: ${imageResponse.status}`);
           continue;
@@ -427,13 +439,8 @@ Respond with ONLY valid JSON (no markdown code blocks):
         const arrayBuffer = await imageResponse.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString("base64");
 
-        // Determine media type from response headers or URL
-        const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
-        const mediaType = contentType.split(";")[0].trim() as
-          | "image/jpeg"
-          | "image/png"
-          | "image/gif"
-          | "image/webp";
+        // Cloudinary f_jpg transformation always returns JPEG
+        const mediaType = "image/jpeg" as const;
 
         // Add image with label context
         imageContent.push({
