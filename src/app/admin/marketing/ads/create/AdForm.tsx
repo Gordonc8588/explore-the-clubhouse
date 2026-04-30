@@ -380,7 +380,7 @@ export function AdForm({ clubs, promoCodes }: AdFormProps) {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Easter Camp 2026 - Parents"
+                  placeholder="e.g., Summer Camp 2026 - Parents"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--craigies-burnt-orange)]"
                 />
                 <p className="mt-1 text-xs text-gray-500">

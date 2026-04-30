@@ -234,7 +234,7 @@ export function PrintAdForm({ initialData }: PrintAdFormProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Easter 2026 - Local Magazine"
+                placeholder="e.g., Summer 2026 - Local Magazine"
                 className="w-full rounded-lg border p-3 transition-colors focus:outline-none focus:ring-2"
                 style={{
                   borderColor: "var(--craigies-dark-olive)",
@@ -398,7 +398,7 @@ export function PrintAdForm({ initialData }: PrintAdFormProps) {
                 type="text"
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value.slice(0, MAX_HEADLINE_LENGTH))}
-                placeholder="e.g., Farm Adventures Await This Easter"
+                placeholder="e.g., Farm Adventures Await This Summer"
                 className="w-full rounded-lg border p-3 transition-colors focus:outline-none focus:ring-2"
                 style={{
                   borderColor: "var(--craigies-dark-olive)",

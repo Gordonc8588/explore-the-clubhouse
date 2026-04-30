@@ -38,13 +38,13 @@ const activities = [
     emoji: "🐐",
     title: "Animal Care & Feeding",
     description:
-      "This is such a special season to spend with the animals as the farm gets their NEW ARRIVALS - last year was our young chickens and the opportunity to get the little lambs onto bottles. Then of course collecting eggs, and learning about the chickens to preparing food and treats for our goats, bunnies, and horses, animal lovers will be in their element. Our Animal Specialists will share fascinating facts and expertly guide children in caring for the animals.",
+      "Summer is a wonderful time to spend with the animals — collecting eggs, preparing food and treats for our goats, bunnies, ponies, and chickens, and learning about how each animal is cared for through the warmer months. Our Animal Specialists will share fascinating facts and expertly guide children in caring for the animals.",
   },
   {
     emoji: "🌱",
-    title: "Growing & Gardening",
+    title: "Growing & Harvesting",
     description:
-      "Spring on the farm is all about planting and getting it all growing again! Children will help prepare beds, sow seeds, plant vegetables and flowers, and learn how we care for them as they grow through the season.",
+      "Summer on the farm is all about harvest! Children will help pick fresh produce, weed and water beds, and learn how crops are looked after in the heat — tasting the difference straight from the field to plate.",
   },
   {
     emoji: "🌾",
@@ -56,19 +56,19 @@ const activities = [
     emoji: "🛠",
     title: "Traditional Skills & Woodworking",
     description:
-      "From building raised beds and crafting birdhouses for nesting season to helping with the coop or creating small woodworking projects to take home, children will develop practical skills alongside creative arts and crafts.",
+      "From building raised beds and crafting birdhouses to helping with the coop or creating small woodworking projects to take home, children will develop practical skills alongside creative arts and crafts.",
   },
   {
     emoji: "🍽",
     title: "Cookery & Farm-to-Table Food Prep",
     description:
-      "Children will learn the basics of baking & cooking, using seasonal produce from the farm wherever possible, and collecting their own eggs — learning about where food comes from and how it changes throughout the year.",
+      "Children will learn the basics of baking & cooking, using seasonal summer produce from the farm wherever possible, and collecting their own eggs — learning about where food comes from and how it changes throughout the year.",
   },
   {
     emoji: "🌳",
     title: "Forest Exploration & Bushcraft",
     description:
-      "Led by our in-house Forest Ranger, children will explore the woods as they come alive in spring, identify mini-beasts, learn about woodland animals, play team games, and build their very own dens.",
+      "Led by our in-house Forest Ranger, children will explore the woods at their summer best, identify mini-beasts, learn about woodland animals, play team games, and build their very own dens.",
   },
 ];
 
@@ -95,7 +95,7 @@ export default async function WhatsOnPage() {
         </div>
       </section>
 
-      {/* Easter Club Details Section */}
+      {/* Summer Club Details Section */}
       <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
@@ -108,20 +108,20 @@ export default async function WhatsOnPage() {
                   color: "var(--craigies-dark-olive)",
                 }}
               >
-                🌱 Farm Activity Club – Easter 2026 🌱
+                🌾 Farm Activity Club – Summer 2026 🌾
               </h2>
               <p
                 className="mt-2 font-body text-lg font-semibold"
                 style={{ color: "var(--craigies-burnt-orange)" }}
               >
-                (6-10 &amp; 13-17 April)
+                (6-10 &amp; 13-17 July)
               </p>
               <p
                 className="mt-6 font-body text-lg leading-relaxed"
                 style={{ color: "var(--craigies-dark-olive)" }}
               >
-                Join us at The Clubhouse this spring, where children can explore, learn, and
-                enjoy the very best of Scotland&apos;s countryside during the school break.
+                Join us at The Clubhouse this summer, where children can explore, learn, and
+                enjoy the very best of Scotland&apos;s countryside during the school holidays.
                 As a working farm, activities will vary each day — but here are just some of
                 the exciting adventures we have planned:
               </p>

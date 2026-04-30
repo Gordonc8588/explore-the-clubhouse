@@ -7,13 +7,13 @@ import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import CTASection from "@/components/CTASection";
 
 export const metadata: Metadata = {
-  title: "The Clubhouse | Easter Holiday Club 2026 - Now Booking",
+  title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
   description:
-    "Book now for Easter 2026! Join our outdoor holiday club for children aged 5-12 at Craigies Farm, South Queensferry. Spring lambs, egg hunts, forest adventures, and farm activities.",
+    "Book now for Summer 2026! Join our outdoor holiday club for children aged 5-12 at Craigies Farm, South Queensferry. Animal care, harvest, woodland adventures, and farm activities across two weeks in July.",
   openGraph: {
-    title: "The Clubhouse | Easter Holiday Club 2026 - Now Booking",
+    title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
     description:
-      "Easter adventure at Craigies Farm! Meet spring lambs, explore woodland trails, and enjoy Easter activities. Ages 5-12. Limited spaces available.",
+      "Summer adventure at Craigies Farm! Care for animals, explore woodland trails, and enjoy hands-on farm activities. Ages 5-12. Limited spaces available.",
   },
 };
 
@@ -108,13 +108,11 @@ export default function HomePage() {
         title="On the Farm!"
         content={`There really is no better setting for a classroom — from our farm-to-fork cooking classes to our STEM lessons exploring new farming technology and innovations. At The Clubhouse, children learn the science of growing, animal care, woodworking, and other traditional skills, all through hands-on experience.
 
-During Spring, we were busy caring for baby chicks and lambs — including the unforgettable experience of bottle-feeding them! We get our allotments up and running, build fantastic enrichment toys in our woodworking sessions, plant pumpkins, and make the most of wonderfully warm and sunny days spent outdoors.
+Summer is one of the most exciting times on the farm. The crops are thriving, the woods are at their lush, leafy best, and there's a real buzz around the place — bees in the wildflowers, birds in the hedgerows, and animals making the most of the long, sunny days. The kids will be right in the middle of it all.
 
-In Autumn, we jumped straight back into harvesting, learning to pickle and preserve our summer crops, and watching the farm transform with the season. The kids loved foraging for wild ingredients, pressing apple juice, and preparing the beds for winter crops.
+This summer, the children will get stuck into the harvest, picking and tasting fresh produce straight from the field, and learning how it travels from soil to plate. They'll help care for the animals, build and stock enrichment toys in the woodworking sessions, and make the most of wonderfully warm days spent outdoors.
 
-Now, as the days grow lighter and the first signs of spring appear, we're getting ready to welcome new life on the farm again. Soon we'll be planting seeds, tending to baby animals, and exploring all the wonders of springtime at Craigies.
-
-With Spring just around the corner, the kids will be back in the soil — learning how to germinate seeds, raise and care for seedlings, mulch and weed beds, support climbing plants, and understand what helps crops thrive. They'll head out on rounds with the farmers, test soil pH, learn what grows best in different areas of the farm, visit the beehives, and see how farming works on both small and large scales. 🌱`}
+Out in the fields they'll go on rounds with the farmers, see what's ready to harvest, learn how summer crops are watered and looked after, and find out what grows best in different parts of the farm. They'll visit the beehives, spot summer wildlife, and see how farming works on both small and large scales. 🌾`}
         imageUrl="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/IMG_1176-scaled_pemded.jpg"
         imageAlt="Farm activities and learning"
         imagePosition="right"
@@ -137,11 +135,11 @@ With Spring just around the corner, the kids will be back in the soil — learni
       {/* Caring for Farm Animals Section */}
       <ContentSection
         title="Caring for the Farm Animals"
-        content={`At The Clubhouse, kids don't just visit the farm—they become part of it! From helping with bottle-feeding new lambs to helping raise chicks this past spring, children get hands-on experience caring for animals while learning how a farm works and the basics of animal care.
+        content={`At The Clubhouse, kids don't just visit the farm—they become part of it! From feeding goats and brushing ponies to looking after the chickens and collecting fresh eggs, children get hands-on experience caring for animals while learning how a farm works and the basics of animal care.
 
 They've helped to chop and prep treats, feed the goats, brush the ponies, and build animal enrichment activities for the farm. With all sorts of treasures found around the farm—like suet from the butcher for bird feeders or old fruit baskets turned into animal toys—the farm becomes a brilliant little world for learning how to reuse and get creative.
 
-Whether it's cuddling a fluffy chick or watching lambs take their first steps, every moment is a fun and unforgettable lesson in animal care. The children develop empathy and responsibility while forming special bonds with our farmyard friends.`}
+Whether it's holding a chick, brushing a pony, or scattering feed for the goats, every moment is a fun and unforgettable lesson in animal care. The children develop empathy and responsibility while forming special bonds with our farmyard friends.`}
         imageUrl="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/IMG_8406_ejjgwy.jpg"
         imageAlt="Children caring for farm animals"
         imagePosition="right"

@@ -4,17 +4,17 @@ import Link from 'next/link';
 import { LandingPageTracker } from '@/components/landing/LandingPageTracker';
 import { LandingCTAButton } from '@/components/landing/LandingCTAButton';
 
-const BOOK_URL = '/book/easter-2026';
+const BOOK_URL = '/clubs#upcoming-events';
 
 export const metadata: Metadata = {
-  title: 'Easter Holiday Club 2026 | The Clubhouse at Craigies Farm',
+  title: 'Summer Holiday Club 2026 | The Clubhouse at Craigies Farm',
   description:
-    'Book your child\'s Easter adventure at Craigies Farm, South Queensferry. Farm animals, forest exploration & creative learning for ages 5-12. Limited spaces - book now!',
+    'Book your child\'s Summer adventure at Craigies Farm, South Queensferry. Farm animals, harvest, forest exploration & creative learning for ages 5-12 across two weeks in July. Limited spaces - book now!',
   robots: { index: false, follow: false },
   openGraph: {
-    title: 'Easter Holiday Club 2026 | The Clubhouse',
+    title: 'Summer Holiday Club 2026 | The Clubhouse',
     description:
-      'Farm animals, forest adventures & creative learning at Craigies Farm. Ages 5-12, Easter holidays. Limited spaces available!',
+      'Farm animals, forest adventures & creative learning at Craigies Farm. Ages 5-12, July school holidays. Limited spaces available!',
     type: 'website',
     locale: 'en_GB',
     siteName: 'The Clubhouse',
@@ -33,7 +33,7 @@ const activities = [
   {
     title: 'Animal Care',
     description:
-      'Feed lambs, hold chicks, collect eggs and learn about animal care on a working farm.',
+      'Feed goats, brush ponies, hold chicks, collect eggs and learn about animal care on a working farm.',
     image:
       'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-11-45_nwgwh5.jpg',
     alt: 'Children caring for farm animals',
@@ -41,7 +41,7 @@ const activities = [
   {
     title: 'Forest Adventures',
     description:
-      'Explore woodland trails, build dens, discover wildlife and enjoy the great outdoors.',
+      'Explore woodland trails at their summer best, build dens, discover wildlife and enjoy the great outdoors.',
     image:
       'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-12-46_vonx6d.jpg',
     alt: 'Children exploring the forest',
@@ -49,7 +49,7 @@ const activities = [
   {
     title: 'Workshops',
     description:
-      'Nature crafts, outdoor cooking, science experiments and hands-on seasonal projects.',
+      'Nature crafts, outdoor cooking, science experiments and hands-on summer harvest projects.',
     image:
       'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-11-14_mj2ndq.jpg',
     alt: 'Children in a workshop activity',
@@ -91,17 +91,17 @@ const testimonials = [
   },
   {
     quote:
-      'The kids really loved their time at the Clubhouse Easter holiday! Fantastic activities - fun, educational and wonderful to see them enjoying being closer to nature.',
-    author: 'Joanna Mackenzie',
+      'My 10 year old and 6 year old daughters absolutely loved the summer club. They enjoyed every single day there. Thank you to the whole team for their effort, friendliness and super activities!',
+    author: 'Anna Ishkova',
   },
   {
     quote:
-      'Over the course of the week they fed lambs, looked after baby chickens, got involved in all sorts of arts and crafts. They could not wait to go back each morning!',
-    author: 'Tom Malone',
+      'My son attended a few days of summer camp and loved it. He got to take part in a good variety of brilliant farm experiences. Will definitely book another one!',
+    author: 'Lauren Scott',
   },
 ];
 
-export default function EasterLandingPage() {
+export default function SummerLandingPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--craigies-cream)' }}>
       {/* Minimal Header */}
@@ -119,11 +119,11 @@ export default function EasterLandingPage() {
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <h1 className="font-display text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
-                Easter Holiday Club 2026
+                Summer Holiday Club 2026
               </h1>
               <p className="mt-6 text-lg text-white/90 sm:text-xl">
                 Farm animals, forest adventures &amp; creative learning at Craigies Farm, South Queensferry.
-                Ages 5&ndash;12, Easter holidays.
+                Ages 5&ndash;12, July school holidays.
               </p>
               <div className="mt-8">
                 <LandingCTAButton href={BOOK_URL} position="hero">
@@ -207,7 +207,7 @@ export default function EasterLandingPage() {
           </h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 text-left">
             {[
-              { label: 'Dates', value: '6-10 & 13-17 April 2026' },
+              { label: 'Dates', value: '6-10 & 13-17 July 2026' },
               { label: 'Times', value: 'Drop-off 8:30-9:30am, Pick-up 3:00pm' },
               { label: 'Ages', value: '5 to 12 years' },
               { label: 'Location', value: 'Craigies Farm, South Queensferry' },
@@ -231,11 +231,11 @@ export default function EasterLandingPage() {
             <div className="mt-3 h-4 w-full overflow-hidden rounded-full bg-gray-200">
               <div
                 className="h-full rounded-full transition-all"
-                style={{ width: '75%', backgroundColor: 'var(--craigies-burnt-orange)' }}
+                style={{ width: '40%', backgroundColor: 'var(--craigies-burnt-orange)' }}
               />
             </div>
             <p className="mt-2 text-sm font-semibold text-gray-600">
-              75% of places already booked
+              Book early to secure your child&apos;s place
             </p>
             <div className="mt-4">
               <LandingCTAButton href={BOOK_URL} position="mid">
@@ -275,7 +275,7 @@ export default function EasterLandingPage() {
             Ready to Book?
           </h2>
           <p className="mt-4 text-lg text-white/90">
-            Spaces are limited and fill up fast. Secure your child&apos;s place at our Easter holiday club today.
+            Spaces are limited and fill up fast. Secure your child&apos;s place at our Summer holiday club today.
           </p>
           <div className="mt-8">
             <LandingCTAButton href={BOOK_URL} position="bottom">
@@ -306,9 +306,9 @@ export default function EasterLandingPage() {
 
       {/* Tracking */}
       <LandingPageTracker
-        contentName="Easter Holiday Club 2026"
+        contentName="Summer Holiday Club 2026"
         contentCategory="holiday_club"
-        contentId="easter-2026"
+        contentId="summer-2026"
         value={35}
       />
     </div>

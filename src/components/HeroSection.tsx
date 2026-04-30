@@ -16,7 +16,7 @@ export default function HeroSection() {
                 color: 'var(--craigies-dark-olive)'
               }}
             >
-              Join us on the farm this Easter!
+              Join us on the farm this Summer!
             </h1>
 
             {/* CTA Button */}
@@ -31,7 +31,7 @@ export default function HeroSection() {
             {/* Microcopy */}
             <p className="mt-6 text-sm leading-relaxed" style={{ color: 'var(--craigies-dark-olive)' }}>
               <strong className="block mb-1 text-base" style={{ color: 'var(--craigies-olive)' }}>LIMITED PLACES AVAILABLE!</strong>
-              Our Easter sessions fill up fast. Book early to secure your child&apos;s spot!
+              Our Summer sessions fill up fast. Book early to secure your child&apos;s spot!
             </p>
           </div>
 
@@ -56,10 +56,10 @@ export default function HeroSection() {
                       color: 'var(--craigies-dark-olive)'
                     }}
                   >
-                    Easter 2026
+                    Summer 2026
                   </h2>
                   <p className="text-lg" style={{ color: 'var(--craigies-dark-olive)' }}>
-                    6-10 &amp; 13-17 April
+                    6-10 &amp; 13-17 July
                   </p>
                 </div>
               </div>

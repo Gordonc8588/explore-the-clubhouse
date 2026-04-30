@@ -478,7 +478,7 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                   e.target.style.borderColor = "#D1D5DB";
                   e.target.style.boxShadow = "none";
                 }}
-                placeholder="e.g., Easter Holiday Club 2025"
+                placeholder="e.g., Summer Holiday Club 2026"
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-red-500">
@@ -511,7 +511,7 @@ export function ClubEditForm({ clubId, initialData, isNew }: ClubEditFormProps) 
                   e.target.style.borderColor = "#D1D5DB";
                   e.target.style.boxShadow = "none";
                 }}
-                placeholder="e.g., easter-2025"
+                placeholder="e.g., summer-2026"
               />
               {errors.slug && (
                 <p className="mt-1 text-sm text-red-500">
