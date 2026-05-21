@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { BookingDetail } from "./BookingDetail";
 
 interface BookingPageProps {
@@ -7,7 +7,7 @@ interface BookingPageProps {
 }
 
 async function getBookingData(bookingId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data: booking, error } = await supabase
     .from("bookings")

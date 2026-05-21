@@ -7,7 +7,7 @@ import {
   Eye,
   Plus,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -29,7 +29,7 @@ function getTodayFormatted(): string {
 }
 
 async function getDashboardData() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const today = new Date().toISOString().split("T")[0];
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - weekStart.getDay());

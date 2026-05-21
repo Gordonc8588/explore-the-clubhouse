@@ -5,11 +5,11 @@ import {
   PoundSterling,
   BookOpen,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { BookingsTable } from "./BookingsTable";
 
 async function getBookingsData() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get all bookings with related data
   const { data: bookings } = await supabase
