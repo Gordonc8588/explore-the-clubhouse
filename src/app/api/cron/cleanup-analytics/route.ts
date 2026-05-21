@@ -19,7 +19,18 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // Fail closed: refuse if the secret is not configured, rather than running
+  // the destructive cleanup unauthenticated. Vercel Cron sends the
+  // `Authorization: Bearer <CRON_SECRET>` header, so the scheduled run still
+  // works once CRON_SECRET is set.
+  if (!cronSecret) {
+    console.error('[Cron] CRON_SECRET is not configured');
+    return NextResponse.json(
+      { error: 'Server misconfiguration' },
+      { status: 500 }
+    );
+  }
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -65,24 +65,28 @@ export async function POST(request: NextRequest) {
   const body = await request.text();
   const signature = request.headers.get('resend-signature');
 
-  // Verify signature if present (Resend signs webhooks)
-  if (signature) {
-    try {
-      const isValid = verifySignature(body, signature, webhookSecret);
-      if (!isValid) {
-        console.error('[Resend Webhook] Invalid signature');
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 401 }
-        );
-      }
-    } catch {
-      console.error('[Resend Webhook] Signature verification error');
+  // Require and verify the signature — Resend signs every webhook. A missing
+  // header must be rejected, otherwise anyone could forge bounce/complaint
+  // events and suppress real customers' emails.
+  if (!signature) {
+    console.error('[Resend Webhook] Missing signature');
+    return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+  }
+  try {
+    const isValid = verifySignature(body, signature, webhookSecret);
+    if (!isValid) {
+      console.error('[Resend Webhook] Invalid signature');
       return NextResponse.json(
-        { error: 'Signature verification failed' },
+        { error: 'Invalid signature' },
         { status: 401 }
       );
     }
+  } catch {
+    console.error('[Resend Webhook] Signature verification error');
+    return NextResponse.json(
+      { error: 'Signature verification failed' },
+      { status: 401 }
+    );
   }
 
   let event: ResendWebhookEvent;
