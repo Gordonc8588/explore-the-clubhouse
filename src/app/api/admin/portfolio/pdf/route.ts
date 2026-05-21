@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 /**
  * Portfolio PDF Generation
  * POST /api/admin/portfolio/pdf - Generate portfolio case study PDF
@@ -12,7 +13,7 @@ import { PortfolioPdfDocument } from '@/components/portfolio/PortfolioPdfDocumen
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get('admin-session')?.value === 'authenticated';
+  return verifyAdminSessionToken(cookieStore.get('admin-session')?.value);
 }
 
 // Validation schema for screenshot URLs

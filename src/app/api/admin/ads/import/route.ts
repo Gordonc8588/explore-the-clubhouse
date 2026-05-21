@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 /**
  * Import Ads from Meta API
  * POST /api/admin/ads/import - Sync all ads from Meta Ad Account to local database
@@ -16,7 +17,7 @@ import {
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get("admin-session")?.value === "authenticated";
+  return verifyAdminSessionToken(cookieStore.get("admin-session")?.value);
 }
 
 export async function POST() {

@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  ADMIN_SESSION_COOKIE,
+  ADMIN_SESSION_MAX_AGE,
+  createAdminSessionToken,
+} from "@/lib/admin-session";
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
@@ -17,12 +22,12 @@ export async function POST(request: Request) {
   if (email === adminEmail && password === adminPassword) {
     const response = NextResponse.json({ success: true });
 
-    // Set the admin session cookie
-    response.cookies.set("admin-session", "authenticated", {
+    // Issue a signed, expiring session token (not a guessable constant)
+    response.cookies.set(ADMIN_SESSION_COOKIE, createAdminSessionToken(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: ADMIN_SESSION_MAX_AGE,
       path: "/",
     });
 

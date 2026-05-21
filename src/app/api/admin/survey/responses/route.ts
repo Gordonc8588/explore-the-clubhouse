@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 /**
  * Survey Responses API Route
  * GET /api/admin/survey/responses - List all survey responses with pagination and filters
@@ -10,7 +11,7 @@ import { cookies } from 'next/headers';
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get('admin-session')?.value === 'authenticated';
+  return verifyAdminSessionToken(cookieStore.get('admin-session')?.value);
 }
 
 /**

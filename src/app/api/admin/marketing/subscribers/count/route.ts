@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
@@ -5,7 +6,7 @@ import { cookies } from "next/headers";
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get("admin-session")?.value === "authenticated";
+  return verifyAdminSessionToken(cookieStore.get("admin-session")?.value);
 }
 
 export async function GET() {

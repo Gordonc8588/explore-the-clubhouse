@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 /**
  * Print Ad PDF Generation
  * POST /api/admin/print-ads/pdf - Generate and download PDF
@@ -14,7 +15,7 @@ import type { PrintAd } from '@/types/database';
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get('admin-session')?.value === 'authenticated';
+  return verifyAdminSessionToken(cookieStore.get('admin-session')?.value);
 }
 
 // Validation schema for PDF generation
