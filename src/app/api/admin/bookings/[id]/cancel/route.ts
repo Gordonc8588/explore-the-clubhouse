@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
@@ -6,7 +7,7 @@ import { cookies } from "next/headers";
 
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get("admin-session")?.value === "authenticated";
+  return verifyAdminSessionToken(cookieStore.get("admin-session")?.value);
 }
 
 /**

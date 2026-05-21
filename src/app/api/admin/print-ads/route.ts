@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 /**
  * Print Ads API Routes
  * GET /api/admin/print-ads - List all print ads with optional filters
@@ -12,7 +13,7 @@ import { z } from 'zod';
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get('admin-session')?.value === 'authenticated';
+  return verifyAdminSessionToken(cookieStore.get('admin-session')?.value);
 }
 
 // Validation schema for creating a print ad

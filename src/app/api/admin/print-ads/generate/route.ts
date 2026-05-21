@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 /**
  * Print Ad AI Copy Generation
  * POST /api/admin/print-ads/generate - Generate editorial copy using Claude AI
@@ -13,7 +14,7 @@ import { format } from 'date-fns';
 // Check if user is admin
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get('admin-session')?.value === 'authenticated';
+  return verifyAdminSessionToken(cookieStore.get('admin-session')?.value);
 }
 
 // Validation schema for generate request

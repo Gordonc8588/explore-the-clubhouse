@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from '@/lib/admin-session';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getNewsletterMetrics, type DateRange } from '@/lib/analytics-queries';
@@ -6,7 +7,7 @@ export async function GET(request: NextRequest) {
   // Check admin auth
   const cookieStore = await cookies();
   const session = cookieStore.get('admin-session');
-  if (!session) {
+  if (!verifyAdminSessionToken(session?.value)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

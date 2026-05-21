@@ -1,3 +1,4 @@
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
@@ -7,7 +8,7 @@ import type { Newsletter, Club, PromoCode } from "@/types/database";
 
 async function isAdmin() {
   const cookieStore = await cookies();
-  return cookieStore.get("admin-session")?.value === "authenticated";
+  return verifyAdminSessionToken(cookieStore.get("admin-session")?.value);
 }
 
 function getWeekBounds(dateStr: string): { weekStart: string; weekEnd: string } {
