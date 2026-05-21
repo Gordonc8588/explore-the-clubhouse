@@ -9,17 +9,26 @@ export function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for admin session cookie
+  // Require a valid admin session — check the cookie's value, not just its
+  // presence (an expired/blank cookie should not count as authenticated).
   const adminSession = request.cookies.get('admin-session')
-
-  // If no session, redirect to login
-  if (!adminSession) {
+  if (adminSession?.value !== 'authenticated') {
     const loginUrl = new URL('/admin/login', request.url)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Allow authenticated users to proceed
-  return NextResponse.next()
+  // Authenticated: refresh the session cookie so active admins aren't logged
+  // out mid-task (sliding expiry). Keep these attributes in sync with the
+  // cookie set in src/app/api/admin/login/route.ts.
+  const response = NextResponse.next()
+  response.cookies.set('admin-session', 'authenticated', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: '/',
+  })
+  return response
 }
 
 export const config = {

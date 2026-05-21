@@ -39,6 +39,17 @@ const newsletterSchema = z.object({
 
 type NewsletterFormData = z.infer<typeof newsletterSchema>;
 
+// If an admin API call returns 401, the session has expired. Send the user to
+// the login page to re-authenticate rather than showing a dead-end
+// "Unauthorized" error.
+function handleUnauthorized(response: Response): boolean {
+  if (response.status === 401 && typeof window !== "undefined") {
+    window.location.href = "/admin/login";
+    return true;
+  }
+  return false;
+}
+
 interface NewsletterFormProps {
   newsletter?: Newsletter | null;
   clubs: Club[];
@@ -173,6 +184,8 @@ export function NewsletterForm({
         }),
       });
 
+      if (handleUnauthorized(response)) return;
+
       if (!response.ok) {
         const data = await response.json();
         const msg = data.detail ? `${data.error} — ${data.detail}` : (data.error || "Failed to generate content");
@@ -240,6 +253,8 @@ export function NewsletterForm({
           summarizedContext,
         }),
       });
+
+      if (handleUnauthorized(response)) return;
 
       if (!response.ok) {
         const data = await response.json();
@@ -314,6 +329,8 @@ export function NewsletterForm({
         body: JSON.stringify(payload),
       });
 
+      if (handleUnauthorized(response)) return;
+
       if (!response.ok) {
         const result = await response.json();
         throw new Error(result.error || "Failed to save newsletter");
@@ -365,6 +382,8 @@ export function NewsletterForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newsletterId: newsletter.id }),
       });
+
+      if (handleUnauthorized(response)) return;
 
       if (!response.ok) {
         const data = await response.json();
