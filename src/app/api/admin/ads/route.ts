@@ -1,3 +1,4 @@
+import { isAdmin } from "@/lib/admin-auth";
 /**
  * Meta Ads API Routes
  * GET /api/admin/ads - List all ads with optional filters
@@ -33,6 +34,10 @@ const createAdSchema = z.object({
  * List ads with optional filters
  */
 export async function GET(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
@@ -92,6 +97,10 @@ export async function GET(request: NextRequest) {
  * Create a new draft ad
  */
 export async function POST(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
 

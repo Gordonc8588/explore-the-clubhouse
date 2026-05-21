@@ -55,6 +55,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const supabase = createAdminClient();
     const data = await request.json();
@@ -152,6 +156,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const supabase = createAdminClient();
     const { slug, bookings_open } = await request.json();
@@ -177,6 +185,10 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const supabase = createAdminClient();
     const data = await request.json();

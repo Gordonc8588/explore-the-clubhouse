@@ -1,3 +1,4 @@
+import { isAdmin } from "@/lib/admin-auth";
 /**
  * Single Meta Ad API Routes
  * GET /api/admin/ads/[id] - Get ad details
@@ -39,6 +40,10 @@ interface RouteParams {
  * Get ad details with related data
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const supabase = createAdminClient();
@@ -96,6 +101,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  * Update an ad (only drafts and rejected can be fully edited)
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -182,6 +191,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
  * Delete a draft ad (cannot delete published ads)
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const supabase = createAdminClient();

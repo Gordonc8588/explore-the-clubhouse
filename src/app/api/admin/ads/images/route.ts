@@ -1,3 +1,4 @@
+import { isAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -31,6 +32,10 @@ const updateImageSchema = z.object({
  *   - limit/offset: pagination
  */
 export async function GET(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const supabase = createAdminClient();
     const searchParams = request.nextUrl.searchParams;
@@ -138,6 +143,10 @@ export async function GET(request: NextRequest) {
  * Add a new image to the library, optionally importing from newsletter library
  */
 export async function POST(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const result = addImageSchema.safeParse(body);
@@ -272,6 +281,10 @@ export async function POST(request: NextRequest) {
  * Update an existing image in the library
  */
 export async function PATCH(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const result = updateImageSchema.safeParse(body);
@@ -319,6 +332,10 @@ export async function PATCH(request: NextRequest) {
  * Remove an image from the library
  */
 export async function DELETE(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get("id");
