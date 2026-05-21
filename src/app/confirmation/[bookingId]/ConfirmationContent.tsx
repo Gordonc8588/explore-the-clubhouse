@@ -291,21 +291,6 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
               Complete Child Information
             </Link>
           )}
-          <Link
-            href={"/add-days/" + booking.id}
-            className="inline-flex items-center justify-center gap-2 border-2 font-semibold py-3 px-6 rounded-lg transition-colors"
-            style={{
-              borderColor: "var(--craigies-dark-olive)",
-              color: "var(--craigies-dark-olive)",
-              fontFamily: "'Playfair Display', serif",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "var(--craigies-cream)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-          >
-            Add More Days
-          </Link>
         </div>
       </div>
     </div>
