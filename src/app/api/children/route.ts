@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendBookingComplete } from "@/lib/email";
+import { verifyBookingToken } from "@/lib/booking-access";
 
 const phoneRegex = /^[\d\s+()-]+$/;
 
@@ -104,6 +105,13 @@ const simplifiedChildrenRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // Per-booking access token: defends against IDOR — without it, anyone with
+    // a booking UUID could write/lock a stranger's child info. See
+    // lib/booking-access.
+    if (!verifyBookingToken(body?.bookingId, body?.t)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Check if this is a simplified submission (for add-on workshops)
     const isSimplified = body.simplified === true;
@@ -306,9 +314,16 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const bookingId = searchParams.get("bookingId");
+  const token = searchParams.get("t");
 
   if (!bookingId) {
     return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
+  }
+
+  // Per-booking access token: defends against IDOR — without it, anyone with a
+  // booking UUID could read every child's full PII. See lib/booking-access.
+  if (!verifyBookingToken(bookingId, token)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const supabase = createAdminClient();

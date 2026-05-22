@@ -41,9 +41,10 @@ interface ConfirmationContentProps {
   bookingOption: BookingOption;
   children: Child[];
   bookingDays: (BookingDay & { club_days: ClubDay })[];
+  accessToken: string;
 }
 
-export function ConfirmationContent({ booking, club, bookingOption, children, bookingDays }: ConfirmationContentProps) {
+export function ConfirmationContent({ booking, club, bookingOption, children, bookingDays, accessToken }: ConfirmationContentProps) {
   const bookingRef = booking.id.slice(0, 8).toUpperCase();
   const isComplete = booking.status === "complete" && children.length > 0;
 
@@ -281,7 +282,7 @@ export function ConfirmationContent({ booking, club, bookingOption, children, bo
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {!isComplete && (
             <Link
-              href={"/complete/" + booking.id}
+              href={"/complete/" + booking.id + "?t=" + accessToken}
               className="inline-flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
               style={{
                 backgroundColor: "var(--craigies-burnt-orange)",

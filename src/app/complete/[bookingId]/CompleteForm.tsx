@@ -22,9 +22,10 @@ interface CompleteFormProps {
   club: Club;
   bookingOption: BookingOption;
   existingChildren: Child[];
+  accessToken: string;
 }
 
-export function CompleteForm({ booking, club, bookingOption, existingChildren }: CompleteFormProps) {
+export function CompleteForm({ booking, club, bookingOption, existingChildren, accessToken }: CompleteFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -195,6 +196,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId: booking.id,
+          t: accessToken,
           children: childrenDataRef.current,
           parentAddress: {
             line1: addressLine1.trim(),
@@ -211,7 +213,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
         throw new Error(result.error || "Failed to save children information");
       }
 
-      router.push("/confirmation/" + booking.id);
+      router.push("/confirmation/" + booking.id + "?t=" + accessToken);
     } catch (err) {
       console.error("Submit error:", err);
       setError(err instanceof Error ? err.message : "Failed to save information");
@@ -248,6 +250,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId: booking.id,
+          t: accessToken,
           children: simplifiedChildren,
           simplified: true,
         }),
@@ -259,7 +262,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
         throw new Error(result.error || "Failed to save children information");
       }
 
-      router.push("/confirmation/" + booking.id);
+      router.push("/confirmation/" + booking.id + "?t=" + accessToken);
     } catch (err) {
       console.error("Submit error:", err);
       setError(err instanceof Error ? err.message : "Failed to save information");
@@ -294,7 +297,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren }:
               Children information has already been submitted for this booking.
             </p>
             <Link
-              href={"/confirmation/" + booking.id}
+              href={"/confirmation/" + booking.id + "?t=" + accessToken}
               className="mt-6 inline-block text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
               style={{
                 backgroundColor: "var(--craigies-burnt-orange)",

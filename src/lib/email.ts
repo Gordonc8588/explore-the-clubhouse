@@ -6,6 +6,7 @@
 import { Resend } from 'resend';
 import type { Booking, Club, Child, Newsletter, PromoCode, TimeSlot } from '@/types/database';
 import { getProxiedImageUrl } from '@/lib/cloudinary';
+import { bookingTokenQuery } from '@/lib/booking-access';
 
 // Lazy initialize Resend client to avoid errors when API key is not set
 let resendClient: Resend | null = null;
@@ -195,7 +196,7 @@ export async function sendBookingConfirmation(
   timeSlot?: TimeSlot,
   bookedDates?: string[]
 ): Promise<SendEmailResult> {
-  const childInfoUrl = `${siteUrl}/complete/${booking.id}`;
+  const childInfoUrl = `${siteUrl}/complete/${booking.id}${bookingTokenQuery(booking.id)}`;
 
   const content = `
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
@@ -632,7 +633,7 @@ export async function sendIncompleteReminder(
   booking: Booking,
   club: Club
 ): Promise<SendEmailResult> {
-  const childInfoUrl = `${siteUrl}/complete/${booking.id}`;
+  const childInfoUrl = `${siteUrl}/complete/${booking.id}${bookingTokenQuery(booking.id)}`;
 
   const content = `
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">

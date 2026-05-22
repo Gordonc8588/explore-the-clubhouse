@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { bookingTokenQuery } from "@/lib/booking-access";
 
 interface UTMParams {
   utm_source: string | null;
@@ -268,7 +269,7 @@ export async function POST(request: NextRequest) {
         utmMedium: utmParams?.utm_medium || "",
         utmCampaign: utmParams?.utm_campaign || "",
       },
-      success_url: `${baseUrl}/complete/${booking.id}`,
+      success_url: `${baseUrl}/complete/${booking.id}${bookingTokenQuery(booking.id)}`,
       cancel_url: `${baseUrl}/book/${clubSlug}?cancelled=true`,
     });
 

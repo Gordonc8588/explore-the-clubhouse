@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
+import { verifyBookingToken, BOOKING_TOKEN_PARAM } from "@/lib/booking-access";
+import { SecureLinkNotice } from "@/components/SecureLinkNotice";
 import { ConfirmationContent } from "./ConfirmationContent";
 
 interface ConfirmationPageProps {
   params: Promise<{ bookingId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 async function getBookingData(bookingId: string) {
@@ -39,8 +42,16 @@ async function getBookingData(bookingId: string) {
   };
 }
 
-export default async function ConfirmationPage({ params }: ConfirmationPageProps) {
+export default async function ConfirmationPage({ params, searchParams }: ConfirmationPageProps) {
   const { bookingId } = await params;
+  const token = (await searchParams)[BOOKING_TOKEN_PARAM];
+  const accessToken = typeof token === "string" ? token : "";
+
+  // Require a valid per-booking token before revealing any booking/child data.
+  if (!verifyBookingToken(bookingId, accessToken)) {
+    return <SecureLinkNotice />;
+  }
+
   const data = await getBookingData(bookingId);
 
   if (!data) {
@@ -54,6 +65,7 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
       bookingOption={data.bookingOption}
       children={data.children}
       bookingDays={data.bookingDays}
+      accessToken={accessToken}
     />
   );
 }
