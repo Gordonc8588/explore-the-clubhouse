@@ -1,6 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { AdForm } from "./AdForm";
 
+// Render on every request so newly created clubs/promos appear in the form
+// (otherwise the page is statically rendered at build time and goes stale).
+export const dynamic = "force-dynamic";
+
 async function getFormData() {
   const supabase = createAdminClient();
 

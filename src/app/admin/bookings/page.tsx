@@ -8,6 +8,10 @@ import {
 import { createAdminClient } from "@/lib/supabase/server";
 import { BookingsTable } from "./BookingsTable";
 
+// Render on every request so new bookings appear immediately (otherwise the
+// page is statically rendered at build time and the list goes stale).
+export const dynamic = "force-dynamic";
+
 async function getBookingsData() {
   const supabase = createAdminClient();
 

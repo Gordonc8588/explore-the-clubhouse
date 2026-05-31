@@ -2,6 +2,11 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Send, Users, Mail, FileText } from "lucide-react";
 import { NewslettersManager } from "./NewslettersManager";
 
+// Fetch clubs/promo codes fresh on every request so newly created clubs
+// appear immediately (without this the page is statically rendered at build
+// time and the dropdown list goes stale). Matches the print-ads admin pages.
+export const dynamic = "force-dynamic";
+
 async function getNewslettersData() {
   const supabase = createAdminClient();
 

@@ -9,6 +9,10 @@ import {
 } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 
+// Render on every request so dashboard stats reflect live data (otherwise the
+// page is statically rendered at build time and the figures go stale).
+export const dynamic = "force-dynamic";
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-GB", {

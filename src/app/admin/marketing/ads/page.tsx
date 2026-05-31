@@ -4,6 +4,10 @@ import Link from "next/link";
 import { AdsManager } from "./AdsManager";
 import { isMetaAdsConfigured } from "@/lib/meta-ads";
 
+// Render on every request so newly created clubs/promos/ads appear immediately
+// (otherwise the page is statically rendered at build time and goes stale).
+export const dynamic = "force-dynamic";
+
 async function getAdsData() {
   const supabase = createAdminClient();
 
