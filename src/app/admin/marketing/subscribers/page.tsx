@@ -2,6 +2,10 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Users, UserPlus, TrendingUp, Tag } from "lucide-react";
 import { SubscribersTable } from "./SubscribersTable";
 
+// Render on every request so new subscribers appear immediately (otherwise the
+// page is statically rendered at build time and the list goes stale).
+export const dynamic = "force-dynamic";
+
 async function getSubscribersData() {
   const supabase = createAdminClient();
 
