@@ -5,6 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import CTASection from "@/components/CTASection";
+import SummerScheduleSection from "@/components/SummerScheduleSection";
 
 export const metadata: Metadata = {
   title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
@@ -227,6 +228,9 @@ Whether it's holding a chick, brushing a pony, or scattering feed for the goats,
           </div>
         </div>
       </section>
+
+      {/* Summer Schedule Section */}
+      <SummerScheduleSection />
 
       {/* CTA Section */}
       <CTASection />
