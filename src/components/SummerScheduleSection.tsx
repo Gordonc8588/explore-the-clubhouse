@@ -10,6 +10,7 @@ interface ScheduleDay {
 interface ScheduleWeek {
   label: string;
   dates: string;
+  startDay: number; // day of month of the Monday, all weeks run Mon-Fri in July
   days: ScheduleDay[];
 }
 
@@ -17,6 +18,7 @@ const weeks: ScheduleWeek[] = [
   {
     label: 'Week One',
     dates: '6-10 July',
+    startDay: 6,
     days: [
       {
         day: 'Monday',
@@ -73,6 +75,7 @@ const weeks: ScheduleWeek[] = [
   {
     label: 'Week Two',
     dates: '13-17 July',
+    startDay: 13,
     days: [
       {
         day: 'Monday',
@@ -129,6 +132,7 @@ const weeks: ScheduleWeek[] = [
   {
     label: 'Week Three',
     dates: '20-24 July',
+    startDay: 20,
     days: [
       {
         day: 'Monday',
@@ -253,7 +257,7 @@ export default function SummerScheduleSection() {
         {/* Day Cards */}
         {week.days.length > 0 ? (
           <div className="flex flex-wrap justify-center gap-6">
-            {week.days.map((d) => (
+            {week.days.map((d, i) => (
               <div
                 key={d.day}
                 className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] p-6 rounded-lg bg-white shadow-md"
@@ -262,7 +266,7 @@ export default function SummerScheduleSection() {
                   className="text-sm font-semibold uppercase tracking-wide mb-1"
                   style={{ color: 'var(--craigies-burnt-orange)' }}
                 >
-                  {d.day}
+                  {d.day} - {week.startDay + i} July
                 </p>
                 <h3
                   className="text-xl mb-3"
