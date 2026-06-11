@@ -9,7 +9,7 @@ import CTASection from "@/components/CTASection";
 export const metadata: Metadata = {
   title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
   description:
-    "Book now for Summer 2026! Join our outdoor holiday club for children aged 5-12 at Craigies Farm, South Queensferry. Animal care, harvest, woodland adventures, and farm activities across two weeks in July.",
+    "Book now for Summer 2026! Join our outdoor holiday club for children aged 5-12 at Craigies Farm, South Queensferry. Animal care, harvest, woodland adventures, and farm activities across three weeks in July.",
   openGraph: {
     title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
     description:

@@ -59,7 +59,7 @@ export default function HeroSection() {
                     Summer 2026
                   </h2>
                   <p className="text-lg" style={{ color: 'var(--craigies-dark-olive)' }}>
-                    6-10 &amp; 13-17 July
+                    6-10, 13-17 &amp; 20-24 July
                   </p>
                 </div>
               </div>

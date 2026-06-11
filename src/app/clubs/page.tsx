@@ -114,7 +114,7 @@ export default async function WhatsOnPage() {
                 className="mt-2 font-body text-lg font-semibold"
                 style={{ color: "var(--craigies-burnt-orange)" }}
               >
-                (6-10 &amp; 13-17 July)
+                (6-10, 13-17 &amp; 20-24 July)
               </p>
               <p
                 className="mt-6 font-body text-lg leading-relaxed"
