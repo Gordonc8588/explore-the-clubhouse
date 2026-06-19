@@ -48,6 +48,21 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     notFound();
   }
 
+  // Active clubs the booking could be rescheduled into (incl. other weeks).
+  const supabase = createAdminClient();
+  const { data: clubRows } = await supabase
+    .from("clubs")
+    .select("id, name, start_date")
+    .eq("is_active", true)
+    .order("start_date", { ascending: true });
+  const availableClubs = (clubRows || []).map(
+    (c: { id: string; name: string; start_date: string }) => ({
+      id: c.id,
+      name: c.name,
+      startDate: c.start_date,
+    })
+  );
+
   // Transform booking data for the component
   const bookedDays = booking.booking_days?.map((bd: any) => ({
     bookingDayId: bd.id,
@@ -147,5 +162,5 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     createdAt: booking.created_at,
   };
 
-  return <BookingDetail booking={transformedBooking} />;
+  return <BookingDetail booking={transformedBooking} availableClubs={availableClubs} />;
 }

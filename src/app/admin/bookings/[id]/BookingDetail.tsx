@@ -93,8 +93,15 @@ interface BookingDetailData {
   createdAt: string;
 }
 
+interface AvailableClub {
+  id: string;
+  name: string;
+  startDate: string;
+}
+
 interface BookingDetailProps {
   booking: BookingDetailData;
+  availableClubs: AvailableClub[];
 }
 
 function formatDate(dateString: string): string {
@@ -152,7 +159,7 @@ function getStatusBadgeStyles(status: string): { backgroundColor: string; color:
   }
 }
 
-export function BookingDetail({ booking }: BookingDetailProps) {
+export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [changeDayTarget, setChangeDayTarget] = useState<BookedDay | null>(null);
@@ -191,6 +198,137 @@ export function BookingDetail({ booking }: BookingDetailProps) {
     const t = setTimeout(() => setCooldownPassed(true), 1500);
     return () => clearTimeout(t);
   }, [showManageModal, loadingInfo]);
+
+  // ---- Reschedule modal ----
+  const dayCount = booking.bookedDays.length;
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [rsClubId, setRsClubId] = useState("");
+  const [rsDays, setRsDays] = useState<AvailableDay[]>([]);
+  const [rsLoadingDays, setRsLoadingDays] = useState(false);
+  const [rsSelected, setRsSelected] = useState<string[]>([]);
+  const [rsReprice, setRsReprice] = useState<{
+    oldTotalPence: number;
+    newTotalPence: number;
+    deltaPence: number;
+    direction: string;
+    refundablePence: number | null;
+    optionName: string | null;
+  } | null>(null);
+  const [rsLoadingReprice, setRsLoadingReprice] = useState(false);
+  const [rsConfirm, setRsConfirm] = useState("");
+  const [rsError, setRsError] = useState<string | null>(null);
+  const [rsWarning, setRsWarning] = useState<string | null>(null);
+
+  const openReschedule = () => {
+    setShowReschedule(true);
+    setRsClubId("");
+    setRsDays([]);
+    setRsSelected([]);
+    setRsReprice(null);
+    setRsConfirm("");
+    setRsError(null);
+    setRsWarning(null);
+  };
+
+  const loadRsDays = async (clubId: string) => {
+    setRsClubId(clubId);
+    setRsSelected([]);
+    setRsReprice(null);
+    setRsDays([]);
+    setRsError(null);
+    if (!clubId) return;
+    setRsLoadingDays(true);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/change-day?clubId=${clubId}`);
+      const data = await res.json();
+      if (res.ok) setRsDays(data.days || []);
+      else setRsError(data.error || "Couldn't load days for that week.");
+    } catch {
+      setRsError("Couldn't load days for that week.");
+    } finally {
+      setRsLoadingDays(false);
+    }
+  };
+
+  const toggleRsDay = (id: string) => {
+    setRsReprice(null);
+    setRsConfirm("");
+    setRsSelected((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : prev.length < dayCount
+          ? [...prev, id]
+          : prev
+    );
+  };
+
+  // Server-authoritative preview once the right number of days is chosen.
+  useEffect(() => {
+    if (!showReschedule || !rsClubId || rsSelected.length !== dayCount) {
+      setRsReprice(null);
+      return;
+    }
+    let cancelled = false;
+    setRsLoadingReprice(true);
+    setRsError(null);
+    fetch(`/api/admin/bookings/${booking.id}/reprice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ newClubId: rsClubId, clubDayIds: rsSelected }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
+        if (cancelled) return;
+        if (ok) setRsReprice(d);
+        else setRsError(d.error || "Couldn't price this change.");
+      })
+      .catch(() => {
+        if (!cancelled) setRsError("Couldn't price this change.");
+      })
+      .finally(() => {
+        if (!cancelled) setRsLoadingReprice(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showReschedule, rsClubId, rsSelected, dayCount, booking.id]);
+
+  const rsPlannedRefundPence =
+    rsReprice && rsReprice.direction === "refund"
+      ? Math.min(-rsReprice.deltaPence, rsReprice.refundablePence ?? 0)
+      : 0;
+  const rsConfirmTarget = rsPlannedRefundPence > 0 ? `£${(rsPlannedRefundPence / 100).toFixed(2)}` : booking.ref;
+  const rsConfirmOk = rsConfirm.trim().toUpperCase() === rsConfirmTarget.trim().toUpperCase();
+  const rsCanSubmit = !!rsReprice && rsReprice.deltaPence <= 0 && rsConfirmOk && !isProcessing && !rsLoadingReprice;
+
+  const handleReschedule = async () => {
+    if (!rsReprice) return;
+    setIsProcessing(true);
+    setRsError(null);
+    setRsWarning(null);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/reschedule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newClubId: rsClubId, clubDayIds: rsSelected }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRsError(data.error || "Reschedule failed.");
+        return;
+      }
+      if (data.warning) {
+        setRsWarning(data.warning); // keep modal open to surface it; user clicks Done
+        return;
+      }
+      setShowReschedule(false);
+      router.refresh();
+    } catch {
+      setRsError("Reschedule failed.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const openManageModal = async () => {
     setShowManageModal(true);
@@ -493,6 +631,20 @@ export function BookingDetail({ booking }: BookingDetailProps) {
           >
             <RefreshCw className="h-5 w-5" />
             Cancel / Refund
+          </button>
+        )}
+        {(booking.status === "paid" || booking.status === "complete") && availableClubs.length > 0 && (
+          <button
+            onClick={openReschedule}
+            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "var(--craigies-olive)",
+              color: "var(--craigies-olive)",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
+            <Calendar className="h-5 w-5" />
+            Reschedule
           </button>
         )}
         {booking.status === "pending" && (
@@ -1065,6 +1217,186 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {showReschedule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <h3
+              className="text-xl font-bold"
+              style={{ fontFamily: "'Playfair Display', serif", color: "var(--craigies-dark-olive)" }}
+            >
+              Reschedule {booking.ref}
+            </h3>
+            <p className="mt-1 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+              Pick a week, then choose {dayCount} day{dayCount !== 1 ? "s" : ""} (same as now).
+            </p>
+
+            <select
+              value={rsClubId}
+              onChange={(e) => loadRsDays(e.target.value)}
+              className="mt-4 w-full rounded-md border px-3 py-2 text-sm"
+              style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+            >
+              <option value="">Select a week…</option>
+              {availableClubs.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            {rsLoadingDays ? (
+              <div className="mt-4 flex justify-center py-6">
+                <div
+                  className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+                  style={{ borderColor: "var(--craigies-olive)", borderTopColor: "transparent" }}
+                />
+              </div>
+            ) : rsClubId ? (
+              <div className="mt-4">
+                <p className="text-xs font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Selected {rsSelected.length} / {dayCount}
+                </p>
+                <div className="mt-2 max-h-52 space-y-2 overflow-y-auto">
+                  {rsDays.length === 0 ? (
+                    <p className="text-sm text-center" style={{ color: "var(--craigies-dark-olive)" }}>
+                      No available days for this week.
+                    </p>
+                  ) : (
+                    rsDays.map((day) => {
+                      const dayDate = new Date(day.date);
+                      const dayName = dayDate.toLocaleDateString("en-GB", { weekday: "long" });
+                      const morningRemaining = day.morningCapacity - day.morningBooked;
+                      const afternoonRemaining = day.afternoonCapacity - day.afternoonBooked;
+                      const isFull = morningRemaining <= 0 && afternoonRemaining <= 0;
+                      const isSel = rsSelected.includes(day.id);
+                      const atLimit = rsSelected.length >= dayCount && !isSel;
+                      const disabled = isFull || atLimit;
+                      return (
+                        <button
+                          key={day.id}
+                          onClick={() => !disabled && toggleRsDay(day.id)}
+                          disabled={disabled}
+                          className={`w-full rounded-lg px-4 py-3 text-left transition-all ${
+                            disabled ? "cursor-not-allowed opacity-50" : "hover:opacity-80"
+                          }`}
+                          style={{
+                            backgroundColor: isSel ? "rgba(122, 124, 74, 0.15)" : "rgba(122, 124, 74, 0.05)",
+                            outline: isSel ? "2px solid var(--craigies-olive)" : undefined,
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
+                                {dayName}
+                              </span>
+                              <span className="ml-2 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                                {formatDate(day.date)}
+                              </span>
+                            </div>
+                            <div className="text-right text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                              {isFull ? (
+                                <span className="font-medium text-red-500">Full</span>
+                              ) : (
+                                <span>{morningRemaining} AM / {afternoonRemaining} PM</span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            {rsLoadingReprice && (
+              <p className="mt-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                Pricing…
+              </p>
+            )}
+            {rsReprice && (
+              <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: "#F5F4ED" }}>
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Was <strong>£{(rsReprice.oldTotalPence / 100).toFixed(2)}</strong> → now{" "}
+                  <strong>£{(rsReprice.newTotalPence / 100).toFixed(2)}</strong>
+                </p>
+                {rsReprice.deltaPence < 0 && (
+                  <p className="mt-1 text-sm font-medium" style={{ color: "var(--craigies-olive)" }}>
+                    Refund £{(rsPlannedRefundPence / 100).toFixed(2)}
+                  </p>
+                )}
+                {rsReprice.deltaPence === 0 && (
+                  <p className="mt-1 text-sm" style={{ color: "#6B7280" }}>No change to payment.</p>
+                )}
+                {rsReprice.deltaPence > 0 && (
+                  <p className="mt-1 text-sm font-medium" style={{ color: "#D97706" }}>
+                    This increases the price by £{(rsReprice.deltaPence / 100).toFixed(2)} — taking extra payment isn&apos;t supported yet (next phase).
+                  </p>
+                )}
+              </div>
+            )}
+
+            {rsReprice && rsReprice.deltaPence <= 0 && (
+              <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "rgba(212, 132, 62, 0.08)" }}>
+                <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Type <strong>{rsConfirmTarget}</strong> to confirm.
+                </p>
+                <input
+                  type="text"
+                  value={rsConfirm}
+                  onChange={(e) => setRsConfirm(e.target.value)}
+                  placeholder={rsConfirmTarget}
+                  className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+                  style={{ borderColor: "#D1D5DB" }}
+                />
+              </div>
+            )}
+
+            {rsWarning && (
+              <p className="mt-3 rounded-md p-2 text-xs font-medium" style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}>
+                {rsWarning}
+              </p>
+            )}
+            {rsError && (
+              <p className="mt-3 text-xs font-medium" style={{ color: "#DC2626" }}>
+                {rsError}
+              </p>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              {rsWarning ? (
+                <button
+                  onClick={() => { setShowReschedule(false); router.refresh(); }}
+                  className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                >
+                  Done
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowReschedule(false)}
+                    className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                    style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleReschedule}
+                    disabled={!rsCanSubmit}
+                    className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {isProcessing ? "Working..." : "Confirm reschedule"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

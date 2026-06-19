@@ -604,6 +604,83 @@ export async function sendRefundEmail(
 }
 
 /**
+ * Send a confirmation that a booking's days/week were changed (reschedule),
+ * itemising the new days and the money outcome (no charge, or a refund issued).
+ */
+export async function sendBookingModifiedEmail(
+  booking: Booking,
+  details: {
+    newDates: string[]; // ISO date strings
+    newClubName: string;
+    oldTotalPence: number;
+    newTotalPence: number;
+    deltaPence: number;
+    refundedPence: number;
+  }
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email client not configured' };
+  }
+
+  const firstName = booking.parent_name.split(' ')[0];
+
+  const dayRows = details.newDates
+    .map(
+      (d) =>
+        `<tr><td style="padding: 6px 0; font-size: 14px; font-weight: 500;">${formatDate(d)}</td></tr>`
+    )
+    .join('');
+
+  const moneyLine =
+    details.refundedPence > 0
+      ? `A refund of <strong>${formatPrice(details.refundedPence)}</strong> has been issued to your original payment method (please allow 5–10 business days).`
+      : `There is no change to your payment.`;
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Your booking has been updated
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      Hi ${firstName}, your booking has been moved to <strong>${details.newClubName}</strong>. Here are your new days.
+    </p>
+
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">New days</h3>
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">${dayRows}</table>
+    </div>
+
+    <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+      ${moneyLine}
+    </p>
+
+    <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+      If anything doesn't look right, just reply to this email and we'll sort it out.
+    </p>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: booking.parent_email,
+      replyTo: fromEmail,
+      subject: `Your booking has been updated - ${details.newClubName}`,
+      html: emailTemplate(content),
+    });
+
+    if (error) {
+      console.error('Failed to send booking-modified email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send booking-modified email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
  * Send notification to admin when a new booking is made
  */
 export async function sendAdminNotification(

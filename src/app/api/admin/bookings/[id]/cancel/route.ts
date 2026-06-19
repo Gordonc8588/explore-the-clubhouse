@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
 import { sendCancellationEmail, sendRefundEmail } from "@/lib/email";
+import { getRefundState } from "@/lib/booking-modify";
 import { cookies } from "next/headers";
 import type Stripe from "stripe";
 import type { BookingStatus } from "@/types/database";
@@ -13,36 +14,6 @@ async function isAdmin() {
 }
 
 const adminActor = process.env.ADMIN_EMAIL || "admin";
-
-/**
- * Resolve the live refundable ceiling for a booking's payment intent.
- * ceiling = amount_captured - amount_refunded (NEVER the charge.refunded boolean,
- * which is only true after a FULL refund).
- */
-async function getRefundState(paymentIntentId: string | null): Promise<{
-  ok: boolean;
-  error?: string;
-  paymentStatus?: string;
-  capturedPence?: number;
-  alreadyRefundedPence?: number;
-  refundablePence?: number;
-}> {
-  if (!stripe) return { ok: false, error: "Stripe is not configured" };
-  if (!paymentIntentId) return { ok: false, error: "This booking has no payment to refund" };
-
-  const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
-  if (pi.status !== "succeeded") {
-    return { ok: false, error: `Payment cannot be refunded — status is "${pi.status}"`, paymentStatus: pi.status };
-  }
-  if (!pi.latest_charge) {
-    return { ok: false, error: "No charge found on this payment" };
-  }
-  const charge = await stripe.charges.retrieve(pi.latest_charge as string);
-  const capturedPence = charge.amount_captured;
-  const alreadyRefundedPence = charge.amount_refunded;
-  const refundablePence = capturedPence - alreadyRefundedPence;
-  return { ok: true, paymentStatus: pi.status, capturedPence, alreadyRefundedPence, refundablePence };
-}
 
 /**
  * GET /api/admin/bookings/[id]/cancel
