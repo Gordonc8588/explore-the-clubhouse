@@ -1405,8 +1405,9 @@ export interface Database {
           p_reason?: string | null;
           p_old_state?: unknown;
           p_new_state?: unknown;
+          p_modification_id?: string | null;
         };
-        Returns: string;
+        Returns: string | null;
       };
     };
   };

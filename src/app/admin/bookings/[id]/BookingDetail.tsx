@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -99,9 +99,16 @@ interface AvailableClub {
   startDate: string;
 }
 
+interface PendingUpcharge {
+  id: string;
+  deltaPence: number;
+  createdAt: string;
+}
+
 interface BookingDetailProps {
   booking: BookingDetailData;
   availableClubs: AvailableClub[];
+  pendingUpcharges: PendingUpcharge[];
 }
 
 function formatDate(dateString: string): string {
@@ -159,7 +166,7 @@ function getStatusBadgeStyles(status: string): { backgroundColor: string; color:
   }
 }
 
-export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
+export function BookingDetail({ booking, availableClubs, pendingUpcharges }: BookingDetailProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [changeDayTarget, setChangeDayTarget] = useState<BookedDay | null>(null);
@@ -436,6 +443,138 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
       setRmError("Couldn't update the days.");
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // ---- Add days modal (upcharge via payment link) ----
+  const [showAdd, setShowAdd] = useState(false);
+  const [addDays, setAddDays] = useState<AvailableDay[]>([]);
+  const [addLoadingDays, setAddLoadingDays] = useState(false);
+  const [addSelected, setAddSelected] = useState<string[]>([]);
+  const [addReprice, setAddReprice] = useState<{
+    oldTotalPence: number;
+    newTotalPence: number;
+    deltaPence: number;
+    direction: string;
+    optionName: string | null;
+  } | null>(null);
+  const [addLoadingReprice, setAddLoadingReprice] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [addSentUrl, setAddSentUrl] = useState<string | null>(null);
+  const [cancellingMod, setCancellingMod] = useState<string | null>(null);
+
+  const openAdd = async () => {
+    setShowAdd(true);
+    setAddSelected([]);
+    setAddReprice(null);
+    setAddError(null);
+    setAddSentUrl(null);
+    setAddDays([]);
+    setAddLoadingDays(true);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/change-day?clubId=${booking.clubId}`);
+      const data = await res.json();
+      if (res.ok) {
+        const bookedSet = new Set(currentDayIds);
+        setAddDays((data.days || []).filter((d: AvailableDay) => !bookedSet.has(d.id)));
+      } else {
+        setAddError(data.error || "Couldn't load days for this week.");
+      }
+    } catch {
+      setAddError("Couldn't load days for this week.");
+    } finally {
+      setAddLoadingDays(false);
+    }
+  };
+
+  const toggleAdd = (id: string) => {
+    setAddReprice(null);
+    setAddSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  useEffect(() => {
+    if (!showAdd || addSelected.length < 1) {
+      setAddReprice(null);
+      return;
+    }
+    let cancelled = false;
+    setAddLoadingReprice(true);
+    setAddError(null);
+    fetch(`/api/admin/bookings/${booking.id}/edit-days`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clubDayIds: [...currentDayIds, ...addSelected], preview: true }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
+        if (cancelled) return;
+        if (ok) setAddReprice(d);
+        else setAddError(d.error || "Couldn't price this change.");
+      })
+      .catch(() => {
+        if (!cancelled) setAddError("Couldn't price this change.");
+      })
+      .finally(() => {
+        if (!cancelled) setAddLoadingReprice(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showAdd, addSelected, currentDayIds, booking.id]);
+
+  const addCanSend =
+    !!addReprice && addReprice.deltaPence > 0 && addSelected.length > 0 && !isProcessing && !addLoadingReprice;
+
+  const addSubmitting = useRef(false);
+  const handleAddSubmit = async () => {
+    if (addSubmitting.current) return; // synchronous guard against double-click
+    addSubmitting.current = true;
+    setIsProcessing(true);
+    setAddError(null);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/edit-days`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clubDayIds: [...currentDayIds, ...addSelected] }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAddError(data.error || "Couldn't create the payment request.");
+        return;
+      }
+      if (data.upcharge && data.checkoutUrl) {
+        setAddSentUrl(data.checkoutUrl); // keep modal open to show the link
+        router.refresh();
+      } else {
+        setShowAdd(false);
+        router.refresh();
+      }
+    } catch {
+      setAddError("Couldn't create the payment request.");
+    } finally {
+      setIsProcessing(false);
+      addSubmitting.current = false;
+    }
+  };
+
+  const cancelPendingMod = async (modId: string) => {
+    setCancellingMod(modId);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/cancel-modification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ modificationId: modId }),
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const d = await res.json();
+        alert(d.error || "Couldn't cancel the request.");
+      }
+    } catch {
+      alert("Couldn't cancel the request.");
+    } finally {
+      setCancellingMod(null);
     }
   };
 
@@ -770,6 +909,20 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
             Remove Days
           </button>
         )}
+        {(booking.status === "paid" || booking.status === "complete") && pendingUpcharges.length === 0 && (
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "var(--craigies-burnt-orange)",
+              color: "var(--craigies-burnt-orange)",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
+            <UserPlus className="h-5 w-5" />
+            Add Days
+          </button>
+        )}
         {booking.status === "pending" && (
           <button
             onClick={handleSendReminder}
@@ -785,6 +938,29 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
           </button>
         )}
       </div>
+
+      {/* Pending add-days payment requests */}
+      {pendingUpcharges.length > 0 && (
+        <div className="rounded-2xl bg-white p-4 shadow-md" style={{ borderLeft: "4px solid #D97706" }}>
+          {pendingUpcharges.map((p) => (
+            <div key={p.id} className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                ⏳ Awaiting payment for added days —{" "}
+                <strong>£{(p.deltaPence / 100).toFixed(2)}</strong>. The parent has been emailed a payment link;
+                the days are added automatically once they pay.
+              </p>
+              <button
+                onClick={() => cancelPendingMod(p.id)}
+                disabled={cancellingMod === p.id}
+                className="rounded-lg border-2 px-3 py-1.5 text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+              >
+                {cancellingMod === p.id ? "Cancelling…" : "Cancel request"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Parent Details Card */}
@@ -1337,6 +1513,150 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
                       </button>
                     </>
                   )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Days Modal */}
+      {showAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <h3
+              className="text-xl font-bold"
+              style={{ fontFamily: "'Playfair Display', serif", color: "var(--craigies-dark-olive)" }}
+            >
+              Add days to {booking.ref}
+            </h3>
+
+            {addSentUrl ? (
+              <div className="mt-4">
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  ✅ Payment request sent — we&apos;ve emailed the parent a secure payment link. The day(s) are added
+                  automatically once they pay.
+                </p>
+                <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "#F5F4ED" }}>
+                  <p className="text-xs" style={{ color: "#6B7280" }}>Payment link (you can copy and share it too):</p>
+                  <a
+                    href={addSentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs break-all"
+                    style={{ color: "var(--craigies-olive)" }}
+                  >
+                    {addSentUrl}
+                  </a>
+                </div>
+                <button
+                  onClick={() => { setShowAdd(false); router.refresh(); }}
+                  className="mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="mt-1 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Pick day(s) to add. The parent is sent a payment link for the difference; the booking changes only
+                  once they pay.
+                </p>
+
+                {addLoadingDays ? (
+                  <div className="mt-4 flex justify-center py-6">
+                    <div
+                      className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+                      style={{ borderColor: "var(--craigies-olive)", borderTopColor: "transparent" }}
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-4 max-h-52 space-y-2 overflow-y-auto">
+                    {addDays.length === 0 ? (
+                      <p className="text-sm text-center" style={{ color: "var(--craigies-dark-olive)" }}>
+                        No more available days this week.
+                      </p>
+                    ) : (
+                      addDays.map((day) => {
+                        const dayDate = new Date(day.date);
+                        const dayName = dayDate.toLocaleDateString("en-GB", { weekday: "long" });
+                        const morningRemaining = day.morningCapacity - day.morningBooked;
+                        const afternoonRemaining = day.afternoonCapacity - day.afternoonBooked;
+                        const isFull = morningRemaining <= 0 && afternoonRemaining <= 0;
+                        const isSel = addSelected.includes(day.id);
+                        return (
+                          <button
+                            key={day.id}
+                            onClick={() => !isFull && toggleAdd(day.id)}
+                            disabled={isFull}
+                            className={`w-full rounded-lg px-4 py-3 text-left transition-all ${
+                              isFull ? "cursor-not-allowed opacity-50" : "hover:opacity-80"
+                            }`}
+                            style={{
+                              backgroundColor: isSel ? "rgba(212, 132, 62, 0.15)" : "rgba(122, 124, 74, 0.05)",
+                              outline: isSel ? "2px solid var(--craigies-burnt-orange)" : undefined,
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="font-medium" style={{ color: "var(--craigies-dark-olive)" }}>{dayName}</span>
+                                <span className="ml-2 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>{formatDate(day.date)}</span>
+                              </div>
+                              <div className="text-right text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                                {isFull ? <span className="font-medium text-red-500">Full</span> : <span>{morningRemaining} AM / {afternoonRemaining} PM</span>}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+
+                {addLoadingReprice && (
+                  <p className="mt-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>Pricing…</p>
+                )}
+                {addReprice && addSelected.length > 0 && (
+                  <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: "#F5F4ED" }}>
+                    <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                      Was <strong>£{(addReprice.oldTotalPence / 100).toFixed(2)}</strong> → now{" "}
+                      <strong>£{(addReprice.newTotalPence / 100).toFixed(2)}</strong>
+                    </p>
+                    {addReprice.deltaPence > 0 ? (
+                      <p className="mt-1 text-sm font-medium" style={{ color: "var(--craigies-burnt-orange)" }}>
+                        Additional payment £{(addReprice.deltaPence / 100).toFixed(2)}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-sm" style={{ color: "#6B7280" }}>No additional payment needed.</p>
+                    )}
+                  </div>
+                )}
+
+                {addError && (
+                  <p className="mt-3 text-xs font-medium" style={{ color: "#DC2626" }}>{addError}</p>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => setShowAdd(false)}
+                    className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                    style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleAddSubmit}
+                    disabled={!addCanSend}
+                    className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: "var(--craigies-burnt-orange)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {isProcessing
+                      ? "Sending…"
+                      : addReprice && addReprice.deltaPence > 0
+                        ? `Send payment request (£${(addReprice.deltaPence / 100).toFixed(2)})`
+                        : "Send payment request"}
+                  </button>
                 </div>
               </>
             )}

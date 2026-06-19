@@ -54,6 +54,8 @@ export interface ReschedulePricing {
     total_amount: number;
     discount_percent_applied: number;
     stripe_payment_intent_id: string | null;
+    parent_email: string;
+    parent_name: string;
     booking_options: { option_type: string; time_slot: string; name: string } | null;
   };
   targetOption?: { id: string; option_type: string; time_slot: string; name: string; price_per_child: number };

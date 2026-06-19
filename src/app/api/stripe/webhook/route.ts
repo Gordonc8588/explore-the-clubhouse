@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { sendBookingConfirmation, sendAdminNotification, type SendEmailResult } from '@/lib/email';
+import { sendBookingConfirmation, sendAdminNotification, sendBookingModifiedEmail, type SendEmailResult } from '@/lib/email';
+import { computeEditPricing } from '@/lib/booking-modify';
 import { trackPurchaseConversion } from '@/lib/meta-conversions';
 
 interface SessionMetadata {
@@ -59,7 +60,12 @@ export async function POST(request: NextRequest) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.kind === 'modification') {
+          await handleModificationPaid(session);
+        } else {
+          await handleCheckoutSessionCompleted(session);
+        }
         break;
       }
       default:
@@ -93,6 +99,165 @@ async function sendWithRetry(
     console.error(`[Webhook] ${emailType} email to ${recipient} failed after retry: ${retryResult.error}`);
   }
   return retryResult;
+}
+
+/**
+ * Refund a captured upcharge exactly once. Uses a per-modification idempotency
+ * key shared with the cancel path, so no two routes can double-refund. RE-THROWS
+ * on failure so the webhook returns non-200 and Stripe redelivers (retry-safe).
+ */
+async function refundUpchargeOnce(modificationId: string, paymentIntentId: string | null, reason: string): Promise<void> {
+  if (!stripe || !paymentIntentId) return;
+  try {
+    await stripe.refunds.create(
+      { payment_intent: paymentIntentId, metadata: { modificationId, reason } },
+      { idempotencyKey: `mod-refund-${modificationId}` }
+    );
+  } catch (e) {
+    console.error(`[Webhook] refund (${reason}) for modification ${modificationId} failed — will retry on redelivery:`, e);
+    throw e;
+  }
+}
+
+/**
+ * A parent paid the hosted Checkout link for an add-days upcharge. Re-prices at
+ * pay time, then applies the stored modification via an ATOMIC claim inside the
+ * RPC (mutually exclusive with cancel + idempotent against redelivery). If the
+ * price drifted, capacity is gone, or the request was cancelled, the upcharge is
+ * refunded instead of applied.
+ */
+async function handleModificationPaid(session: Stripe.Checkout.Session): Promise<void> {
+  const modificationId = session.metadata?.modificationId;
+  if (!modificationId) {
+    console.error('[Webhook] modification session missing modificationId');
+    return;
+  }
+  const paymentIntentId = session.payment_intent as string;
+  const supabase = createAdminClient();
+
+  const { data: mod } = await supabase
+    .from('booking_modifications')
+    .select('*')
+    .eq('id', modificationId)
+    .single();
+  if (!mod) {
+    console.error(`[Webhook] modification ${modificationId} not found`);
+    return;
+  }
+
+  // Already finalised. Idempotent no-op — EXCEPT a cancelled request the parent
+  // nevertheless paid (race with cancel): refund to avoid orphaned money.
+  if (mod.status !== 'pending') {
+    if (mod.status === 'expired' && paymentIntentId) {
+      await refundUpchargeOnce(modificationId, paymentIntentId, 'cancelled_but_paid');
+    } else {
+      console.log(`[Webhook] modification ${modificationId} already ${mod.status} — no-op`);
+    }
+    return;
+  }
+
+  const ns = (mod.new_state || {}) as {
+    club_id: string;
+    option_id: string;
+    num_children: number;
+    total_pence: number;
+    days: { club_day_id: string; time_slot: string }[];
+    dates: string[];
+  };
+
+  // Re-price at pay time. If the price drifted since the link was created (an
+  // option or discount was edited), do NOT apply — refund and fail.
+  const clubDayIds = (ns.days || []).map((d) => d.club_day_id);
+  const fresh = await computeEditPricing(supabase, mod.booking_id, clubDayIds);
+  if (fresh.error || fresh.newTotalPence !== ns.total_pence) {
+    console.error(`[Webhook] modification ${modificationId} price drift (frozen ${ns.total_pence}, now ${fresh.newTotalPence ?? 'error'}) — refunding`);
+    await refundUpchargeOnce(modificationId, paymentIntentId, 'price_changed');
+    await supabase
+      .from('booking_modifications')
+      .update({ status: 'failed', stripe_payment_intent_id: paymentIntentId })
+      .eq('id', modificationId)
+      .eq('status', 'pending');
+    return;
+  }
+
+  // Atomic claim + apply: the RPC flips pending → applied in the same transaction
+  // as the day-set change, and returns NULL if the row is no longer pending.
+  const { data: appliedId, error: rpcError } = await supabase.rpc('apply_booking_modification', {
+    p_booking_id: mod.booking_id,
+    p_new_club_id: ns.club_id,
+    p_new_option_id: ns.option_id,
+    p_new_children: ns.num_children,
+    p_new_total: ns.total_pence,
+    p_days: ns.days,
+    p_modification_type: 'add_days',
+    p_admin_actor: 'webhook',
+    p_direction: 'charge',
+    p_delta_pence: mod.delta_pence,
+    p_reason: mod.reason,
+    p_old_state: { total_pence: mod.old_total_pence },
+    p_new_state: ns,
+    p_modification_id: modificationId,
+  });
+
+  if (rpcError) {
+    // Capacity gone in the pay window (or another failure). Refund first; if the
+    // refund throws, refundUpchargeOnce re-throws so Stripe redelivers and retries
+    // — we do NOT mark 'failed' until the refund is confirmed.
+    console.error(`[Webhook] modification ${modificationId} apply failed:`, rpcError);
+    await refundUpchargeOnce(modificationId, paymentIntentId, 'apply_failed');
+    await supabase
+      .from('booking_modifications')
+      .update({ status: 'failed', stripe_payment_intent_id: paymentIntentId })
+      .eq('id', modificationId)
+      .eq('status', 'pending');
+    return;
+  }
+
+  if (!appliedId) {
+    // Claim returned NULL: cancelled/expired or already applied between read and now.
+    const { data: freshMod } = await supabase
+      .from('booking_modifications')
+      .select('status')
+      .eq('id', modificationId)
+      .single();
+    if (freshMod?.status !== 'applied' && paymentIntentId) {
+      await refundUpchargeOnce(modificationId, paymentIntentId, 'not_applied');
+    }
+    return;
+  }
+
+  // Applied (status flipped inside the RPC). Record the payment + email the parent.
+  await supabase
+    .from('booking_modifications')
+    .update({ stripe_payment_intent_id: paymentIntentId })
+    .eq('id', modificationId);
+
+  await supabase
+    .from('booking_payments')
+    .upsert(
+      { booking_id: mod.booking_id, stripe_payment_intent_id: paymentIntentId, amount_pence: mod.delta_pence, kind: 'upcharge' },
+      { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true }
+    );
+
+  const { data: booking } = await supabase.from('bookings').select('*').eq('id', mod.booking_id).single();
+  const { data: club } = await supabase.from('clubs').select('name').eq('id', ns.club_id).single();
+  if (booking) {
+    await sendWithRetry(
+      () =>
+        sendBookingModifiedEmail(booking, {
+          newDates: ns.dates || [],
+          newClubName: club?.name || 'Holiday Club',
+          oldTotalPence: mod.old_total_pence ?? booking.total_amount,
+          newTotalPence: ns.total_pence,
+          deltaPence: mod.delta_pence ?? 0,
+          refundedPence: 0,
+          chargedPence: mod.delta_pence ?? 0,
+        }),
+      'modification paid',
+      booking.parent_email,
+    );
+  }
+  console.log(`[Webhook] Applied add-days modification ${modificationId} for booking ${mod.booking_id}`);
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
@@ -135,6 +300,22 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
   }
 
   console.log(`[Webhook] Updated booking ${bookingId} status to 'paid'`);
+
+  // 1b. Record the original payment (idempotent) so later full refunds can cover
+  // every captured intent (the booking may gain upcharge intents over time).
+  if (session.payment_intent) {
+    await supabase
+      .from('booking_payments')
+      .upsert(
+        {
+          booking_id: bookingId,
+          stripe_payment_intent_id: session.payment_intent as string,
+          amount_pence: booking.total_amount,
+          kind: 'original',
+        },
+        { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true }
+      );
+  }
 
   // 2. Get the booking option to determine time_slot
   const { data: bookingOption } = await supabase

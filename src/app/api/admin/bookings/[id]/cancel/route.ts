@@ -311,6 +311,52 @@ export async function POST(
         .eq("id", modRow.id);
     }
 
+    // A full cancellation also refunds any upcharge payments (separate intents),
+    // so add-days money is never orphaned.
+    if (action === "cancel_refund") {
+      const { data: upcharges } = await supabase
+        .from("booking_payments")
+        .select("stripe_payment_intent_id")
+        .eq("booking_id", bookingId)
+        .eq("kind", "upcharge");
+      let upchargeRefundedPence = 0;
+      for (const up of upcharges || []) {
+        try {
+          const ups = await getRefundState(up.stripe_payment_intent_id);
+          const amt = ups.refundablePence ?? 0;
+          if (ups.ok && amt > 0) {
+            const r = await stripe.refunds.create(
+              { payment_intent: up.stripe_payment_intent_id, amount: amt },
+              { idempotencyKey: `cancel-upcharge-refund-${up.stripe_payment_intent_id}` }
+            );
+            upchargeRefundedPence += amt;
+            // Audit row for the upcharge refund so the ledger stays coherent.
+            await supabase.from("booking_modifications").insert({
+              booking_id: bookingId,
+              admin_actor: adminActor,
+              modification_type: "refund",
+              direction: "refund",
+              status: "applied",
+              refund_amount_pence: amt,
+              reason: "Upcharge refunded on full cancellation",
+              stripe_payment_intent_id: up.stripe_payment_intent_id,
+              stripe_refund_id: r.id,
+              applied_at: new Date().toISOString(),
+            });
+          }
+        } catch (e) {
+          console.error("Failed to refund upcharge intent on full cancel:", e);
+        }
+      }
+      // Keep amount_refunded_pence booking-wide cumulative (original + upcharges).
+      if (upchargeRefundedPence > 0) {
+        await supabase
+          .from("bookings")
+          .update({ amount_refunded_pence: newRefundedTotal + upchargeRefundedPence })
+          .eq("id", bookingId);
+      }
+    }
+
     // Email the parent the ACTUAL amount.
     try {
       const remainingChargedPence = Math.max(0, booking.total_amount - newRefundedTotal);

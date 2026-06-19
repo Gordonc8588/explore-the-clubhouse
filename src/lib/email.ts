@@ -616,6 +616,7 @@ export async function sendBookingModifiedEmail(
     newTotalPence: number;
     deltaPence: number;
     refundedPence: number;
+    chargedPence?: number;
   }
 ): Promise<SendEmailResult> {
   const resend = getResendClient();
@@ -635,7 +636,9 @@ export async function sendBookingModifiedEmail(
   const moneyLine =
     details.refundedPence > 0
       ? `A refund of <strong>${formatPrice(details.refundedPence)}</strong> has been issued to your original payment method (please allow 5–10 business days).`
-      : `There is no change to your payment.`;
+      : details.chargedPence && details.chargedPence > 0
+        ? `An additional payment of <strong>${formatPrice(details.chargedPence)}</strong> has been received — thank you.`
+        : `There is no change to your payment.`;
 
   const content = `
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
@@ -676,6 +679,60 @@ export async function sendBookingModifiedEmail(
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     console.error('Failed to send booking-modified email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Ask the parent to pay for added days via a hosted Stripe Checkout link.
+ * The change is NOT applied until the payment completes (handled by the webhook).
+ */
+export async function sendModificationPaymentRequestEmail(
+  booking: Booking,
+  clubName: string,
+  deltaPence: number,
+  checkoutUrl: string
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email client not configured' };
+  }
+
+  const firstName = booking.parent_name.split(' ')[0];
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      Additional payment needed
+    </h2>
+    <p style="margin: 0 0 16px; font-size: 16px; color: #6B7280;">
+      Hi ${firstName}, to add the extra day(s) to your booking for <strong>${clubName}</strong>, an additional payment of <strong>${formatPrice(deltaPence)}</strong> is needed.
+    </p>
+    <p style="margin: 0 0 8px; font-size: 14px; line-height: 1.6;">
+      Your booking change is <strong>not confirmed until this is paid</strong>. Tap the button below to pay securely.
+    </p>
+    ${ctaButton(`Pay ${formatPrice(deltaPence)}`, checkoutUrl)}
+    <p style="margin: 0 0 16px; font-size: 13px; color: #6B7280; line-height: 1.6;">
+      If the button doesn't work, copy and paste this link into your browser:<br>
+      <a href="${checkoutUrl}" style="color: #7A7C4A; word-break: break-all;">${checkoutUrl}</a>
+    </p>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: booking.parent_email,
+      replyTo: fromEmail,
+      subject: `Additional payment needed - ${clubName}`,
+      html: emailTemplate(content),
+    });
+    if (error) {
+      console.error('Failed to send modification payment-request email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send modification payment-request email:', errorMessage);
     return { success: false, error: errorMessage };
   }
 }

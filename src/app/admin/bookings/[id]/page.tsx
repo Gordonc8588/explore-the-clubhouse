@@ -63,6 +63,22 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     })
   );
 
+  // Pending add-days payment requests awaiting the parent's payment.
+  const { data: pendingMods } = await supabase
+    .from("booking_modifications")
+    .select("id, delta_pence, created_at")
+    .eq("booking_id", id)
+    .eq("status", "pending")
+    .eq("direction", "charge")
+    .order("created_at", { ascending: false });
+  const pendingUpcharges = (pendingMods || []).map(
+    (m: { id: string; delta_pence: number | null; created_at: string }) => ({
+      id: m.id,
+      deltaPence: m.delta_pence ?? 0,
+      createdAt: m.created_at,
+    })
+  );
+
   // Transform booking data for the component
   const bookedDays = booking.booking_days?.map((bd: any) => ({
     bookingDayId: bd.id,
@@ -162,5 +178,11 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     createdAt: booking.created_at,
   };
 
-  return <BookingDetail booking={transformedBooking} availableClubs={availableClubs} />;
+  return (
+    <BookingDetail
+      booking={transformedBooking}
+      availableClubs={availableClubs}
+      pendingUpcharges={pendingUpcharges}
+    />
+  );
 }
