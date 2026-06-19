@@ -1390,6 +1390,24 @@ export interface Database {
         Args: { club_uuid: string };
         Returns: boolean;
       };
+      apply_booking_modification: {
+        Args: {
+          p_booking_id: string;
+          p_new_club_id: string;
+          p_new_option_id: string;
+          p_new_children: number;
+          p_new_total: number;
+          p_days: { club_day_id: string; time_slot: string }[];
+          p_modification_type?: string;
+          p_admin_actor?: string | null;
+          p_direction?: string;
+          p_delta_pence?: number;
+          p_reason?: string | null;
+          p_old_state?: unknown;
+          p_new_state?: unknown;
+        };
+        Returns: string;
+      };
     };
   };
 }

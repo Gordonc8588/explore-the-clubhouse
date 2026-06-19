@@ -10,8 +10,10 @@ async function isAdmin() {
 
 /**
  * POST /api/admin/bookings/[id]/change-day
- * Change a booking day to a different date, checking capacity first
+ * Move ONE booked day to a different date in the SAME week, atomically and
+ * capacity-checked, via the apply_booking_modification RPC.
  * Body: { bookingDayId, newClubDayId, timeSlot }
+ * (Cross-week moves are a separate reschedule flow — Phase 3.)
  */
 export async function POST(
   request: NextRequest,
@@ -34,49 +36,45 @@ export async function POST(
 
     const supabase = createAdminClient();
 
-    // Verify the booking exists and the booking_day belongs to it
-    const { data: bookingDay, error: bdError } = await supabase
-      .from("booking_days")
-      .select("*")
-      .eq("id", bookingDayId)
-      .eq("booking_id", bookingId)
-      .single();
-
-    if (bdError || !bookingDay) {
-      return NextResponse.json(
-        { error: "Booking day not found" },
-        { status: 404 }
-      );
-    }
-
-    // Get the booking to know num_children for capacity check
+    // Load the booking aggregate (unchanged by a same-week day move).
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
-      .select("num_children")
+      .select("id, club_id, booking_option_id, num_children, total_amount")
       .eq("id", bookingId)
       .single();
-
     if (bookingError || !booking) {
-      return NextResponse.json(
-        { error: "Booking not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    // Verify the new club day exists and is available
+    // Load all of the booking's days (the RPC replaces the whole set).
+    const { data: bookingDays, error: bdError } = await supabase
+      .from("booking_days")
+      .select("id, club_day_id, time_slot")
+      .eq("booking_id", bookingId);
+    if (bdError || !bookingDays || bookingDays.length === 0) {
+      return NextResponse.json({ error: "Booking days not found" }, { status: 404 });
+    }
+
+    const target = bookingDays.find((d) => d.id === bookingDayId);
+    if (!target) {
+      return NextResponse.json({ error: "Booking day not found" }, { status: 404 });
+    }
+
+    // Confirm the new day exists, is available, and is in THIS week.
     const { data: newDay, error: dayError } = await supabase
       .from("club_days")
-      .select("*")
+      .select("id, date, club_id, is_available")
       .eq("id", newClubDayId)
       .single();
-
     if (dayError || !newDay) {
+      return NextResponse.json({ error: "Target day not found" }, { status: 404 });
+    }
+    if (newDay.club_id !== booking.club_id) {
       return NextResponse.json(
-        { error: "Target day not found" },
-        { status: 404 }
+        { error: "That day is in a different week. Use Reschedule to move weeks." },
+        { status: 400 }
       );
     }
-
     if (!newDay.is_available) {
       return NextResponse.json(
         { error: "That day is not available for bookings" },
@@ -84,68 +82,53 @@ export async function POST(
       );
     }
 
-    // Check capacity using the RPC function
-    const effectiveTimeSlot = timeSlot || bookingDay.time_slot;
-    const { data: availability, error: availError } = await supabase
-      .rpc("get_club_day_availability", { day_id: newClubDayId });
-
-    if (availError || !availability) {
-      console.error("Availability check error:", availError);
+    // Don't allow moving onto a date the booking already holds.
+    if (bookingDays.some((d) => d.id !== bookingDayId && d.club_day_id === newClubDayId)) {
       return NextResponse.json(
-        { error: "Failed to check availability" },
-        { status: 500 }
+        { error: "That day is already part of this booking." },
+        { status: 400 }
       );
     }
 
-    const avail = availability[0] || availability;
-    const childrenCount = booking.num_children;
+    // Build the full new day-set: swap only the target day.
+    const effectiveTimeSlot = timeSlot || target.time_slot;
+    const days = bookingDays.map((d) =>
+      d.id === bookingDayId
+        ? { club_day_id: newClubDayId, time_slot: effectiveTimeSlot }
+        : { club_day_id: d.club_day_id, time_slot: d.time_slot }
+    );
 
-    // Check capacity based on time slot
-    if (effectiveTimeSlot === "morning" || effectiveTimeSlot === "full_day") {
-      const morningRemaining = avail.morning_capacity - avail.morning_booked;
-      if (morningRemaining < childrenCount) {
-        return NextResponse.json(
-          {
-            error: `Not enough morning capacity. Only ${morningRemaining} spot${morningRemaining !== 1 ? "s" : ""} remaining but this booking has ${childrenCount} child${childrenCount !== 1 ? "ren" : ""}.`,
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (effectiveTimeSlot === "afternoon" || effectiveTimeSlot === "full_day") {
-      const afternoonRemaining = avail.afternoon_capacity - avail.afternoon_booked;
-      if (afternoonRemaining < childrenCount) {
-        return NextResponse.json(
-          {
-            error: `Not enough afternoon capacity. Only ${afternoonRemaining} spot${afternoonRemaining !== 1 ? "s" : ""} remaining but this booking has ${childrenCount} child${childrenCount !== 1 ? "ren" : ""}.`,
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    // All checks passed — update the booking day
-    const { error: updateError } = await supabase
-      .from("booking_days")
-      .update({
-        club_day_id: newClubDayId,
-        time_slot: effectiveTimeSlot,
-      })
-      .eq("id", bookingDayId);
-
-    if (updateError) {
-      console.error("Error updating booking day:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update booking day" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      newDate: newDay.date,
+    // Atomic, locked, capacity-checked mutation. No price change for a same-week move.
+    const { error: rpcError } = await supabase.rpc("apply_booking_modification", {
+      p_booking_id: bookingId,
+      p_new_club_id: booking.club_id,
+      p_new_option_id: booking.booking_option_id,
+      p_new_children: booking.num_children,
+      p_new_total: booking.total_amount,
+      p_days: days,
+      p_modification_type: "change_day",
+      p_admin_actor: process.env.ADMIN_EMAIL || "admin",
+      p_direction: "none",
+      p_delta_pence: 0,
+      p_old_state: { club_day_id: target.club_day_id, time_slot: target.time_slot },
+      p_new_state: { club_day_id: newClubDayId, time_slot: effectiveTimeSlot },
     });
+
+    if (rpcError) {
+      // User-fixable conditions (capacity, availability, validation) are tagged
+      // check_violation (SQLSTATE 23514) in the RPC; surface those. Anything else
+      // is an internal error — log it and return a generic message (no raw leak).
+      if (rpcError.code === "23514") {
+        return NextResponse.json({ error: rpcError.message }, { status: 400 });
+      }
+      console.error("apply_booking_modification failed:", rpcError);
+      return NextResponse.json(
+        { error: "Couldn't change the day — please try again." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, newDate: newDay.date });
   } catch (error) {
     console.error("Error in POST /api/admin/bookings/[id]/change-day:", error);
     return NextResponse.json(
