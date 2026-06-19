@@ -119,3 +119,87 @@ export async function computeReschedulePricing(
     deltaPence: newTotalPence - booking.total_amount,
   };
 }
+
+export interface EditPricing extends ReschedulePricing {
+  dayCount?: number;
+}
+
+/**
+ * Re-price a booking for a NEW set of days WITHIN ITS CURRENT WEEK (add/remove),
+ * choosing the cheapest valid option for the new day count. This encodes the two
+ * owner-ratified rules:
+ *  - drop below a full week → the bundle discount is lost (priced per day), and
+ *  - adding days that reach the full week → auto-bundle to the cheaper Full Week.
+ * It always picks the lowest-cost valid option, so the customer is never overcharged.
+ */
+export async function computeEditPricing(
+  supabase: SupabaseClient,
+  bookingId: string,
+  clubDayIds: string[]
+): Promise<EditPricing> {
+  const dayCount = clubDayIds.length;
+  if (dayCount < 1) return { error: "At least one day is required." };
+
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .select("*, booking_options(*)")
+    .eq("id", bookingId)
+    .single();
+  if (error || !booking) return { error: "Booking not found" };
+
+  const currentOption = booking.booking_options;
+  if (!currentOption) return { error: "Booking has no pricing option" };
+
+  // How many days make up a "full week" for this club.
+  const { count: fullWeekDayCount } = await supabase
+    .from("club_days")
+    .select("id", { count: "exact", head: true })
+    .eq("club_id", booking.club_id);
+
+  // Candidate options of the same time slot, valid for this day count.
+  const { data: options } = await supabase
+    .from("booking_options")
+    .select("*")
+    .eq("club_id", booking.club_id)
+    .eq("time_slot", currentOption.time_slot)
+    .eq("is_active", true);
+
+  type OptionRow = { id: string; option_type: string; time_slot: string; name: string; price_per_child: number };
+  const candidates = ((options || []) as OptionRow[])
+    .filter(
+      (o) =>
+        (o.option_type === "single_day" && dayCount === 1) ||
+        o.option_type === "multi_day" ||
+        (o.option_type === "full_week" && fullWeekDayCount != null && dayCount === fullWeekDayCount)
+    )
+    .map((o) => ({
+      option: o,
+      total: priceBooking({
+        optionType: o.option_type as "full_week" | "single_day" | "multi_day",
+        pricePerChild: o.price_per_child,
+        dayCount,
+        numChildren: booking.num_children,
+        discountPercent: booking.discount_percent_applied || 0,
+      }).totalPence,
+    }));
+
+  if (candidates.length === 0) {
+    return {
+      error:
+        dayCount > 1
+          ? "This week has no per-day (Multi-Day) price for this booking's time slot, so days can't be removed here. Add a Multi-Day option for the week first."
+          : "No pricing option matches that number of days for this week.",
+    };
+  }
+  candidates.sort((a, b) => a.total - b.total); // cheapest valid option wins
+  const chosen = candidates[0];
+
+  return {
+    booking,
+    targetOption: chosen.option,
+    oldTotalPence: booking.total_amount,
+    newTotalPence: chosen.total,
+    deltaPence: chosen.total - booking.total_amount,
+    dayCount,
+  };
+}

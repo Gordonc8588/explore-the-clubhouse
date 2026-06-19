@@ -330,6 +330,115 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
     }
   };
 
+  // ---- Remove days modal ----
+  const currentDayIds = booking.bookedDays.map((d) => d.clubDayId);
+  const [showRemove, setShowRemove] = useState(false);
+  const [rmKept, setRmKept] = useState<string[]>([]);
+  const [rmReprice, setRmReprice] = useState<{
+    oldTotalPence: number;
+    newTotalPence: number;
+    deltaPence: number;
+    direction: string;
+    refundablePence: number | null;
+    optionName: string | null;
+  } | null>(null);
+  const [rmLoading, setRmLoading] = useState(false);
+  const [rmConfirm, setRmConfirm] = useState("");
+  const [rmError, setRmError] = useState<string | null>(null);
+  const [rmWarning, setRmWarning] = useState<string | null>(null);
+
+  const openRemove = () => {
+    setShowRemove(true);
+    setRmKept(booking.bookedDays.map((d) => d.clubDayId));
+    setRmReprice(null);
+    setRmConfirm("");
+    setRmError(null);
+    setRmWarning(null);
+  };
+
+  const toggleKeep = (clubDayId: string) => {
+    setRmConfirm("");
+    setRmKept((prev) =>
+      prev.includes(clubDayId)
+        ? prev.length > 1
+          ? prev.filter((x) => x !== clubDayId)
+          : prev // never remove the last day (that's a cancellation)
+        : [...prev, clubDayId]
+    );
+  };
+
+  const rmRemovedCount = currentDayIds.length - rmKept.length;
+
+  // Preview the refund once at least one day is removed.
+  useEffect(() => {
+    if (!showRemove || rmKept.length < 1 || rmKept.length >= currentDayIds.length) {
+      setRmReprice(null);
+      return;
+    }
+    let cancelled = false;
+    setRmLoading(true);
+    setRmError(null);
+    fetch(`/api/admin/bookings/${booking.id}/edit-days`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clubDayIds: rmKept, preview: true }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
+        if (cancelled) return;
+        if (ok) setRmReprice(d);
+        else setRmError(d.error || "Couldn't price this change.");
+      })
+      .catch(() => {
+        if (!cancelled) setRmError("Couldn't price this change.");
+      })
+      .finally(() => {
+        if (!cancelled) setRmLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showRemove, rmKept, currentDayIds.length, booking.id]);
+
+  const rmRefundUnknown = !!rmReprice && rmReprice.direction === "refund" && rmReprice.refundablePence == null;
+  const rmPlannedRefundPence =
+    rmReprice && rmReprice.direction === "refund"
+      ? Math.min(-rmReprice.deltaPence, rmReprice.refundablePence ?? 0)
+      : 0;
+  const rmConfirmTarget = rmPlannedRefundPence > 0 ? `£${(rmPlannedRefundPence / 100).toFixed(2)}` : booking.ref;
+  const rmConfirmOk = rmConfirm.trim().toUpperCase() === rmConfirmTarget.trim().toUpperCase();
+  const rmCanSubmit =
+    !!rmReprice && rmReprice.deltaPence <= 0 && rmRemovedCount > 0 && rmConfirmOk && !isProcessing && !rmLoading;
+
+  const handleRemoveDays = async () => {
+    if (!rmReprice) return;
+    setIsProcessing(true);
+    setRmError(null);
+    setRmWarning(null);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/edit-days`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clubDayIds: rmKept }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRmError(data.error || "Couldn't update the days.");
+        return;
+      }
+      if (data.warning) {
+        setRmWarning(data.warning);
+        return;
+      }
+      setShowRemove(false);
+      router.refresh();
+    } catch {
+      setRmError("Couldn't update the days.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const openManageModal = async () => {
     setShowManageModal(true);
     setManageAction(booking.status === "cancelled" ? "cancel_refund" : "cancel");
@@ -645,6 +754,20 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
           >
             <Calendar className="h-5 w-5" />
             Reschedule
+          </button>
+        )}
+        {(booking.status === "paid" || booking.status === "complete") && booking.bookedDays.length > 1 && (
+          <button
+            onClick={openRemove}
+            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "var(--craigies-olive)",
+              color: "var(--craigies-olive)",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
+            <Calendar className="h-5 w-5" />
+            Remove Days
           </button>
         )}
         {booking.status === "pending" && (
@@ -1217,6 +1340,126 @@ export function BookingDetail({ booking, availableClubs }: BookingDetailProps) {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Remove Days Modal */}
+      {showRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <h3
+              className="text-xl font-bold"
+              style={{ fontFamily: "'Playfair Display', serif", color: "var(--craigies-dark-olive)" }}
+            >
+              Remove days from {booking.ref}
+            </h3>
+            <p className="mt-1 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+              Untick the days to remove (at least one day must remain).
+            </p>
+
+            <div className="mt-4 space-y-2">
+              {booking.bookedDays.map((d) => {
+                const kept = rmKept.includes(d.clubDayId);
+                return (
+                  <button
+                    key={d.clubDayId}
+                    onClick={() => toggleKeep(d.clubDayId)}
+                    className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-all hover:opacity-80"
+                    style={{
+                      backgroundColor: kept ? "rgba(122, 124, 74, 0.08)" : "#FEE2E2",
+                      outline: kept ? undefined : "1px solid #FCA5A5",
+                    }}
+                  >
+                    <span style={{ color: "var(--craigies-dark-olive)" }}>
+                      <span className="font-medium">{d.dayName}</span>
+                      <span className="ml-2 text-sm">{formatDate(d.date)}</span>
+                    </span>
+                    <span className="text-xs font-medium" style={{ color: kept ? "var(--craigies-olive)" : "#DC2626" }}>
+                      {kept ? "Keeping" : "Removing"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {rmLoading && (
+              <p className="mt-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>Pricing…</p>
+            )}
+            {rmReprice && rmRemovedCount > 0 && (
+              <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: "#F5F4ED" }}>
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Was <strong>£{(rmReprice.oldTotalPence / 100).toFixed(2)}</strong> → now{" "}
+                  <strong>£{(rmReprice.newTotalPence / 100).toFixed(2)}</strong>
+                </p>
+                {rmPlannedRefundPence > 0 ? (
+                  <p className="mt-1 text-sm font-medium" style={{ color: "var(--craigies-olive)" }}>
+                    Refund £{(rmPlannedRefundPence / 100).toFixed(2)}
+                  </p>
+                ) : rmRefundUnknown ? (
+                  <p className="mt-1 text-sm" style={{ color: "#D97706" }}>
+                    Couldn&apos;t confirm the refundable amount with Stripe — a refund of up to £{((-rmReprice.deltaPence) / 100).toFixed(2)} will be attempted.
+                  </p>
+                ) : (
+                  <p className="mt-1 text-sm" style={{ color: "#6B7280" }}>No refund due.</p>
+                )}
+              </div>
+            )}
+
+            {rmReprice && rmRemovedCount > 0 && rmReprice.deltaPence <= 0 && (
+              <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "rgba(212, 132, 62, 0.08)" }}>
+                <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Type <strong>{rmConfirmTarget}</strong> to confirm.
+                </p>
+                <input
+                  type="text"
+                  value={rmConfirm}
+                  onChange={(e) => setRmConfirm(e.target.value)}
+                  placeholder={rmConfirmTarget}
+                  className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+                  style={{ borderColor: "#D1D5DB" }}
+                />
+              </div>
+            )}
+
+            {rmWarning && (
+              <p className="mt-3 rounded-md p-2 text-xs font-medium" style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}>
+                {rmWarning}
+              </p>
+            )}
+            {rmError && (
+              <p className="mt-3 text-xs font-medium" style={{ color: "#DC2626" }}>{rmError}</p>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              {rmWarning ? (
+                <button
+                  onClick={() => { setShowRemove(false); router.refresh(); }}
+                  className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                >
+                  Done
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowRemove(false)}
+                    className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                    style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleRemoveDays}
+                    disabled={!rmCanSubmit}
+                    className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {isProcessing ? "Working..." : "Remove & refund"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

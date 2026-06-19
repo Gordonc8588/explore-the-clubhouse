@@ -642,7 +642,7 @@ export async function sendBookingModifiedEmail(
       Your booking has been updated
     </h2>
     <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
-      Hi ${firstName}, your booking has been moved to <strong>${details.newClubName}</strong>. Here are your new days.
+      Hi ${firstName}, your booking has been updated. Here are your days for <strong>${details.newClubName}</strong>.
     </p>
 
     <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
