@@ -516,6 +516,94 @@ export async function sendCancellationEmail(
 }
 
 /**
+ * Send a refund confirmation to the parent stating the ACTUAL amount refunded.
+ * Used for partial/goodwill refunds and full refunds — unlike sendCancellationEmail,
+ * which hardcodes the full booking total.
+ */
+export async function sendRefundEmail(
+  booking: Booking,
+  club: Club,
+  refundedAmountPence: number,
+  isPartial: boolean,
+  remainingChargedPence: number,
+  reason?: string | null
+): Promise<SendEmailResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email client not configured' };
+  }
+
+  const firstName = booking.parent_name.split(' ')[0];
+  const heading = isPartial ? 'Refund Issued' : 'Booking Refunded';
+
+  const remainingRow = isPartial
+    ? `
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Still charged</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${formatPrice(remainingChargedPence)}</td>
+        </tr>`
+    : '';
+
+  const reasonLine = reason
+    ? `<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6; color: #6B7280;">Reason: ${reason}</p>`
+    : '';
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #7A7C4A;">
+      ${heading}
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      Hi ${firstName}, a refund has been issued on your booking${isPartial ? '' : ' and it has been cancelled'}.
+    </p>
+
+    <div style="background-color: #F5F4ED; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #7A7C4A;">Refund Details</h3>
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 140px;">Club</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${club.name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Refunded</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 700; color: #7A7C4A;">${formatPrice(refundedAmountPence)}</td>
+        </tr>
+        ${remainingRow}
+      </table>
+    </div>
+
+    ${reasonLine}
+
+    <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+      The refund of <strong>${formatPrice(refundedAmountPence)}</strong> has been issued to your original payment method. Please allow 5–10 business days for it to appear.
+    </p>
+
+    <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+      If you have any questions, please don't hesitate to get in touch.
+    </p>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: booking.parent_email,
+      replyTo: fromEmail,
+      subject: `${heading} - ${club.name}`,
+      html: emailTemplate(content),
+    });
+
+    if (error) {
+      console.error('Failed to send refund email:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Failed to send refund email:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
  * Send notification to admin when a new booking is made
  */
 export async function sendAdminNotification(

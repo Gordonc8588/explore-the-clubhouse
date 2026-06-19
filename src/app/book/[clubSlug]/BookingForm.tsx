@@ -14,6 +14,7 @@ import {
   trackAddToCart,
   getCheckoutUTMParams,
 } from "@/lib/analytics";
+import { priceBooking } from "@/lib/pricing";
 
 const STEPS = [
   { number: 1, label: "Option" },
@@ -238,16 +239,14 @@ export function BookingForm({ club, bookingOptions, clubDays, fullWeekAvailable 
 
   const calculateTotal = (): number => {
     if (!formData.selectedOption) return 0;
-    let subtotal = 0;
-    if (formData.selectedOption.option_type === "full_week") {
-      subtotal = formData.selectedOption.price_per_child * formData.childrenCount;
-    } else if (formData.selectedOption.option_type === "single_day") {
-      subtotal = formData.selectedOption.price_per_child * formData.childrenCount;
-    } else {
-      subtotal = formData.selectedOption.price_per_child * formData.selectedDates.length * formData.childrenCount;
-    }
-    const discount = appliedPromo ? Math.round((subtotal * appliedPromo.discount_percent) / 100) : 0;
-    return subtotal - discount;
+    // Canonical engine (see src/lib/pricing.ts) — keep in lockstep with checkout.
+    return priceBooking({
+      optionType: formData.selectedOption.option_type,
+      pricePerChild: formData.selectedOption.price_per_child,
+      dayCount: formData.selectedDates.length,
+      numChildren: formData.childrenCount,
+      discountPercent: appliedPromo ? appliedPromo.discount_percent : 0,
+    }).totalPence;
   };
 
   const renderStepContent = () => {

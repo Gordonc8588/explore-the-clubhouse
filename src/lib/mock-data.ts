@@ -289,6 +289,9 @@ export const mockBookings: Booking[] = [
     total_amount: 30000, // £300 (2 children × £150)
     status: 'complete',
     promo_code_id: null,
+    discount_percent_applied: 0,
+    amount_refunded_pence: 0,
+    updated_at: null,
     stripe_payment_intent_id: 'pi_mock_001',
     stripe_checkout_session_id: 'cs_mock_001',
     utm_source: null,
@@ -314,6 +317,9 @@ export const mockBookings: Booking[] = [
     total_amount: 3500, // £35
     status: 'paid',
     promo_code_id: null,
+    discount_percent_applied: 0,
+    amount_refunded_pence: 0,
+    updated_at: null,
     stripe_payment_intent_id: 'pi_mock_002',
     stripe_checkout_session_id: 'cs_mock_002',
     utm_source: null,
@@ -339,6 +345,9 @@ export const mockBookings: Booking[] = [
     total_amount: 6000, // £60 (3 mornings × £20)
     status: 'complete',
     promo_code_id: null,
+    discount_percent_applied: 0,
+    amount_refunded_pence: 0,
+    updated_at: null,
     stripe_payment_intent_id: 'pi_mock_003',
     stripe_checkout_session_id: 'cs_mock_003',
     utm_source: null,

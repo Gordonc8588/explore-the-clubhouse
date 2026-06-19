@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   Clock,
   PoundSterling,
-  XCircle,
   RefreshCw,
   Bell,
   UserPlus,
@@ -83,6 +82,7 @@ interface BookingDetailData {
   startDate: string;
   endDate: string;
   totalAmount: number;
+  numChildren: number;
   bookedDays: BookedDay[];
   parent: {
     name: string;
@@ -154,53 +154,120 @@ function getStatusBadgeStyles(status: string): { backgroundColor: string; color:
 
 export function BookingDetail({ booking }: BookingDetailProps) {
   const router = useRouter();
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showRefundModal, setShowRefundModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [changeDayTarget, setChangeDayTarget] = useState<BookedDay | null>(null);
   const [availableDays, setAvailableDays] = useState<AvailableDay[]>([]);
   const [loadingDays, setLoadingDays] = useState(false);
   const [selectedNewDayId, setSelectedNewDayId] = useState<string>("");
 
-  const handleCancelBooking = async () => {
-    setIsProcessing(true);
+  // Cancel / Refund modal
+  type RefundInfo = {
+    refundablePence: number;
+    alreadyRefundedPence: number;
+    refundError: string | null;
+  };
+  type ManageAction = "cancel" | "cancel_refund" | "partial_refund";
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [loadingInfo, setLoadingInfo] = useState(false);
+  const [refundInfo, setRefundInfo] = useState<RefundInfo | null>(null);
+  const [manageAction, setManageAction] = useState<ManageAction>("cancel");
+  const [partialPounds, setPartialPounds] = useState("");
+  const [reason, setReason] = useState("");
+  const [confirmText, setConfirmText] = useState("");
+  const [cooldownPassed, setCooldownPassed] = useState(false);
+  const [manageError, setManageError] = useState<string | null>(null);
+  const [manageWarning, setManageWarning] = useState<string | null>(null);
+  const [partialFailure, setPartialFailure] = useState(false);
+
+  // Brief post-open disable on the confirm button to defeat double-clicks. Start
+  // the clock when the form becomes interactive (refund info loaded), so a slow
+  // Stripe fetch can't void the window.
+  useEffect(() => {
+    if (!showManageModal || loadingInfo) {
+      setCooldownPassed(false);
+      return;
+    }
+    setCooldownPassed(false);
+    const t = setTimeout(() => setCooldownPassed(true), 1500);
+    return () => clearTimeout(t);
+  }, [showManageModal, loadingInfo]);
+
+  const openManageModal = async () => {
+    setShowManageModal(true);
+    setManageAction(booking.status === "cancelled" ? "cancel_refund" : "cancel");
+    setPartialPounds("");
+    setReason("");
+    setConfirmText("");
+    setManageError(null);
+    setManageWarning(null);
+    setPartialFailure(false);
+    setRefundInfo(null);
+    setLoadingInfo(true);
     try {
-      const res = await fetch(`/api/admin/bookings/${booking.id}/cancel`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refund: false }),
-      });
+      const res = await fetch(`/api/admin/bookings/${booking.id}/cancel`);
       const data = await res.json();
-      if (!res.ok) {
-        alert(`Failed to cancel: ${data.error}`);
-        return;
+      if (res.ok) {
+        setRefundInfo({
+          refundablePence: data.refundablePence ?? 0,
+          alreadyRefundedPence: data.alreadyRefundedPence ?? 0,
+          refundError: data.refundError ?? null,
+        });
+      } else {
+        setManageError(data.error || "Could not load refund details.");
       }
-      setShowCancelModal(false);
-      router.refresh();
     } catch {
-      alert("Failed to cancel booking. Please try again.");
+      setManageError("Could not load refund details.");
     } finally {
-      setIsProcessing(false);
+      setLoadingInfo(false);
     }
   };
 
-  const handleRefund = async () => {
+  const partialPence = Math.round(parseFloat(partialPounds || "0") * 100);
+  const refundablePence = refundInfo?.refundablePence ?? 0;
+  const isRefundAction = manageAction === "cancel_refund" || manageAction === "partial_refund";
+  const plannedRefundPence =
+    manageAction === "cancel_refund" ? refundablePence : manageAction === "partial_refund" ? partialPence : 0;
+
+  // Type-to-confirm gate + brief post-open disable to defeat double-clicks.
+  const confirmTarget = isRefundAction ? `£${(plannedRefundPence / 100).toFixed(2)}` : booking.ref;
+  const confirmOk = confirmText.trim().toUpperCase() === confirmTarget.trim().toUpperCase();
+  const partialValid =
+    manageAction !== "partial_refund" || (partialPence >= 1 && partialPence <= refundablePence);
+  const canSubmit = confirmOk && cooldownPassed && partialValid && !isProcessing && !loadingInfo;
+
+  const handleManageSubmit = async () => {
     setIsProcessing(true);
+    setManageError(null);
+    setManageWarning(null);
     try {
       const res = await fetch(`/api/admin/bookings/${booking.id}/cancel`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refund: true }),
+        body: JSON.stringify({
+          action: manageAction,
+          refundAmountPence: manageAction === "partial_refund" ? partialPence : undefined,
+          reason: reason.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(`Failed to refund: ${data.error}`);
+        // Money moved but DB failed → do NOT offer a re-submit (it could double
+        // refund). The refund is safe in Stripe; ask them to reload.
+        if (data.moneyMoved && !data.dbApplied) {
+          setPartialFailure(true);
+          setManageWarning(
+            data.error ||
+              "The refund went through in Stripe but the booking record didn't update. Reload the page — the money is safe; the record may need a manual tidy-up."
+          );
+        } else {
+          setManageError(data.error || "Action failed. Please try again.");
+        }
         return;
       }
-      setShowRefundModal(false);
+      setShowManageModal(false);
       router.refresh();
     } catch {
-      alert("Failed to process refund. Please try again.");
+      setManageError("Action failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -400,7 +467,12 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                 className="font-medium"
                 style={{ color: "var(--craigies-dark-olive)" }}
               >
-                {booking.children.length} child{booking.children.length !== 1 && "ren"}
+                {booking.numChildren} child{booking.numChildren !== 1 && "ren"}
+                {booking.children.length !== booking.numChildren && (
+                  <span className="ml-1 text-xs" style={{ color: "var(--craigies-olive)" }}>
+                    ({booking.children.length} profile{booking.children.length !== 1 && "s"})
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -409,23 +481,9 @@ export function BookingDetail({ booking }: BookingDetailProps) {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        {booking.status !== "cancelled" && booking.status !== "refunded" && (
+        {booking.status !== "refunded" && (
           <button
-            onClick={() => setShowCancelModal(true)}
-            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
-            style={{
-              borderColor: "#EF4444",
-              color: "#EF4444",
-              fontFamily: "'Playfair Display', serif",
-            }}
-          >
-            <XCircle className="h-5 w-5" />
-            Cancel Booking
-          </button>
-        )}
-        {(booking.status === "paid" || booking.status === "complete" || booking.status === "cancelled") && (
-          <button
-            onClick={() => setShowRefundModal(true)}
+            onClick={openManageModal}
             className="flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
             style={{
               borderColor: "#D97706",
@@ -434,7 +492,7 @@ export function BookingDetail({ booking }: BookingDetailProps) {
             }}
           >
             <RefreshCw className="h-5 w-5" />
-            Refund
+            Cancel / Refund
           </button>
         )}
         {booking.status === "pending" && (
@@ -847,10 +905,10 @@ export function BookingDetail({ booking }: BookingDetailProps) {
         )}
       </div>
 
-      {/* Cancel Booking Modal */}
-      {showCancelModal && (
+      {/* Cancel / Refund Modal */}
+      {showManageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
             <h3
               className="text-xl font-bold"
               style={{
@@ -858,88 +916,155 @@ export function BookingDetail({ booking }: BookingDetailProps) {
                 color: "var(--craigies-dark-olive)",
               }}
             >
-              Cancel Booking?
+              Cancel / Refund {booking.ref}
             </h3>
-            <p
-              className="mt-2"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            >
-              Are you sure you want to cancel booking <strong>{booking.ref}</strong>?
-              This action cannot be undone.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setShowCancelModal(false)}
-                className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
-                style={{
-                  borderColor: "#D1D5DB",
-                  color: "var(--craigies-dark-olive)",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                Keep Booking
-              </button>
-              <button
-                onClick={handleCancelBooking}
-                disabled={isProcessing}
-                className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-                style={{
-                  backgroundColor: "#EF4444",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                {isProcessing ? "Cancelling..." : "Yes, Cancel"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Refund Modal */}
-      {showRefundModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
-            <h3
-              className="text-xl font-bold"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: "var(--craigies-dark-olive)",
-              }}
-            >
-              Process Refund?
-            </h3>
-            <p
-              className="mt-2"
-              style={{ color: "var(--craigies-dark-olive)" }}
-            >
-              Are you sure you want to refund{" "}
-              <strong>£{booking.totalAmount.toFixed(2)}</strong> for booking{" "}
-              <strong>{booking.ref}</strong>?
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setShowRefundModal(false)}
-                className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
-                style={{
-                  borderColor: "#D1D5DB",
-                  color: "var(--craigies-dark-olive)",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRefund}
-                disabled={isProcessing}
-                className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-                style={{
-                  backgroundColor: "#D97706",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                {isProcessing ? "Processing..." : "Confirm Refund"}
-              </button>
-            </div>
+            {loadingInfo ? (
+              <div className="mt-6 flex justify-center py-8">
+                <div
+                  className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+                  style={{ borderColor: "var(--craigies-olive)", borderTopColor: "transparent" }}
+                />
+              </div>
+            ) : (
+              <>
+                {refundInfo && (
+                  <p className="mt-2 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                    Paid £{booking.totalAmount.toFixed(2)} · refundable now{" "}
+                    <strong>£{(refundInfo.refundablePence / 100).toFixed(2)}</strong>
+                    {refundInfo.alreadyRefundedPence > 0 && (
+                      <> · already refunded £{(refundInfo.alreadyRefundedPence / 100).toFixed(2)}</>
+                    )}
+                  </p>
+                )}
+                {refundInfo?.refundError && (
+                  <p className="mt-1 text-xs" style={{ color: "#D97706" }}>{refundInfo.refundError}</p>
+                )}
+
+                {/* Action choices */}
+                <div className="mt-4 space-y-2">
+                  {booking.status !== "cancelled" && (
+                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3" style={{ borderColor: manageAction === "cancel" ? "var(--craigies-olive)" : "#E5E7EB" }}>
+                      <input type="radio" name="manageAction" checked={manageAction === "cancel"} onChange={() => { setManageAction("cancel"); setConfirmText(""); }} className="mt-1" />
+                      <span>
+                        <span className="block font-medium" style={{ color: "var(--craigies-dark-olive)" }}>Cancel, no refund</span>
+                        <span className="block text-xs" style={{ color: "#6B7280" }}>Releases the seats. No money returned.</span>
+                      </span>
+                    </label>
+                  )}
+                  <label className={`flex items-start gap-3 rounded-lg border p-3 ${refundablePence > 0 ? "cursor-pointer" : "opacity-50"}`} style={{ borderColor: manageAction === "cancel_refund" ? "var(--craigies-olive)" : "#E5E7EB" }}>
+                    <input type="radio" name="manageAction" disabled={refundablePence <= 0} checked={manageAction === "cancel_refund"} onChange={() => { setManageAction("cancel_refund"); setConfirmText(""); }} className="mt-1" />
+                    <span>
+                      <span className="block font-medium" style={{ color: "var(--craigies-dark-olive)" }}>Cancel &amp; full refund (£{(refundablePence / 100).toFixed(2)})</span>
+                      <span className="block text-xs" style={{ color: "#6B7280" }}>Refunds everything still refundable and marks the booking refunded.</span>
+                    </span>
+                  </label>
+                  <label className={`flex items-start gap-3 rounded-lg border p-3 ${refundablePence > 0 ? "cursor-pointer" : "opacity-50"}`} style={{ borderColor: manageAction === "partial_refund" ? "var(--craigies-olive)" : "#E5E7EB" }}>
+                    <input type="radio" name="manageAction" disabled={refundablePence <= 0} checked={manageAction === "partial_refund"} onChange={() => { setManageAction("partial_refund"); setConfirmText(""); }} className="mt-1" />
+                    <span className="flex-1">
+                      <span className="block font-medium" style={{ color: "var(--craigies-dark-olive)" }}>Partial / goodwill refund</span>
+                      <span className="block text-xs" style={{ color: "#6B7280" }}>Refunds part of the payment; the booking stays active.</span>
+                      {manageAction === "partial_refund" && (
+                        <span className="mt-2 flex items-center gap-2">
+                          <span style={{ color: "var(--craigies-dark-olive)" }}>£</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={partialPounds}
+                            onChange={(e) => { setPartialPounds(e.target.value); setConfirmText(""); }}
+                            placeholder="0.00"
+                            className="w-28 rounded-md border px-2 py-1 text-sm"
+                            style={{ borderColor: "#D1D5DB" }}
+                          />
+                          <span className="text-xs" style={{ color: "#6B7280" }}>max £{(refundablePence / 100).toFixed(2)}</span>
+                        </span>
+                      )}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Reason */}
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Reason (optional, shown to parent if entered)"
+                    className="w-full rounded-md border px-3 py-2 text-sm"
+                    style={{ borderColor: "#D1D5DB" }}
+                  />
+                </div>
+
+                {/* Type-to-confirm */}
+                <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: "rgba(212, 132, 62, 0.08)" }}>
+                  <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                    {isRefundAction
+                      ? <>This will refund <strong>£{(plannedRefundPence / 100).toFixed(2)}</strong> to the parent. Type <strong>{confirmTarget}</strong> to confirm.</>
+                      : <>This will cancel the booking and release the seats. Type <strong>{confirmTarget}</strong> to confirm.</>}
+                  </p>
+                  <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    placeholder={confirmTarget}
+                    className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+                    style={{ borderColor: "#D1D5DB" }}
+                  />
+                </div>
+
+                {manageWarning && (
+                  <p className="mt-3 rounded-md p-2 text-xs font-medium" style={{ backgroundColor: "#FEE2E2", color: "#B91C1C" }}>{manageWarning}</p>
+                )}
+                {manageError && (
+                  <p className="mt-3 text-xs font-medium" style={{ color: "#DC2626" }}>{manageError}</p>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  {partialFailure ? (
+                    <>
+                      <button
+                        onClick={() => { setShowManageModal(false); router.refresh(); }}
+                        className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                        style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)", fontFamily: "'Playfair Display', serif" }}
+                      >
+                        Close
+                      </button>
+                      <button
+                        onClick={handleManageSubmit}
+                        disabled={isProcessing}
+                        className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                        style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {isProcessing ? "Finishing..." : "Finish refund"}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setShowManageModal(false)}
+                        className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                        style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)", fontFamily: "'Playfair Display', serif" }}
+                      >
+                        Close
+                      </button>
+                      <button
+                        onClick={handleManageSubmit}
+                        disabled={!canSubmit}
+                        className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                        style={{ backgroundColor: isRefundAction ? "#D97706" : "#EF4444", fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {isProcessing
+                          ? "Working..."
+                          : isRefundAction
+                            ? `Refund £${(plannedRefundPence / 100).toFixed(2)}`
+                            : "Cancel booking"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

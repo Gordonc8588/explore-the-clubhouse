@@ -5,6 +5,7 @@ import type { Club } from "@/types/database";
 import type { PromoCode } from "@/types/database";
 import type { BookingFormData } from "./OptionSelect";
 import { formatPrice } from "@/lib/mock-data";
+import { priceBooking } from "@/lib/pricing";
 
 interface ReviewStepProps {
   club: Club;
@@ -26,25 +27,18 @@ export function ReviewStep({
   const { selectedOption, selectedDates, parentName, parentEmail, parentPhone, childrenCount } =
     formData;
 
-  // Calculate pricing
-  const calculateSubtotal = (): number => {
-    if (!selectedOption) return 0;
-
-    if (selectedOption.option_type === "full_week") {
-      return selectedOption.price_per_child * childrenCount;
-    } else if (selectedOption.option_type === "single_day") {
-      return selectedOption.price_per_child * childrenCount;
-    } else {
-      // multi_day: price per day * number of days * number of children
-      return selectedOption.price_per_child * selectedDates.length * childrenCount;
-    }
-  };
-
-  const subtotal = calculateSubtotal();
-  const discountAmount = promoCode
-    ? Math.round((subtotal * promoCode.discount_percent) / 100)
-    : 0;
-  const total = subtotal - discountAmount;
+  // Calculate pricing — canonical engine (see src/lib/pricing.ts), so this
+  // confirmation screen stays in lockstep with the server charge.
+  const { subtotalPence: subtotal, discountAmountPence: discountAmount, totalPence: total } =
+    selectedOption
+      ? priceBooking({
+          optionType: selectedOption.option_type,
+          pricePerChild: selectedOption.price_per_child,
+          dayCount: selectedDates.length,
+          numChildren: childrenCount,
+          discountPercent: promoCode ? promoCode.discount_percent : 0,
+        })
+      : { subtotalPence: 0, discountAmountPence: 0, totalPence: 0 };
 
   // Format dates for display
   const formatDateRange = (): string => {

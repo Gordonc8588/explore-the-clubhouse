@@ -136,6 +136,7 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     startDate: bookedDays[0]?.date || booking.created_at,
     endDate: bookedDays[bookedDays.length - 1]?.date || booking.created_at,
     totalAmount: (booking.total_amount || 0) / 100, // Convert pence to pounds
+    numChildren: booking.num_children,
     bookedDays,
     parent: {
       name: booking.parent_name,

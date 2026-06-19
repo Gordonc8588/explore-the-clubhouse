@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bookingTokenQuery } from "@/lib/booking-access";
+import { priceBooking } from "@/lib/pricing";
 
 interface UTMParams {
   utm_source: string | null;
@@ -158,20 +159,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate pricing
-    let subtotal = 0;
-    if (bookingOption.option_type === "full_week") {
-      subtotal = bookingOption.price_per_child * childrenCount;
-    } else if (bookingOption.option_type === "single_day") {
-      subtotal = bookingOption.price_per_child * childrenCount;
-    } else {
-      // multi_day
-      subtotal = bookingOption.price_per_child * selectedDates.length * childrenCount;
-    }
-
     // Apply promo code if provided
     let discountPercent = 0;
-    let promoCode = null;
     if (promoCodeId) {
       const { data: promo } = await supabase
         .from('promo_codes')
@@ -181,13 +170,22 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (promo) {
-        promoCode = promo;
         discountPercent = promo.discount_percent;
       }
     }
 
-    const discountAmount = Math.round((subtotal * discountPercent) / 100);
-    const total = subtotal - discountAmount;
+    // Calculate pricing — canonical engine (see src/lib/pricing.ts)
+    const {
+      subtotalPence: subtotal,
+      discountAmountPence: discountAmount,
+      totalPence: total,
+    } = priceBooking({
+      optionType: bookingOption.option_type,
+      pricePerChild: bookingOption.price_per_child,
+      dayCount: selectedDates.length,
+      numChildren: childrenCount,
+      discountPercent,
+    });
 
     // Create pending booking in database with UTM attribution
     const { data: booking, error: bookingError } = await supabase
@@ -202,6 +200,9 @@ export async function POST(request: NextRequest) {
         total_amount: total,
         status: 'pending',
         promo_code_id: promoCodeId || null,
+        // Snapshot the discount rate actually applied so later modifications
+        // re-price against what the customer paid, not a drifted live promo.
+        discount_percent_applied: discountPercent,
         // UTM attribution
         utm_source: utmParams?.utm_source || null,
         utm_medium: utmParams?.utm_medium || null,

@@ -1,0 +1,98 @@
+# Booking Modification System — Implementation Plan
+
+_Status: proposed (awaiting owner decisions). Produced from a multi-agent design + adversarial review pass over the live codebase._
+
+## 1. What we're building
+
+One coherent way for an admin to change a booking after payment, covering every real-world scenario:
+
+| Scenario | Money direction | Example |
+|---|---|---|
+| **Cancel** | Full / partial / no refund | Family can't come at all |
+| **Reschedule** (incl. different week) | Usually £0 | Move Week 2 → Week 1, same number of days |
+| **Reduce days** | Refund the difference | 4 days → 3 days |
+| **Add days** | Charge the difference | 3 days → 4 days |
+| **Full-week conversions** | Refund or charge | Drop a day from a full week; or add a day that completes a week |
+| **Mixed edit** (later) | Net refund or charge | Move 2 days, drop 1, in one go |
+
+All of it runs on **one shared core** so the money math can never disagree with itself.
+
+---
+
+## 2. ⚠️ Bugs found in the CURRENT code (fix these first)
+
+The review found defects in the live cancel/refund path that are worth knowing about today:
+
+1. **The "Refund" button always refunds the *full* amount.** `stripe.refunds.create()` is called with no `amount`, so there's no way to refund one day. (`cancel/route.ts:96`)
+2. **The double-refund guard is broken** — it's a tautology (`amount_received === amount_received`) and the real check (`charge.refunded`) is only true *after a full refund*. So after any partial refund, a second refund isn't correctly blocked and could **over-refund**. (`cancel/route.ts:84`)
+3. **No record of refunds** is stored on the booking, so the system can't tell how much has already been returned.
+4. **The pricing formula is copied in 3 places** (checkout, the booking form, and implicitly every future change) — they can silently drift and produce wrong refund/charge amounts.
+5. **Capacity is checked then written without a lock** — two simultaneous bookings can both take the last seat (overbooking).
+6. **The admin booking page shows the wrong child count** — it displays `children.length` (profiles collected, often 0) instead of `num_children` (the paying count used for all money/capacity). (`BookingDetail.tsx:403`)
+
+> **Practical note for now:** until Phase 1 ships, treat the existing **Refund** button as "full refund only." For anything partial (like Suzanne's £65), keep using the Stripe Dashboard.
+
+---
+
+## 3. Architecture: shared core + thin endpoints
+
+**Decision: do _not_ build one giant "edit booking" endpoint first.** Build a small shared core, then expose it through several simple, independently-shippable admin actions. A unified editor comes last, as a thin caller of the same core.
+
+**The core (3 primitives + 2 tables):**
+
+- **`src/lib/pricing.ts`** — one pure `priceBooking({ optionType, pricePerChild, dayCount, numChildren, discountPercent })` function. The *only* place pricing math lives. `full_week`/`single_day` = flat price; `multi_day` = per-day; discount = `Math.round`. Pure → unit-testable.
+- **`apply_booking_modification(...)` Postgres RPC** (SECURITY DEFINER) — does the whole DB change in **one transaction**: locks the target days (`SELECT … FOR UPDATE`), re-checks capacity *excluding this booking's own seats*, replaces the booking's days, and updates `club_id` / `option` / `total` / audit row together. This closes the overbooking race and the "half-moved booking" risk.
+- **`src/lib/booking-modify.ts` → `reconcilePayment(booking, deltaPence)`** — encodes the two money-ordering rules and the signed-delta guard.
+- **`booking_modifications` table** — audit log + pending-upcharge holder + partial-refund ledger (one table, three jobs).
+- **`booking_payments` table** — records every Stripe payment intent (a booking can have more than one after an upgrade).
+
+Plus snapshot columns on `bookings`: `discount_percent_applied`, `amount_refunded_pence`, `updated_at`.
+
+---
+
+## 4. The money rules (the part that must be exactly right)
+
+- **One signed delta per change:** `delta = newTotal − total_amount`, where `newTotal` is the whole booking re-priced under the correct option using the **snapshotted discount the customer actually paid** (never the current live promo, which can drift).
+- **Hard sign guard:** never run Stripe when `delta === 0`; never send a payment request for `delta ≤ 0`; never refund for `delta ≥ 0`.
+- **Refunds (delta < 0):** apply the DB change **first**, then issue a **partial** refund (`amount` param), capped at the live ceiling `charge.amount_captured − charge.amount_refunded`. A failed refund leaves a consistent, cheaper booking that can be retried.
+- **Upgrades (delta > 0):** because checkout is guest/card-only (no saved card), we **can't charge on the spot.** We hold the proposed change as `pending`, send the parent a **hosted Stripe Checkout link** for the difference, and only apply the change in the **webhook once they pay** (seats aren't granted before payment).
+- **Idempotency keys** on every refund and checkout-session call (none exist today) so a double-click or Stripe retry can't double-charge/refund.
+- **Full-week rule:** the £295 week is an indivisible bundle. We always re-price the *whole* new state and diff two final totals — never pro-rata a single day. (Worked example: dropping 1 of 5 full-week days re-prices as 4 × £65 = £260, so **£35 back**, not £65; adding a 5th day to a 4-day booking auto-bundles to the cheaper £295 week, so **£35 charge**, not £65.)
+
+---
+
+## 5. Safety & customer comms
+
+- **Preview before commit:** a server-computed dry-run (`/reprice`) returns `was £X → now £Y → difference £Z` and the confirm button shows *that* exact number. The admin never approves a figure the browser guessed.
+- **Accidental-click protection:** type-to-confirm the amount/ref, brief disable after the modal opens, explicit success panel ("Refunded £35.00, ref re_xxx").
+- **Partial-failure recovery:** every money+DB action returns `{moneyMoved, dbApplied}`; if money moved but the DB didn't, a persistent "Retry" banner appears (no silent `console.error`).
+- **Correct emails:** new `sendRefundEmail` (actual amount, not always "full") and `sendBookingModifiedEmail` (itemised old→new + the real £). Upgrade flow: a "payment link" email at request time, and a separate "payment received / updated booking" email only **after** the money clears.
+- **Status model:** keep the existing 5 statuses. A *partial* refund leaves the booking `paid`/`complete` (it's still active for the remaining days); the money state lives in the ledger. Only a *full* refund sets `refunded`.
+
+---
+
+## 6. Phased rollout (each phase is revertible and build-gated)
+
+- **Phase 0 — Pricing engine + tests. ✅ BUILT.** `src/lib/pricing.ts` + 11 vitest tests; checkout, booking form, and review screen all routed through it (behaviour-identical). _Pending: migration apply + deploy._
+- **Phase 1 — Partial / goodwill / full refund. ✅ BUILT.** Parameterised refund route (live ceiling, idempotency, ledger-before-money, **reconcile-first** so a DB-failure retry can't double-refund), `booking_modifications` + `booking_payments` tables, `sendRefundEmail` (actual amount), unified Cancel/Refund modal (type-to-confirm, effect-based cooldown, num_children fix). Self-reviewed by 4 adversarial agents; all findings fixed. _Pending: migration apply + deploy._
+- **Phase 2 — Atomic mutation RPC.** Ship `apply_booking_modification`; migrate the existing per-day "Change" button onto it (closes the overbooking race).
+- **Phase 3 — Reschedule (incl. cross-week).** Updates week/option/total/days together; £0 or refund handled synchronously.
+- **Phase 4 — Add days / reduce days / full-week conversion.** The upgrade (payment-link) path + matching emails.
+- **Phase 5 — Reconciliation hardening.** Webhook handlers so Dashboard/out-of-band refunds sync back; full refund covers all payment intents.
+- **Phase 6 — Unified "Edit booking" editor.** One screen to stage any combination, over the now-proven core, plus an audit-history view.
+
+---
+
+## 7. Decisions made by the owner (2026-06-19)
+
+1. **Full-week part-cancellation refund** — ✅ **Per-day rate.** Lose the bundle; remaining days priced individually (5→4 days = £35 back).
+2. **Adding a day that would cost more than a full week** — ✅ **Auto-upgrade to the cheaper Full Week** and charge the smaller delta, shown explicitly in the preview.
+3. **Collecting extra payment for upgrades** — ✅ **Email the parent a hosted Stripe payment link** (no card-saving build now).
+4. **Modifying started/completed bookings** — recommend (not yet ratified): allow with a safeguarding warning; freeze (or require override) once the club week has started; never auto-delete child records. _Revisit at Phase 3+._
+5. **Waitlist auto-notify on freed capacity** — defer (the waitlist table has no app code yet; orthogonal to money safety).
+
+**Build scope chosen:** Phase 0 + Phase 1 now, then continue phase by phase.
+
+---
+
+_Source review artifacts: 4 adversarial lenses (money-correctness, data-consistency, UX/operational, architecture) all reached the same verdict — the scenarios are sound but must sit on the shared core + ledger + idempotency + atomic RPC before going live._

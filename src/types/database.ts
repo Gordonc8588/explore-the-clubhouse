@@ -235,6 +235,10 @@ export interface Booking {
   total_amount: number; // Amount in pence
   status: BookingStatus;
   promo_code_id: string | null;
+  // Modification ledger / money tracking
+  discount_percent_applied: number; // promo % snapshotted at checkout
+  amount_refunded_pence: number; // cumulative refunded, in pence
+  updated_at: string | null; // last modification time (TIMESTAMPTZ)
   stripe_payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
   // UTM attribution fields
@@ -263,6 +267,9 @@ export interface BookingInsert {
   total_amount: number;
   status?: BookingStatus;
   promo_code_id?: string | null;
+  discount_percent_applied?: number;
+  amount_refunded_pence?: number;
+  updated_at?: string | null;
   stripe_payment_intent_id?: string | null;
   stripe_checkout_session_id?: string | null;
   // UTM attribution fields
@@ -291,6 +298,9 @@ export interface BookingUpdate {
   total_amount?: number;
   status?: BookingStatus;
   promo_code_id?: string | null;
+  discount_percent_applied?: number;
+  amount_refunded_pence?: number;
+  updated_at?: string | null;
   stripe_payment_intent_id?: string | null;
   stripe_checkout_session_id?: string | null;
   // UTM attribution fields
@@ -333,6 +343,92 @@ export interface BookingDayUpdate {
   club_day_id?: string;
   time_slot?: TimeSlot;
   created_at?: string;
+}
+
+export type ModificationDirection = 'charge' | 'refund' | 'none';
+export type ModificationStatus = 'pending' | 'applied' | 'refunded' | 'expired' | 'failed';
+
+/**
+ * BookingModification - Audit log + deferred-upcharge holder + partial-refund ledger
+ */
+export interface BookingModification {
+  id: string;
+  booking_id: string;
+  admin_actor: string | null;
+  modification_type: string;
+  direction: ModificationDirection;
+  status: ModificationStatus;
+  old_total_pence: number | null;
+  new_total_pence: number | null;
+  delta_pence: number | null;
+  refund_amount_pence: number | null;
+  reason: string | null;
+  old_state: unknown | null;
+  new_state: unknown | null;
+  stripe_refund_id: string | null;
+  stripe_checkout_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  created_at: string;
+  applied_at: string | null;
+}
+
+export interface BookingModificationInsert {
+  id?: string;
+  booking_id: string;
+  admin_actor?: string | null;
+  modification_type: string;
+  direction?: ModificationDirection;
+  status?: ModificationStatus;
+  old_total_pence?: number | null;
+  new_total_pence?: number | null;
+  delta_pence?: number | null;
+  refund_amount_pence?: number | null;
+  reason?: string | null;
+  old_state?: unknown | null;
+  new_state?: unknown | null;
+  stripe_refund_id?: string | null;
+  stripe_checkout_session_id?: string | null;
+  stripe_payment_intent_id?: string | null;
+  created_at?: string;
+  applied_at?: string | null;
+}
+
+export interface BookingModificationUpdate {
+  status?: ModificationStatus;
+  direction?: ModificationDirection;
+  refund_amount_pence?: number | null;
+  reason?: string | null;
+  new_state?: unknown | null;
+  stripe_refund_id?: string | null;
+  stripe_checkout_session_id?: string | null;
+  stripe_payment_intent_id?: string | null;
+  applied_at?: string | null;
+}
+
+/**
+ * BookingPayment - Every Stripe PaymentIntent captured against a booking
+ */
+export interface BookingPayment {
+  id: string;
+  booking_id: string;
+  stripe_payment_intent_id: string;
+  amount_pence: number;
+  kind: 'original' | 'upcharge';
+  created_at: string;
+}
+
+export interface BookingPaymentInsert {
+  id?: string;
+  booking_id: string;
+  stripe_payment_intent_id: string;
+  amount_pence: number;
+  kind?: 'original' | 'upcharge';
+  created_at?: string;
+}
+
+export interface BookingPaymentUpdate {
+  amount_pence?: number;
+  kind?: 'original' | 'upcharge';
 }
 
 /**
@@ -1198,6 +1294,16 @@ export interface Database {
         Row: BookingDay;
         Insert: BookingDayInsert;
         Update: BookingDayUpdate;
+      };
+      booking_modifications: {
+        Row: BookingModification;
+        Insert: BookingModificationInsert;
+        Update: BookingModificationUpdate;
+      };
+      booking_payments: {
+        Row: BookingPayment;
+        Insert: BookingPaymentInsert;
+        Update: BookingPaymentUpdate;
       };
       children: {
         Row: Child;
