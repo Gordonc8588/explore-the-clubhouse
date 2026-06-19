@@ -401,9 +401,10 @@ export async function issueRefundAfterModification(
  * unique index → 23505). The proven payment-link flow, shared so the unified editor
  * reuses it instead of duplicating it.
  *
- * NOTE: the webhook re-prices a pending request against the booking's CURRENT week +
- * child count (computeEditPricing), so callers must only stage upcharges where the
- * new_state keeps the same club_id and num_children (same-week day additions).
+ * The full proposed state (target club_id, option_id, num_children, day set, total)
+ * is frozen into new_state; the webhook re-prices THAT state via computeUnifiedPricing
+ * at pay time, so cross-week and children-increase up-charges are handled correctly
+ * (it does not assume the booking's current week/children).
  */
 export async function createUpchargeRequest(
   supabase: SupabaseClient,

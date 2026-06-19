@@ -652,7 +652,6 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges, modif
     numChildren: number;
     weekChanged: boolean;
     childrenChanged: boolean;
-    chargeUnsupported: boolean;
   };
   const [showEdit, setShowEdit] = useState(false);
   const [edClubId, setEdClubId] = useState(booking.clubId);
@@ -793,13 +792,12 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges, modif
       : 0;
   const edRefundUnknown =
     !!edPreview && edPreview.direction === "refund" && edPreview.refundablePence == null;
-  const edIsCharge = !!edPreview && edPreview.direction === "charge" && !edPreview.chargeUnsupported;
+  const edIsCharge = !!edPreview && edPreview.direction === "charge";
   const edConfirmTarget = edPlannedRefundPence > 0 ? `£${(edPlannedRefundPence / 100).toFixed(2)}` : booking.ref;
   const edConfirmOk = edConfirm.trim().toUpperCase() === edConfirmTarget.trim().toUpperCase();
   const edCanSubmit =
     !!edPreview &&
     edHasChange &&
-    !edPreview.chargeUnsupported &&
     !edLoadingPreview &&
     !isProcessing &&
     // Charge sends a payment link (no money moves now) → no type-to-confirm, like Add Days.
@@ -2606,13 +2604,7 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges, modif
                       Was <strong>£{(edPreview.oldTotalPence / 100).toFixed(2)}</strong> → now{" "}
                       <strong>£{(edPreview.newTotalPence / 100).toFixed(2)}</strong>
                     </p>
-                    {edPreview.chargeUnsupported ? (
-                      <p className="mt-1 text-sm font-medium" style={{ color: "#D97706" }}>
-                        This increases the price by £{(edPreview.deltaPence / 100).toFixed(2)}. Collecting extra for a
-                        week or children change isn&apos;t available yet — keep the same week and number of children and
-                        add days only, or apply the change in steps.
-                      </p>
-                    ) : edPreview.direction === "refund" ? (
+                    {edPreview.direction === "refund" ? (
                       edRefundUnknown ? (
                         <p className="mt-1 text-sm font-medium" style={{ color: "#D97706" }}>
                           Couldn&apos;t confirm the refundable amount with Stripe — a refund of up to £
@@ -2645,7 +2637,7 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges, modif
                 />
 
                 {/* Type-to-confirm (refund / no-change only; a charge just sends a link) */}
-                {edPreview && edHasChange && !edPreview.chargeUnsupported && !edIsCharge && (
+                {edPreview && edHasChange && !edIsCharge && (
                   <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "rgba(212, 132, 62, 0.08)" }}>
                     <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
                       {edPlannedRefundPence > 0

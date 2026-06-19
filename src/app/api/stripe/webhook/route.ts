@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendBookingConfirmation, sendAdminNotification, sendBookingModifiedEmail, sendSeatingFailureAlert, sendDisputeAlert, type SendEmailResult } from '@/lib/email';
-import { computeEditPricing } from '@/lib/booking-modify';
+import { computeUnifiedPricing } from '@/lib/booking-modify';
 import { trackPurchaseConversion } from '@/lib/meta-conversions';
 import type { Booking, Club } from '@/types/database';
 
@@ -184,10 +184,17 @@ async function handleModificationPaid(session: Stripe.Checkout.Session): Promise
     dates: string[];
   };
 
-  // Re-price at pay time. If the price drifted since the link was created (an
-  // option or discount was edited), do NOT apply — refund and fail.
+  // Re-price at pay time against the FULL proposed state (target week + children +
+  // day set) that was frozen into new_state — NOT the booking's current week/children
+  // — so cross-week and children-increase up-charges re-price on the right basis. If
+  // the price drifted since the link was created (an option/discount was edited, or the
+  // cheapest valid option changed), do NOT apply — refund and fail.
   const clubDayIds = (ns.days || []).map((d) => d.club_day_id);
-  const fresh = await computeEditPricing(supabase, mod.booking_id, clubDayIds);
+  const fresh = await computeUnifiedPricing(supabase, mod.booking_id, {
+    newClubId: ns.club_id,
+    clubDayIds,
+    numChildren: ns.num_children,
+  });
   if (fresh.error || fresh.newTotalPence !== ns.total_pence) {
     console.error(`[Webhook] modification ${modificationId} price drift (frozen ${ns.total_pence}, now ${fresh.newTotalPence ?? 'error'}) — refunding`);
     await refundUpchargeOnce(modificationId, paymentIntentId, 'price_changed');

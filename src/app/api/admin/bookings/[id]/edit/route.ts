@@ -30,9 +30,10 @@ const adminActor = process.env.ADMIN_EMAIL || "admin";
  * Money routing:
  *  - delta === 0  → apply (no money)
  *  - delta  <  0  → apply (DB-first), then refund the difference
- *  - delta  >  0  → ONLY same-week + same-children day additions use the payment-link
- *                   flow (the webhook re-prices against the current week/children, so
- *                   cross-week / children-increase up-charges are blocked here — Safe v1).
+ *  - delta  >  0  → stage the FULL proposed state (any target week / day set / child
+ *                   count) as a pending upcharge and email a payment link; the webhook
+ *                   re-prices the FROZEN new_state via computeUnifiedPricing at pay time
+ *                   and applies the change atomically only once the parent pays.
  */
 export async function POST(
   request: NextRequest,
@@ -127,8 +128,6 @@ export async function POST(
         numChildren: effectiveChildren,
         weekChanged,
         childrenChanged,
-        // True when a price increase can't be collected by this editor yet (Safe v1).
-        chargeUnsupported: delta > 0 && (weekChanged || childrenChanged),
       });
     }
 
@@ -164,23 +163,16 @@ export async function POST(
     const newDates = (newDayRows || []).map((d) => d.date);
     const days = (clubDayIds as string[]).map((cid) => ({ club_day_id: cid, time_slot: commonSlot }));
 
-    // Price INCREASE → deferred payment link, but only for the proven same-week,
-    // same-children case (the webhook re-prices against current week/children).
+    // Price INCREASE → deferred payment link for the FULL proposed state. The webhook
+    // re-prices the frozen new_state (target week + children + day set) at pay time, so
+    // cross-week and children-increase up-charges are collected correctly and the change
+    // is applied only once the parent pays.
     if (delta > 0) {
-      if (weekChanged || childrenChanged) {
-        return NextResponse.json(
-          {
-            error:
-              "Charging extra for a different week or a higher number of children isn't available yet. For a price increase, keep the same week and number of children and add days only — or apply the change in steps.",
-          },
-          { status: 400 }
-        );
-      }
       const result = await createUpchargeRequest(supabase, {
         booking,
         targetOptionId: pricing.targetOption.id,
-        clubId: booking.club_id,
-        numChildren: booking.num_children,
+        clubId: effectiveClubId,
+        numChildren: effectiveChildren,
         newTotalPence,
         deltaPence: delta,
         days,
