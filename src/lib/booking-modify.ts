@@ -342,9 +342,11 @@ export async function issueRefundAfterModification(
     };
   }
 
+  // The Stripe refund itself. Only a failure HERE means no money moved.
+  let stripeRefund: import("stripe").Stripe.Refund;
   try {
     const idempotencyKey = `${keyPrefix}-${bookingId}-${rs.alreadyRefundedPence}-${refundPence}`;
-    const stripeRefund = await stripe.refunds.create(
+    stripeRefund = await stripe.refunds.create(
       {
         payment_intent: paymentIntentId as string,
         amount: refundPence,
@@ -352,34 +354,8 @@ export async function issueRefundAfterModification(
       },
       { idempotencyKey }
     );
-
-    const { error: ledgerError } = await supabase
-      .from("bookings")
-      .update({ amount_refunded_pence: (rs.alreadyRefundedPence ?? 0) + refundPence })
-      .eq("id", bookingId);
-    if (modId) {
-      await supabase
-        .from("booking_modifications")
-        .update({ stripe_refund_id: stripeRefund.id, refund_amount_pence: refundPence })
-        .eq("id", modId);
-    }
-
-    if (ledgerError) {
-      console.error(`${keyPrefix}: refund issued but ledger update failed:`, ledgerError);
-      return {
-        refundedPence: refundPence,
-        warning: `Refunded £${(refundPence / 100).toFixed(2)} (ref ${stripeRefund.id}), but the booking record didn't finish updating. It will reconcile from Stripe on the next refund action.`,
-      };
-    }
-    if (refundPence < wantPence) {
-      return {
-        refundedPence: refundPence,
-        warning: `Refunded £${(refundPence / 100).toFixed(2)} (the remaining refundable amount); £${((wantPence - refundPence) / 100).toFixed(2)} could not be refunded.`,
-      };
-    }
-    return { refundedPence: refundPence, warning: null };
   } catch (e) {
-    console.error(`${keyPrefix} refund failed after change:`, e);
+    console.error(`${keyPrefix} refund failed:`, e);
     if (modId) {
       await supabase
         .from("booking_modifications")
@@ -391,6 +367,44 @@ export async function issueRefundAfterModification(
       warning: `${subject}, but the £${(wantPence / 100).toFixed(2)} refund failed. Issue it from Cancel / Refund.`,
     };
   }
+
+  // Refund succeeded — it is now the source of truth for the reported amount. The
+  // post-refund DB writes are best-effort: a failed/thrown write must NOT zero the
+  // refunded amount (that would tell the customer no refund happened). Phase 5's
+  // out-of-band sync reconciles amount_refunded_pence from live Stripe regardless.
+  try {
+    const { error: ledgerError } = await supabase
+      .from("bookings")
+      .update({ amount_refunded_pence: (rs.alreadyRefundedPence ?? 0) + refundPence })
+      .eq("id", bookingId);
+    if (modId) {
+      await supabase
+        .from("booking_modifications")
+        .update({ stripe_refund_id: stripeRefund.id, refund_amount_pence: refundPence })
+        .eq("id", modId);
+    }
+    if (ledgerError) {
+      console.error(`${keyPrefix}: refund issued but ledger update failed:`, ledgerError);
+      return {
+        refundedPence: refundPence,
+        warning: `Refunded £${(refundPence / 100).toFixed(2)} (ref ${stripeRefund.id}), but the booking record didn't finish updating. It will reconcile from Stripe on the next refund action.`,
+      };
+    }
+  } catch (e) {
+    console.error(`${keyPrefix}: refund issued but a post-refund write threw:`, e);
+    return {
+      refundedPence: refundPence,
+      warning: `Refunded £${(refundPence / 100).toFixed(2)} (ref ${stripeRefund.id}), but the booking record didn't finish updating. It will reconcile from Stripe on the next refund action.`,
+    };
+  }
+
+  if (refundPence < wantPence) {
+    return {
+      refundedPence: refundPence,
+      warning: `Refunded £${(refundPence / 100).toFixed(2)} (the remaining refundable amount); £${((wantPence - refundPence) / 100).toFixed(2)} could not be refunded.`,
+    };
+  }
+  return { refundedPence: refundPence, warning: null };
 }
 
 /**

@@ -1,8 +1,7 @@
 import { verifyAdminSessionToken } from "@/lib/admin-session";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe";
-import { computeReschedulePricing, getRefundState } from "@/lib/booking-modify";
+import { computeReschedulePricing, issueRefundAfterModification } from "@/lib/booking-modify";
 import { sendBookingModifiedEmail } from "@/lib/email";
 import { cookies } from "next/headers";
 
@@ -148,62 +147,18 @@ export async function POST(
     // ordering: a failed refund leaves a consistent, cheaper booking to retry).
     let refundedPence = 0;
     let refundWarning: string | null = null;
-    if (delta < 0 && stripe) {
-      const rs = await getRefundState(booking.stripe_payment_intent_id);
-      const ceiling = rs.ok ? rs.refundablePence ?? 0 : 0;
-      const want = -delta;
-      const refundPence = Math.min(want, ceiling);
-      if (!rs.ok || refundPence <= 0) {
-        refundWarning = `Booking moved, but the £${(want / 100).toFixed(2)} refund couldn't be issued automatically. Issue it from Cancel / Refund.`;
-        // The move applied but no refund happened — don't let the audit row claim one.
-        if (modId) {
-          await supabase
-            .from("booking_modifications")
-            .update({ direction: "none", reason: "Move applied; refund must be issued manually (Cancel / Refund)" })
-            .eq("id", modId as string);
-        }
-      } else {
-        try {
-          const idempotencyKey = `reschedule-refund-${bookingId}-${rs.alreadyRefundedPence}-${refundPence}`;
-          const stripeRefund = await stripe.refunds.create(
-            {
-              payment_intent: booking.stripe_payment_intent_id as string,
-              amount: refundPence,
-              metadata: { bookingId, modificationId: (modId as string) ?? "", reason: "reschedule" },
-            },
-            { idempotencyKey }
-          );
-          refundedPence = refundPence;
-
-          // amount_refunded_pence is informational (real ceilings come from live
-          // Stripe), but a failed write should be surfaced, not swallowed.
-          const { error: ledgerError } = await supabase
-            .from("bookings")
-            .update({ amount_refunded_pence: (rs.alreadyRefundedPence ?? 0) + refundPence })
-            .eq("id", bookingId);
-          if (modId) {
-            await supabase
-              .from("booking_modifications")
-              .update({ stripe_refund_id: stripeRefund.id, refund_amount_pence: refundPence })
-              .eq("id", modId as string);
-          }
-          if (ledgerError) {
-            console.error("Reschedule: refund issued but ledger update failed:", ledgerError);
-            refundWarning = `Refunded £${(refundPence / 100).toFixed(2)} (ref ${stripeRefund.id}), but the booking record didn't finish updating. It will reconcile from Stripe on the next refund action.`;
-          } else if (refundPence < want) {
-            refundWarning = `Refunded £${(refundPence / 100).toFixed(2)} (the remaining refundable amount); £${((want - refundPence) / 100).toFixed(2)} could not be refunded.`;
-          }
-        } catch (e) {
-          console.error("Reschedule refund failed after move:", e);
-          refundWarning = `Booking moved, but the £${(want / 100).toFixed(2)} refund failed. Issue it from Cancel / Refund.`;
-          if (modId) {
-            await supabase
-              .from("booking_modifications")
-              .update({ direction: "none", reason: "Move applied; refund failed — issue manually (Cancel / Refund)" })
-              .eq("id", modId as string);
-          }
-        }
-      }
+    if (delta < 0) {
+      const r = await issueRefundAfterModification(supabase, {
+        bookingId,
+        paymentIntentId: booking.stripe_payment_intent_id,
+        modId: (modId as string) ?? null,
+        wantPence: -delta,
+        keyPrefix: "reschedule-refund",
+        reason: "reschedule",
+        subject: "Booking moved",
+      });
+      refundedPence = r.refundedPence;
+      refundWarning = r.warning;
     }
 
     // Confirmation email (states the actual refund, if any).

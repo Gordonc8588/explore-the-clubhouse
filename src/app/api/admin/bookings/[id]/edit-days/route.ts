@@ -1,9 +1,8 @@
 import { verifyAdminSessionToken } from "@/lib/admin-session";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe";
-import { computeEditPricing, getRefundState } from "@/lib/booking-modify";
-import { sendBookingModifiedEmail, sendModificationPaymentRequestEmail } from "@/lib/email";
+import { computeEditPricing, getRefundState, createUpchargeRequest, issueRefundAfterModification } from "@/lib/booking-modify";
+import { sendBookingModifiedEmail } from "@/lib/email";
 import { cookies } from "next/headers";
 
 async function isAdmin() {
@@ -102,135 +101,29 @@ export async function POST(
 
     const days = clubDayIds.map((cid: string) => ({ club_day_id: cid, time_slot: commonSlot }));
 
-    // Price went UP → don't change the booking. Collect the difference via a hosted
-    // Checkout link and apply it in the webhook once paid (deferred upcharge).
+    // Price went UP → collect the difference via the shared hosted-payment-link flow;
+    // the webhook applies the change once paid (booking unchanged until then).
     if (delta > 0) {
-      if (!stripe) {
-        return NextResponse.json({ error: "Stripe is not configured" }, { status: 500 });
+      const result = await createUpchargeRequest(supabase, {
+        booking,
+        targetOptionId: pricing.targetOption.id,
+        clubId: booking.club_id,
+        numChildren: booking.num_children,
+        newTotalPence,
+        deltaPence: delta,
+        days,
+        newDates,
+        reason: reason || null,
+        adminActor,
+      });
+      if (!result.ok) {
+        return NextResponse.json({ error: result.error }, { status: result.status });
       }
-
-      // Best-effort capacity pre-check on newly-added days (the RPC re-checks
-      // authoritatively at apply time).
-      const currentSet = new Set(currentSorted);
-      const addedIds = clubDayIds.filter((cid: string) => !currentSet.has(cid));
-      for (const cid of addedIds) {
-        const { data: avail } = await supabase.rpc("get_club_day_availability", { day_id: cid });
-        const a = avail?.[0];
-        if (a) {
-          const remaining =
-            commonSlot === "afternoon"
-              ? a.afternoon_capacity - a.afternoon_booked
-              : commonSlot === "morning"
-                ? a.morning_capacity - a.morning_booked
-                : Math.min(a.morning_capacity - a.morning_booked, a.afternoon_capacity - a.afternoon_booked);
-          if (remaining < booking.num_children) {
-            return NextResponse.json({ error: "One of the new days doesn't have enough space." }, { status: 400 });
-          }
-        }
-      }
-
-      // Only one open payment request per booking — otherwise two links could
-      // both be paid (double charge).
-      const { data: existingPending } = await supabase
-        .from("booking_modifications")
-        .select("id")
-        .eq("booking_id", bookingId)
-        .eq("status", "pending")
-        .eq("direction", "charge")
-        .limit(1)
-        .maybeSingle();
-      if (existingPending) {
-        return NextResponse.json(
-          { error: "There's already a pending payment request for this booking. Cancel it first." },
-          { status: 400 }
-        );
-      }
-
-      // Persist the desired new state as a PENDING modification (booking unchanged).
-      const { data: modRow, error: modErr } = await supabase
-        .from("booking_modifications")
-        .insert({
-          booking_id: bookingId,
-          admin_actor: adminActor,
-          modification_type: "add_days",
-          direction: "charge",
-          status: "pending",
-          old_total_pence: booking.total_amount,
-          new_total_pence: newTotalPence,
-          delta_pence: delta,
-          reason: reason || null,
-          new_state: {
-            club_id: booking.club_id,
-            option_id: pricing.targetOption.id,
-            num_children: booking.num_children,
-            total_pence: newTotalPence,
-            days,
-            dates: newDates,
-          },
-        })
-        .select()
-        .single();
-      if (modErr || !modRow) {
-        // Race-proof one-open-request: the partial unique index raises 23505.
-        if (modErr?.code === "23505") {
-          return NextResponse.json(
-            { error: "There's already a pending payment request for this booking. Cancel it first." },
-            { status: 400 }
-          );
-        }
-        console.error("edit-days: failed to create pending modification:", modErr);
-        return NextResponse.json({ error: "Couldn't start the payment request." }, { status: 500 });
-      }
-
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-      let session;
-      try {
-        session = await stripe.checkout.sessions.create(
-          {
-            payment_method_types: ["card"],
-            mode: "payment",
-            customer_email: booking.parent_email,
-            line_items: [
-              {
-                price_data: {
-                  currency: "gbp",
-                  product_data: { name: `Additional day(s) — booking ${booking.id.slice(0, 8).toUpperCase()}` },
-                  unit_amount: delta,
-                },
-                quantity: 1,
-              },
-            ],
-            metadata: { kind: "modification", modificationId: modRow.id, bookingId },
-            // Bound the pay window so a stale link can't be paid much later.
-            expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-            success_url: `${baseUrl}/?upcharge=success`,
-            cancel_url: `${baseUrl}/?upcharge=cancelled`,
-          },
-          { idempotencyKey: `mod-session-${modRow.id}` }
-        );
-      } catch (e) {
-        console.error("edit-days: failed to create Checkout session:", e);
-        await supabase.from("booking_modifications").update({ status: "failed" }).eq("id", modRow.id);
-        return NextResponse.json({ error: "Couldn't create the payment link." }, { status: 500 });
-      }
-
-      await supabase
-        .from("booking_modifications")
-        .update({ stripe_checkout_session_id: session.id })
-        .eq("id", modRow.id);
-
-      try {
-        const { data: club } = await supabase.from("clubs").select("name").eq("id", booking.club_id).single();
-        await sendModificationPaymentRequestEmail(booking as never, club?.name || "Holiday Club", delta, session.url || "");
-      } catch (e) {
-        console.error("Failed to send payment-request email:", e);
-      }
-
       return NextResponse.json({
         upcharge: true,
-        checkoutUrl: session.url,
+        checkoutUrl: result.checkoutUrl,
         deltaPence: delta,
-        modificationId: modRow.id,
+        modificationId: result.modificationId,
       });
     }
 
@@ -261,57 +154,18 @@ export async function POST(
     // Refund the difference (DB-first; a failed refund leaves a consistent cheaper booking).
     let refundedPence = 0;
     let refundWarning: string | null = null;
-    if (delta < 0 && stripe) {
-      const rs = await getRefundState(booking.stripe_payment_intent_id);
-      const want = -delta;
-      const refundPence = Math.min(want, rs.ok ? rs.refundablePence ?? 0 : 0);
-      if (!rs.ok || refundPence <= 0) {
-        refundWarning = `Days updated, but the £${(want / 100).toFixed(2)} refund couldn't be issued automatically. Issue it from Cancel / Refund.`;
-        if (modId) {
-          await supabase
-            .from("booking_modifications")
-            .update({ direction: "none", reason: "Days updated; refund must be issued manually (Cancel / Refund)" })
-            .eq("id", modId as string);
-        }
-      } else {
-        try {
-          const idempotencyKey = `editdays-refund-${bookingId}-${rs.alreadyRefundedPence}-${refundPence}`;
-          const stripeRefund = await stripe.refunds.create(
-            {
-              payment_intent: booking.stripe_payment_intent_id as string,
-              amount: refundPence,
-              metadata: { bookingId, modificationId: (modId as string) ?? "", reason: "reduce_days" },
-            },
-            { idempotencyKey }
-          );
-          refundedPence = refundPence;
-          const { error: ledgerError } = await supabase
-            .from("bookings")
-            .update({ amount_refunded_pence: (rs.alreadyRefundedPence ?? 0) + refundPence })
-            .eq("id", bookingId);
-          if (modId) {
-            await supabase
-              .from("booking_modifications")
-              .update({ stripe_refund_id: stripeRefund.id, refund_amount_pence: refundPence })
-              .eq("id", modId as string);
-          }
-          if (ledgerError) {
-            console.error("edit-days: refund issued but ledger update failed:", ledgerError);
-            refundWarning = `Refunded £${(refundPence / 100).toFixed(2)} (ref ${stripeRefund.id}), but the booking record didn't finish updating. It will reconcile from Stripe on the next refund action.`;
-          } else if (refundPence < want) {
-            refundWarning = `Refunded £${(refundPence / 100).toFixed(2)} (the remaining refundable amount); £${((want - refundPence) / 100).toFixed(2)} could not be refunded.`;
-          }
-        } catch (e) {
-          console.error("edit-days refund failed after change:", e);
-          refundWarning = `Days updated, but the £${(want / 100).toFixed(2)} refund failed. Issue it from Cancel / Refund.`;
-          if (modId) {
-            await supabase
-              .from("booking_modifications")
-              .update({ direction: "none", reason: "Days updated; refund failed — issue manually (Cancel / Refund)" })
-              .eq("id", modId as string);
-          }
-        }
-      }
+    if (delta < 0) {
+      const r = await issueRefundAfterModification(supabase, {
+        bookingId,
+        paymentIntentId: booking.stripe_payment_intent_id,
+        modId: (modId as string) ?? null,
+        wantPence: -delta,
+        keyPrefix: "editdays-refund",
+        reason: "reduce_days",
+        subject: "Days updated",
+      });
+      refundedPence = r.refundedPence;
+      refundWarning = r.warning;
     }
 
     try {
