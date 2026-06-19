@@ -20,6 +20,10 @@ import {
   FileText,
   Trees,
   PawPrint,
+  Pencil,
+  History,
+  Minus,
+  Plus,
 } from "lucide-react";
 
 interface EmergencyContact {
@@ -105,10 +109,26 @@ interface PendingUpcharge {
   createdAt: string;
 }
 
+interface Modification {
+  id: string;
+  type: string;
+  direction: string;
+  status: string;
+  oldTotalPence: number | null;
+  newTotalPence: number | null;
+  deltaPence: number | null;
+  refundAmountPence: number | null;
+  reason: string | null;
+  adminActor: string | null;
+  createdAt: string;
+  appliedAt: string | null;
+}
+
 interface BookingDetailProps {
   booking: BookingDetailData;
   availableClubs: AvailableClub[];
   pendingUpcharges: PendingUpcharge[];
+  modifications: Modification[];
 }
 
 function formatDate(dateString: string): string {
@@ -166,7 +186,39 @@ function getStatusBadgeStyles(status: string): { backgroundColor: string; color:
   }
 }
 
-export function BookingDetail({ booking, availableClubs, pendingUpcharges }: BookingDetailProps) {
+function modTypeLabel(type: string): string {
+  switch (type) {
+    case "cancel": return "Cancelled";
+    case "refund": return "Full refund";
+    case "partial_refund": return "Partial refund";
+    case "reschedule": return "Rescheduled";
+    case "add_days": return "Added days";
+    case "reduce_days": return "Removed days";
+    case "change_day": return "Changed a day";
+    case "edit": return "Edited booking";
+    case "out_of_band_refund": return "Refund (Stripe)";
+    case "dispute": return "Payment dispute";
+    case "seating_failed": return "Seating failed";
+    default: return type.replace(/_/g, " ");
+  }
+}
+
+function modStatusStyles(status: string): { backgroundColor: string; color: string } {
+  switch (status) {
+    case "applied":
+    case "refunded":
+      return { backgroundColor: "rgba(122, 124, 74, 0.12)", color: "var(--craigies-olive)" };
+    case "pending":
+      return { backgroundColor: "#FEF3C7", color: "#92400E" };
+    case "failed":
+    case "expired":
+      return { backgroundColor: "#FEE2E2", color: "#B91C1C" };
+    default:
+      return { backgroundColor: "#F3F4F6", color: "#6B7280" };
+  }
+}
+
+export function BookingDetail({ booking, availableClubs, pendingUpcharges, modifications }: BookingDetailProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [changeDayTarget, setChangeDayTarget] = useState<BookedDay | null>(null);
@@ -578,6 +630,223 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges }: Boo
     }
   };
 
+  // ---- Unified "Edit booking" modal ----
+  type EditDay = {
+    id: string;
+    date: string;
+    morningCapacity?: number;
+    afternoonCapacity?: number;
+    morningBooked?: number;
+    afternoonBooked?: number;
+    isCurrent: boolean;
+    hasCapacityInfo: boolean;
+  };
+  type EditPreview = {
+    oldTotalPence: number;
+    newTotalPence: number;
+    deltaPence: number;
+    direction: string;
+    refundablePence: number | null;
+    optionName: string | null;
+    dayCount: number;
+    numChildren: number;
+    weekChanged: boolean;
+    childrenChanged: boolean;
+    chargeUnsupported: boolean;
+  };
+  const [showEdit, setShowEdit] = useState(false);
+  const [edClubId, setEdClubId] = useState(booking.clubId);
+  const [edDays, setEdDays] = useState<EditDay[]>([]);
+  const [edLoadingDays, setEdLoadingDays] = useState(false);
+  const [edSelected, setEdSelected] = useState<string[]>([]);
+  const [edChildren, setEdChildren] = useState(booking.numChildren);
+  const [edReason, setEdReason] = useState("");
+  const [edPreview, setEdPreview] = useState<EditPreview | null>(null);
+  const [edLoadingPreview, setEdLoadingPreview] = useState(false);
+  const [edConfirm, setEdConfirm] = useState("");
+  const [edError, setEdError] = useState<string | null>(null);
+  const [edWarning, setEdWarning] = useState<string | null>(null);
+  const [edSentUrl, setEdSentUrl] = useState<string | null>(null);
+  const edSubmitting = useRef(false);
+
+  // Build the day list for a club: its available days (with capacity) plus — on the
+  // CURRENT week — any already-booked days the availability query omits (e.g. a
+  // full-week booking's days flagged unavailable for standalone booking), so they
+  // remain visible and keepable rather than being silently dropped.
+  const buildEditDays = (clubId: string, availDays: AvailableDay[]): EditDay[] => {
+    const isCurrentClub = clubId === booking.clubId;
+    const list: EditDay[] = availDays.map((d) => ({
+      id: d.id,
+      date: d.date,
+      morningCapacity: d.morningCapacity,
+      afternoonCapacity: d.afternoonCapacity,
+      morningBooked: d.morningBooked,
+      afternoonBooked: d.afternoonBooked,
+      isCurrent: isCurrentClub && currentDayIds.includes(d.id),
+      hasCapacityInfo: true,
+    }));
+    if (isCurrentClub) {
+      const seen = new Set(list.map((d) => d.id));
+      for (const bd of booking.bookedDays) {
+        if (!seen.has(bd.clubDayId)) {
+          list.push({ id: bd.clubDayId, date: bd.date, isCurrent: true, hasCapacityInfo: false });
+        }
+      }
+    }
+    return list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
+  const loadEdDays = async (clubId: string) => {
+    setEdLoadingDays(true);
+    setEdError(null);
+    setEdDays([]);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/change-day?clubId=${clubId}`);
+      const data = await res.json();
+      if (res.ok) {
+        setEdDays(buildEditDays(clubId, data.days || []));
+        setEdSelected(clubId === booking.clubId ? [...currentDayIds] : []);
+      } else {
+        setEdError(data.error || "Couldn't load days for that week.");
+      }
+    } catch {
+      setEdError("Couldn't load days for that week.");
+    } finally {
+      setEdLoadingDays(false);
+    }
+  };
+
+  const openEdit = () => {
+    setShowEdit(true);
+    setEdClubId(booking.clubId);
+    setEdChildren(booking.numChildren);
+    setEdSelected([]);
+    setEdPreview(null);
+    setEdConfirm("");
+    setEdReason("");
+    setEdError(null);
+    setEdWarning(null);
+    setEdSentUrl(null);
+    loadEdDays(booking.clubId);
+  };
+
+  const changeEdClub = (clubId: string) => {
+    setEdClubId(clubId);
+    setEdPreview(null);
+    setEdConfirm("");
+    loadEdDays(clubId);
+  };
+
+  const toggleEdDay = (id: string) => {
+    setEdPreview(null);
+    setEdConfirm("");
+    setEdSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const adjustEdChildren = (delta: number) => {
+    setEdPreview(null);
+    setEdConfirm("");
+    setEdChildren((n) => Math.max(1, n + delta));
+  };
+
+  // Server-authoritative preview whenever the proposed state changes.
+  useEffect(() => {
+    if (!showEdit || edSelected.length < 1) {
+      setEdPreview(null);
+      return;
+    }
+    let cancelled = false;
+    setEdLoadingPreview(true);
+    setEdError(null);
+    fetch(`/api/admin/bookings/${booking.id}/edit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ newClubId: edClubId, clubDayIds: edSelected, numChildren: edChildren, preview: true }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
+        if (cancelled) return;
+        if (ok) setEdPreview(d);
+        else {
+          setEdPreview(null);
+          setEdError(d.error || "Couldn't price this change.");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setEdError("Couldn't price this change.");
+      })
+      .finally(() => {
+        if (!cancelled) setEdLoadingPreview(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showEdit, edClubId, edSelected, edChildren, booking.id]);
+
+  const edDaySetChanged =
+    JSON.stringify([...edSelected].sort()) !== JSON.stringify([...currentDayIds].sort());
+  const edHasChange =
+    !!edPreview && (edPreview.weekChanged || edPreview.childrenChanged || edDaySetChanged);
+  const edPlannedRefundPence =
+    edPreview && edPreview.direction === "refund"
+      ? Math.min(-edPreview.deltaPence, edPreview.refundablePence ?? 0)
+      : 0;
+  const edRefundUnknown =
+    !!edPreview && edPreview.direction === "refund" && edPreview.refundablePence == null;
+  const edIsCharge = !!edPreview && edPreview.direction === "charge" && !edPreview.chargeUnsupported;
+  const edConfirmTarget = edPlannedRefundPence > 0 ? `£${(edPlannedRefundPence / 100).toFixed(2)}` : booking.ref;
+  const edConfirmOk = edConfirm.trim().toUpperCase() === edConfirmTarget.trim().toUpperCase();
+  const edCanSubmit =
+    !!edPreview &&
+    edHasChange &&
+    !edPreview.chargeUnsupported &&
+    !edLoadingPreview &&
+    !isProcessing &&
+    // Charge sends a payment link (no money moves now) → no type-to-confirm, like Add Days.
+    (edIsCharge ? true : edConfirmOk);
+
+  const handleEditSubmit = async () => {
+    if (edSubmitting.current || !edPreview) return;
+    edSubmitting.current = true;
+    setIsProcessing(true);
+    setEdError(null);
+    setEdWarning(null);
+    try {
+      const res = await fetch(`/api/admin/bookings/${booking.id}/edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          newClubId: edClubId,
+          clubDayIds: edSelected,
+          numChildren: edChildren,
+          reason: edReason.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEdError(data.error || "Couldn't apply the change.");
+        return;
+      }
+      if (data.upcharge && data.checkoutUrl) {
+        setEdSentUrl(data.checkoutUrl); // keep modal open to show the link
+        router.refresh();
+        return;
+      }
+      if (data.warning) {
+        setEdWarning(data.warning); // keep modal open to surface it
+        router.refresh();
+        return;
+      }
+      setShowEdit(false);
+      router.refresh();
+    } catch {
+      setEdError("Couldn't apply the change.");
+    } finally {
+      setIsProcessing(false);
+      edSubmitting.current = false;
+    }
+  };
+
   const openManageModal = async () => {
     setShowManageModal(true);
     setManageAction(booking.status === "cancelled" ? "cancel_refund" : "cancel");
@@ -879,6 +1148,19 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges }: Boo
           >
             <RefreshCw className="h-5 w-5" />
             Cancel / Refund
+          </button>
+        )}
+        {(booking.status === "paid" || booking.status === "complete") && pendingUpcharges.length === 0 && (
+          <button
+            onClick={openEdit}
+            className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor: "var(--craigies-burnt-orange)",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
+            <Pencil className="h-5 w-5" />
+            Edit booking
           </button>
         )}
         {(booking.status === "paid" || booking.status === "complete") && availableClubs.length > 0 && (
@@ -1352,6 +1634,79 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges }: Boo
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Booking History (audit trail) */}
+      <div className="rounded-2xl bg-white p-6 shadow-md">
+        <h3
+          className="flex items-center gap-2 text-lg font-bold"
+          style={{ fontFamily: "'Playfair Display', serif", color: "var(--craigies-dark-olive)" }}
+        >
+          <History className="h-5 w-5" style={{ color: "var(--craigies-olive)" }} />
+          Booking History
+        </h3>
+        {modifications.length === 0 ? (
+          <p className="mt-4 text-sm" style={{ color: "#6B7280" }}>
+            No changes recorded for this booking yet.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-2">
+            {modifications.map((m) => {
+              const refunded = m.refundAmountPence && m.refundAmountPence > 0 ? m.refundAmountPence : 0;
+              const charged = m.direction === "charge" && m.deltaPence ? m.deltaPence : 0;
+              return (
+                <div
+                  key={m.id}
+                  className="flex flex-wrap items-start justify-between gap-2 rounded-lg px-4 py-3"
+                  style={{ backgroundColor: "rgba(122, 124, 74, 0.05)" }}
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
+                        {modTypeLabel(m.type)}
+                      </span>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase"
+                        style={modStatusStyles(m.status)}
+                      >
+                        {m.status}
+                      </span>
+                    </div>
+                    <p className="text-xs" style={{ color: "#6B7280" }}>
+                      {formatDateTime(m.createdAt)}
+                      {m.adminActor ? ` · ${m.adminActor}` : ""}
+                    </p>
+                    {m.reason && (
+                      <p className="mt-1 text-xs italic" style={{ color: "#6B7280" }}>
+                        {m.reason}
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-right text-sm whitespace-nowrap">
+                    {refunded > 0 ? (
+                      <span className="font-semibold" style={{ color: "var(--craigies-olive)" }}>
+                        −£{(refunded / 100).toFixed(2)}
+                      </span>
+                    ) : charged > 0 ? (
+                      <span className="font-semibold" style={{ color: "var(--craigies-burnt-orange)" }}>
+                        +£{(charged / 100).toFixed(2)}
+                        {m.status === "pending" ? " (awaiting)" : ""}
+                      </span>
+                    ) : m.oldTotalPence != null &&
+                      m.newTotalPence != null &&
+                      m.oldTotalPence !== m.newTotalPence ? (
+                      <span style={{ color: "var(--craigies-dark-olive)" }}>
+                        £{(m.oldTotalPence / 100).toFixed(2)} → £{(m.newTotalPence / 100).toFixed(2)}
+                      </span>
+                    ) : (
+                      <span style={{ color: "#9CA3AF" }}>—</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -2078,6 +2433,265 @@ export function BookingDetail({ booking, availableClubs, pendingUpcharges }: Boo
                 {isProcessing ? "Changing..." : "Confirm Change"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Booking Modal (unified) */}
+      {showEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <h3
+              className="text-xl font-bold"
+              style={{ fontFamily: "'Playfair Display', serif", color: "var(--craigies-dark-olive)" }}
+            >
+              Edit {booking.ref}
+            </h3>
+
+            {edSentUrl ? (
+              <div className="mt-4">
+                <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  ✅ Payment request sent — we&apos;ve emailed the parent a secure payment link. The change is applied
+                  automatically once they pay.
+                </p>
+                <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "#F5F4ED" }}>
+                  <p className="text-xs" style={{ color: "#6B7280" }}>Payment link (you can copy and share it too):</p>
+                  <a href={edSentUrl} target="_blank" rel="noreferrer" className="text-xs break-all" style={{ color: "var(--craigies-olive)" }}>
+                    {edSentUrl}
+                  </a>
+                </div>
+                <button
+                  onClick={() => { setShowEdit(false); router.refresh(); }}
+                  className="mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : edWarning ? (
+              <div className="mt-4">
+                <p className="rounded-md p-3 text-sm font-medium" style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}>
+                  {edWarning}
+                </p>
+                <button
+                  onClick={() => { setShowEdit(false); router.refresh(); }}
+                  className="mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--craigies-olive)", fontFamily: "'Playfair Display', serif" }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="mt-1 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Adjust the week, days, and number of children. The exact price change is shown before you confirm.
+                </p>
+
+                {/* Week */}
+                <label className="mt-4 block text-xs font-medium" style={{ color: "var(--craigies-dark-olive)" }}>Week</label>
+                <select
+                  value={edClubId}
+                  onChange={(e) => changeEdClub(e.target.value)}
+                  className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                  style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                >
+                  {!availableClubs.some((c) => c.id === booking.clubId) && (
+                    <option value={booking.clubId}>{booking.club} (current)</option>
+                  )}
+                  {availableClubs.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}{c.id === booking.clubId ? " (current)" : ""}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Children */}
+                <div className="mt-4 flex items-center justify-between">
+                  <label className="text-xs font-medium" style={{ color: "var(--craigies-dark-olive)" }}>Number of children</label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => adjustEdChildren(-1)}
+                      disabled={edChildren <= 1}
+                      className="flex h-8 w-8 items-center justify-center rounded-md border transition-opacity hover:opacity-80 disabled:opacity-40"
+                      style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                      aria-label="Decrease children"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="w-6 text-center font-medium" style={{ color: "var(--craigies-dark-olive)" }}>{edChildren}</span>
+                    <button
+                      onClick={() => adjustEdChildren(1)}
+                      className="flex h-8 w-8 items-center justify-center rounded-md border transition-opacity hover:opacity-80"
+                      style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                      aria-label="Increase children"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Days */}
+                <label className="mt-4 block text-xs font-medium" style={{ color: "var(--craigies-dark-olive)" }}>
+                  Days ({edSelected.length} selected)
+                </label>
+                {edLoadingDays ? (
+                  <div className="mt-2 flex justify-center py-6">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: "var(--craigies-olive)", borderTopColor: "transparent" }} />
+                  </div>
+                ) : (
+                  <div className="mt-1 max-h-44 space-y-2 overflow-y-auto">
+                    {edDays.length === 0 ? (
+                      <p className="text-sm text-center" style={{ color: "var(--craigies-dark-olive)" }}>No days available for this week.</p>
+                    ) : (
+                      edDays.map((day) => {
+                        const dayName = new Date(day.date).toLocaleDateString("en-GB", { weekday: "long" });
+                        const isSel = edSelected.includes(day.id);
+                        const morningRemaining = day.hasCapacityInfo ? (day.morningCapacity ?? 0) - (day.morningBooked ?? 0) : 0;
+                        const afternoonRemaining = day.hasCapacityInfo ? (day.afternoonCapacity ?? 0) - (day.afternoonBooked ?? 0) : 0;
+                        const isFull = day.hasCapacityInfo && morningRemaining <= 0 && afternoonRemaining <= 0;
+                        const disabled = isFull && !isSel && !day.isCurrent;
+                        return (
+                          <button
+                            key={day.id}
+                            onClick={() => !disabled && toggleEdDay(day.id)}
+                            disabled={disabled}
+                            className={`w-full rounded-lg px-4 py-3 text-left transition-all ${disabled ? "cursor-not-allowed opacity-50" : "hover:opacity-80"}`}
+                            style={{
+                              backgroundColor: isSel ? "rgba(212, 132, 62, 0.15)" : "rgba(122, 124, 74, 0.05)",
+                              outline: isSel ? "2px solid var(--craigies-burnt-orange)" : undefined,
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="font-medium" style={{ color: "var(--craigies-dark-olive)" }}>{dayName}</span>
+                                <span className="ml-2 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>{formatDate(day.date)}</span>
+                              </div>
+                              <div className="text-right text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                                {!day.hasCapacityInfo ? (
+                                  <span style={{ color: "#6B7280" }}>currently booked</span>
+                                ) : isFull ? (
+                                  <span className="font-medium text-red-500">Full</span>
+                                ) : (
+                                  <span>{morningRemaining} AM / {afternoonRemaining} PM</span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+
+                {/* Preview */}
+                {edLoadingPreview && (
+                  <p className="mt-3 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>Pricing…</p>
+                )}
+                {edPreview && edSelected.length > 0 && (
+                  <div className="mt-4 rounded-lg p-3" style={{ backgroundColor: "#F5F4ED" }}>
+                    {edPreview.weekChanged && (
+                      <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                        Week → <strong>{(availableClubs.find((c) => c.id === edClubId)?.name) || booking.club}</strong>
+                      </p>
+                    )}
+                    <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                      Days <strong>{currentDayIds.length}</strong> → <strong>{edPreview.dayCount}</strong>
+                    </p>
+                    {edPreview.childrenChanged && (
+                      <p className="text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                        Children <strong>{booking.numChildren}</strong> → <strong>{edPreview.numChildren}</strong>
+                      </p>
+                    )}
+                    <p className="mt-1 text-sm" style={{ color: "var(--craigies-dark-olive)" }}>
+                      Was <strong>£{(edPreview.oldTotalPence / 100).toFixed(2)}</strong> → now{" "}
+                      <strong>£{(edPreview.newTotalPence / 100).toFixed(2)}</strong>
+                    </p>
+                    {edPreview.chargeUnsupported ? (
+                      <p className="mt-1 text-sm font-medium" style={{ color: "#D97706" }}>
+                        This increases the price by £{(edPreview.deltaPence / 100).toFixed(2)}. Collecting extra for a
+                        week or children change isn&apos;t available yet — keep the same week and number of children and
+                        add days only, or apply the change in steps.
+                      </p>
+                    ) : edPreview.direction === "refund" ? (
+                      edRefundUnknown ? (
+                        <p className="mt-1 text-sm font-medium" style={{ color: "#D97706" }}>
+                          Couldn&apos;t confirm the refundable amount with Stripe — a refund of up to £
+                          {((-edPreview.deltaPence) / 100).toFixed(2)} will be attempted.
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-sm font-medium" style={{ color: "var(--craigies-olive)" }}>
+                          Refund £{(edPlannedRefundPence / 100).toFixed(2)}
+                        </p>
+                      )
+                    ) : edPreview.direction === "charge" ? (
+                      <p className="mt-1 text-sm font-medium" style={{ color: "var(--craigies-burnt-orange)" }}>
+                        Additional payment £{(edPreview.deltaPence / 100).toFixed(2)} — the parent is emailed a payment
+                        link; the change applies once they pay.
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-sm" style={{ color: "#6B7280" }}>No change to payment.</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Reason */}
+                <input
+                  type="text"
+                  value={edReason}
+                  onChange={(e) => setEdReason(e.target.value)}
+                  placeholder="Reason (optional, shown to parent if entered)"
+                  className="mt-3 w-full rounded-md border px-3 py-2 text-sm"
+                  style={{ borderColor: "#D1D5DB" }}
+                />
+
+                {/* Type-to-confirm (refund / no-change only; a charge just sends a link) */}
+                {edPreview && edHasChange && !edPreview.chargeUnsupported && !edIsCharge && (
+                  <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: "rgba(212, 132, 62, 0.08)" }}>
+                    <p className="text-xs" style={{ color: "var(--craigies-dark-olive)" }}>
+                      {edPlannedRefundPence > 0
+                        ? <>This will refund <strong>£{(edPlannedRefundPence / 100).toFixed(2)}</strong>. Type <strong>{edConfirmTarget}</strong> to confirm.</>
+                        : <>Type <strong>{edConfirmTarget}</strong> to confirm.</>}
+                    </p>
+                    <input
+                      type="text"
+                      value={edConfirm}
+                      onChange={(e) => setEdConfirm(e.target.value)}
+                      placeholder={edConfirmTarget}
+                      className="mt-2 w-full rounded-md border px-3 py-2 text-sm"
+                      style={{ borderColor: "#D1D5DB" }}
+                    />
+                  </div>
+                )}
+
+                {edError && (
+                  <p className="mt-3 text-xs font-medium" style={{ color: "#DC2626" }}>{edError}</p>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => setShowEdit(false)}
+                    className="flex-1 rounded-lg border-2 px-4 py-2.5 font-semibold transition-opacity hover:opacity-80"
+                    style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleEditSubmit}
+                    disabled={!edCanSubmit}
+                    className="flex-1 rounded-lg px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: "var(--craigies-burnt-orange)", fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {isProcessing
+                      ? "Working…"
+                      : edIsCharge
+                        ? `Send payment request (£${((edPreview?.deltaPence ?? 0) / 100).toFixed(2)})`
+                        : edPlannedRefundPence > 0
+                          ? `Apply & refund £${(edPlannedRefundPence / 100).toFixed(2)}`
+                          : "Apply change"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

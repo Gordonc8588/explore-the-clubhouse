@@ -79,6 +79,30 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
     })
   );
 
+  // Full modification history (audit trail) for this booking.
+  const { data: modRows } = await supabase
+    .from("booking_modifications")
+    .select(
+      "id, modification_type, direction, status, old_total_pence, new_total_pence, delta_pence, refund_amount_pence, reason, admin_actor, created_at, applied_at"
+    )
+    .eq("booking_id", id)
+    .order("created_at", { ascending: false });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const modifications = (modRows || []).map((m: any) => ({
+    id: m.id,
+    type: m.modification_type as string,
+    direction: m.direction as string,
+    status: m.status as string,
+    oldTotalPence: m.old_total_pence as number | null,
+    newTotalPence: m.new_total_pence as number | null,
+    deltaPence: m.delta_pence as number | null,
+    refundAmountPence: m.refund_amount_pence as number | null,
+    reason: m.reason as string | null,
+    adminActor: m.admin_actor as string | null,
+    createdAt: m.created_at as string,
+    appliedAt: m.applied_at as string | null,
+  }));
+
   // Transform booking data for the component
   const bookedDays = booking.booking_days?.map((bd: any) => ({
     bookingDayId: bd.id,
@@ -183,6 +207,7 @@ export default async function BookingDetailPage({ params }: BookingPageProps) {
       booking={transformedBooking}
       availableClubs={availableClubs}
       pendingUpcharges={pendingUpcharges}
+      modifications={modifications}
     />
   );
 }
