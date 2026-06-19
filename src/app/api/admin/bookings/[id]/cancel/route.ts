@@ -326,7 +326,7 @@ export async function POST(
           const amt = ups.refundablePence ?? 0;
           if (ups.ok && amt > 0) {
             const r = await stripe.refunds.create(
-              { payment_intent: up.stripe_payment_intent_id, amount: amt },
+              { payment_intent: up.stripe_payment_intent_id, amount: amt, metadata: { bookingId } },
               { idempotencyKey: `cancel-upcharge-refund-${up.stripe_payment_intent_id}` }
             );
             upchargeRefundedPence += amt;

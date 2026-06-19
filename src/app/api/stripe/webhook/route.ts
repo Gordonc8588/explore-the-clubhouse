@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { sendBookingConfirmation, sendAdminNotification, sendBookingModifiedEmail, type SendEmailResult } from '@/lib/email';
+import { sendBookingConfirmation, sendAdminNotification, sendBookingModifiedEmail, sendSeatingFailureAlert, sendDisputeAlert, type SendEmailResult } from '@/lib/email';
 import { computeEditPricing } from '@/lib/booking-modify';
 import { trackPurchaseConversion } from '@/lib/meta-conversions';
+import type { Booking, Club } from '@/types/database';
 
 interface SessionMetadata {
   bookingId: string;
@@ -66,6 +67,24 @@ export async function POST(request: NextRequest) {
         } else {
           await handleCheckoutSessionCompleted(session);
         }
+        break;
+      }
+      // Out-of-band refund sync: a refund issued in the Stripe Dashboard (or a bank
+      // reversal) reconciles back into the booking ledger + status. Both events route
+      // through the same idempotent reconcile (it reads Stripe's authoritative
+      // cumulative amount, so redelivery / in-app overlap can't double-count).
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        await reconcileBookingRefunds(charge.payment_intent as string | null);
+        break;
+      }
+      case 'refund.updated': {
+        const refund = event.data.object as Stripe.Refund;
+        await reconcileBookingRefunds(refund.payment_intent as string | null);
+        break;
+      }
+      case 'charge.dispute.created': {
+        await handleDisputeCreated(event.data.object as Stripe.Dispute);
         break;
       }
       default:
@@ -326,58 +345,51 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
 
   const timeSlot = bookingOption?.time_slot || 'full_day';
 
-  // 3. Create booking_days records
+  // 3. Seat the booking — atomically + capacity-checked via the locked RPC, so a
+  // concurrent paid checkout for the last seat can't overbook a day (staff ratios).
+  // The RPC is idempotent (no-op if the booking already has days), which also closes
+  // the latent double-insert-on-redelivery bug.
   const selectedDatesArray: string[] = JSON.parse(selectedDates || '[]');
+  let daysToSeat: { club_day_id: string; time_slot: string }[] = [];
 
   if (selectedDatesArray.length > 0) {
-    // Get club_day IDs for the selected dates
     const { data: clubDays } = await supabase
       .from('club_days')
-      .select('id, date')
+      .select('id')
       .eq('club_id', clubId)
       .in('date', selectedDatesArray);
-
-    if (clubDays && clubDays.length > 0) {
-      const bookingDaysToInsert = clubDays.map((day) => ({
-        booking_id: bookingId,
-        club_day_id: day.id,
-        time_slot: timeSlot,
-      }));
-
-      const { error: daysError } = await supabase
-        .from('booking_days')
-        .insert(bookingDaysToInsert);
-
-      if (daysError) {
-        console.error(`[Webhook] Failed to create booking days:`, daysError);
-      } else {
-        console.log(`[Webhook] Created ${bookingDaysToInsert.length} booking day records`);
-      }
-    }
+    daysToSeat = (clubDays || []).map((day) => ({ club_day_id: day.id, time_slot: timeSlot }));
   } else if (bookingOption?.option_type === 'full_week') {
-    // For full week, insert ALL club days (including days marked unavailable for standalone booking)
+    // Full week books ALL club days (including days marked unavailable for standalone booking).
     const { data: allClubDays } = await supabase
       .from('club_days')
       .select('id')
       .eq('club_id', clubId);
+    daysToSeat = (allClubDays || []).map((day) => ({ club_day_id: day.id, time_slot: timeSlot }));
+  }
 
-    if (allClubDays && allClubDays.length > 0) {
-      const bookingDaysToInsert = allClubDays.map((day) => ({
-        booking_id: bookingId,
-        club_day_id: day.id,
-        time_slot: timeSlot,
-      }));
+  if (daysToSeat.length > 0) {
+    const { error: seatError } = await supabase.rpc('create_initial_booking_days', {
+      p_booking_id: bookingId,
+      p_club_id: clubId,
+      p_days: daysToSeat,
+      p_num_children: booking.num_children,
+    });
 
-      const { error: daysError } = await supabase
-        .from('booking_days')
-        .insert(bookingDaysToInsert);
-
-      if (daysError) {
-        console.error(`[Webhook] Failed to create booking days:`, daysError);
-      } else {
-        console.log(`[Webhook] Created ${bookingDaysToInsert.length} booking day records for full week`);
+    if (seatError) {
+      // SQLSTATE 23514 (check_violation) = the day filled up in the pay window. Owner
+      // policy: refuse + alert admin — leave the booking paid-but-unseated for manual
+      // resolution and do NOT send the parent a confirmation with no days.
+      if (seatError.code === '23514') {
+        console.error(`[Webhook] Booking ${bookingId} paid but could not be seated: ${seatError.message}`);
+        await handleSeatingFailure(supabase, booking, clubId, seatError.message);
+        return;
       }
+      // Transient/unexpected DB error — throw so Stripe redelivers and retries.
+      console.error(`[Webhook] create_initial_booking_days failed for ${bookingId}:`, seatError);
+      throw new Error(`Failed to seat booking ${bookingId}: ${seatError.message}`);
     }
+    console.log(`[Webhook] Seated booking ${bookingId} with ${daysToSeat.length} day(s)`);
   }
 
   // 3b. Query the actual booked dates for emails
@@ -485,4 +497,290 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
   });
 
   console.log(`[Webhook] Successfully processed checkout.session.completed for booking ${bookingId}`);
+}
+
+/**
+ * The public-checkout capacity guard refused a PAID booking (a day filled up in the
+ * pay window). Owner policy: refuse + alert admin. The booking is left paid-but-
+ * unseated for manual resolution (add capacity & seat, or refund via Cancel/Refund).
+ * Writes a durable audit row and alerts the admin at most once per booking.
+ */
+async function handleSeatingFailure(
+  supabase: ReturnType<typeof createAdminClient>,
+  booking: Booking,
+  clubId: string,
+  detail: string,
+): Promise<void> {
+  // Alert once: fast-path SELECT, then rely on the one_seating_failed_per_booking
+  // partial unique index to make it atomic under concurrent Stripe redelivery.
+  const { data: existing } = await supabase
+    .from('booking_modifications')
+    .select('id')
+    .eq('booking_id', booking.id)
+    .eq('modification_type', 'seating_failed')
+    .limit(1)
+    .maybeSingle();
+  if (existing) {
+    console.log(`[Webhook] seating failure for booking ${booking.id} already recorded — skipping duplicate alert`);
+    return;
+  }
+
+  const { error: insErr } = await supabase.from('booking_modifications').insert({
+    booking_id: booking.id,
+    admin_actor: 'webhook',
+    modification_type: 'seating_failed',
+    direction: 'none',
+    status: 'failed',
+    reason: `Paid but not seated: ${detail}`,
+  });
+  // 23505 = a concurrent delivery already recorded (and alerted for) this failure.
+  if (insErr?.code === '23505') {
+    console.log(`[Webhook] seating failure for booking ${booking.id} recorded concurrently — skipping duplicate alert`);
+    return;
+  }
+  if (insErr) {
+    // Audit row failed for another reason — still alert (better a stray email than a silent miss).
+    console.error(`[Webhook] failed to record seating failure for booking ${booking.id}:`, insErr);
+  }
+
+  const { data: club } = await supabase.from('clubs').select('*').eq('id', clubId).single();
+  await sendWithRetry(
+    () => sendSeatingFailureAlert(booking, (club as Club) ?? null, detail),
+    'seating failure alert',
+    'admin',
+  );
+}
+
+/**
+ * Reconcile a booking's refund ledger + status from Stripe's authoritative state.
+ * Triggered by charge.refunded / refund.updated so refunds issued OUTSIDE the app
+ * (Stripe Dashboard, bank reversal) sync back. Idempotent: it reads Stripe's
+ * cumulative amount_refunded (absolute, not a delta) across EVERY payment intent on
+ * the booking, so redelivery or overlap with an in-app refund can't double-count.
+ */
+async function reconcileBookingRefunds(paymentIntentId: string | null): Promise<void> {
+  if (!stripe || !paymentIntentId) return;
+  const supabase = createAdminClient();
+
+  // Map the intent → booking (booking_payments covers original + upcharge intents;
+  // fall back to the booking's own original intent for pre-ledger bookings).
+  let bookingId: string | null = null;
+  const { data: pay } = await supabase
+    .from('booking_payments')
+    .select('booking_id')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .maybeSingle();
+  if (pay) {
+    bookingId = pay.booking_id;
+  } else {
+    const { data: b } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('stripe_payment_intent_id', paymentIntentId)
+      .maybeSingle();
+    if (b) bookingId = b.id;
+  }
+  if (!bookingId) {
+    console.warn(`[Webhook] refund for intent ${paymentIntentId} matched no booking — ignoring`);
+    return;
+  }
+
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('id, status, stripe_payment_intent_id')
+    .eq('id', bookingId)
+    .single();
+  if (!booking) return;
+
+  // Every payment intent on this booking (ledger rows + the booking's own original).
+  // This DB read DEFINES the set we reconcile over — if it fails, the intent set is
+  // incomplete and any status/ledger write would be from a partial view (same
+  // corruption class as a failed Stripe read), so throw to force a redelivery.
+  const { data: pays, error: paysErr } = await supabase
+    .from('booking_payments')
+    .select('stripe_payment_intent_id')
+    .eq('booking_id', bookingId);
+  if (paysErr) {
+    throw new Error(`reconcile: failed to load booking_payments for ${bookingId} — retrying on redelivery`);
+  }
+  const intentIds = new Set<string>();
+  for (const p of pays || []) if (p.stripe_payment_intent_id) intentIds.add(p.stripe_payment_intent_id);
+  if (booking.stripe_payment_intent_id) intentIds.add(booking.stripe_payment_intent_id);
+
+  let totalCaptured = 0;
+  let totalRefunded = 0;
+  let readFailed = false;
+  // Genuinely OUT-OF-BAND refunds only: in-app refunds always carry our metadata
+  // (bookingId/modificationId), so we exclude them here — they're audited by the
+  // route that issued them, and matching on metadata closes the window where an
+  // in-app refund's stripe_refund_id stamp hasn't landed yet.
+  const outOfBandRefunds: { id: string; amount: number; intent: string }[] = [];
+  for (const intentId of intentIds) {
+    try {
+      const pi = await stripe.paymentIntents.retrieve(intentId);
+      if (pi.status !== 'succeeded' || !pi.latest_charge) continue;
+      const charge = await stripe.charges.retrieve(pi.latest_charge as string);
+      totalCaptured += charge.amount_captured;
+      totalRefunded += charge.amount_refunded;
+      const refunds = await stripe.refunds.list({ charge: charge.id, limit: 100 });
+      for (const r of refunds.data) {
+        const issuedByApp = !!(r.metadata?.bookingId || r.metadata?.modificationId);
+        if (r.status === 'succeeded' && !issuedByApp) {
+          outOfBandRefunds.push({ id: r.id, amount: r.amount, intent: intentId });
+        }
+      }
+    } catch (e) {
+      readFailed = true;
+      console.error(`[Webhook] reconcile: failed to read intent ${intentId} for booking ${bookingId}:`, e);
+    }
+  }
+
+  // Money decisions require a COMPLETE view. If ANY intent read failed, the totals are
+  // partial — never write status/ledger from a partial sum (it would corrupt
+  // amount_refunded_pence or wrongly flip a multi-intent booking to 'refunded'). Throw
+  // so the webhook returns non-200 and Stripe redelivers/retries once the transient clears.
+  if (readFailed) {
+    throw new Error(`reconcile: incomplete Stripe read for booking ${bookingId} — retrying on redelivery`);
+  }
+
+  // Write Stripe's absolute cumulative back to the ledger (idempotent).
+  const updates: Record<string, unknown> = {
+    amount_refunded_pence: totalRefunded,
+    updated_at: new Date().toISOString(),
+  };
+  // A FULL refund (every captured penny returned) flips an ACTIVE booking to refunded.
+  // Partial refunds leave the status untouched (still active for the remaining days).
+  if (
+    totalCaptured > 0 &&
+    totalRefunded >= totalCaptured &&
+    (booking.status === 'paid' || booking.status === 'complete')
+  ) {
+    updates.status = 'refunded';
+  }
+  await supabase.from('bookings').update(updates).eq('id', bookingId);
+
+  // Audit each genuinely out-of-band refund once. The uniq_booking_mod_refund_id
+  // partial index makes this race-proof: a concurrent reconcile (charge.refunded +
+  // refund.updated both fire, and redelivery is at-least-once) that loses the insert
+  // gets a unique violation (23505), which we treat as already-recorded.
+  const { data: known } = await supabase
+    .from('booking_modifications')
+    .select('stripe_refund_id')
+    .eq('booking_id', bookingId)
+    .not('stripe_refund_id', 'is', null);
+  const knownIds = new Set((known || []).map((k) => k.stripe_refund_id as string));
+  for (const r of outOfBandRefunds) {
+    if (knownIds.has(r.id)) continue;
+    knownIds.add(r.id); // guard against same-batch duplicates
+    const { error: insErr } = await supabase.from('booking_modifications').insert({
+      booking_id: bookingId,
+      admin_actor: 'stripe',
+      modification_type: 'out_of_band_refund',
+      direction: 'refund',
+      status: 'applied',
+      refund_amount_pence: r.amount,
+      reason: 'Refund issued outside the app (Stripe Dashboard or bank reversal)',
+      stripe_payment_intent_id: r.intent,
+      stripe_refund_id: r.id,
+      applied_at: new Date().toISOString(),
+    });
+    if (insErr) {
+      if (insErr.code === '23505') {
+        console.log(`[Webhook] out-of-band refund ${r.id} recorded concurrently — skipping duplicate`);
+      } else {
+        console.error(`[Webhook] failed to record out-of-band refund ${r.id} for booking ${bookingId}:`, insErr);
+      }
+      continue;
+    }
+    console.log(`[Webhook] Recorded out-of-band refund ${r.id} (${r.amount}p) for booking ${bookingId}`);
+  }
+}
+
+/**
+ * A Stripe dispute / chargeback was opened. We do NOT auto-refund (Stripe holds the
+ * disputed funds; refunding on top would double-pay). Record an audit row + alert the
+ * admin to respond in the Dashboard. Best-effort dedup against redelivery by dispute id.
+ */
+async function handleDisputeCreated(dispute: Stripe.Dispute): Promise<void> {
+  const paymentIntentId = (dispute.payment_intent as string | null) ?? null;
+  if (!paymentIntentId) {
+    console.warn(`[Webhook] dispute ${dispute.id} has no payment_intent — ignoring`);
+    return;
+  }
+  const supabase = createAdminClient();
+
+  // Map the intent → booking (covers upcharge intents too).
+  let bookingId: string | null = null;
+  const { data: pay } = await supabase
+    .from('booking_payments')
+    .select('booking_id')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .maybeSingle();
+  if (pay) {
+    bookingId = pay.booking_id;
+  } else {
+    const { data: b } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('stripe_payment_intent_id', paymentIntentId)
+      .maybeSingle();
+    if (b) bookingId = b.id;
+  }
+  if (!bookingId) {
+    console.warn(`[Webhook] dispute ${dispute.id} (intent ${paymentIntentId}) matched no booking — ignoring`);
+    return;
+  }
+
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('*, clubs(*)')
+    .eq('id', bookingId)
+    .single();
+  if (!booking) return;
+
+  // Dedup on the dispute id: fast-path SELECT, then rely on the
+  // uniq_booking_mod_dispute_id partial unique index to make it atomic under
+  // concurrent Stripe redelivery (alert at most once per dispute).
+  const { data: existing } = await supabase
+    .from('booking_modifications')
+    .select('id')
+    .eq('stripe_dispute_id', dispute.id)
+    .limit(1)
+    .maybeSingle();
+  if (existing) {
+    console.log(`[Webhook] dispute ${dispute.id} already recorded — skipping duplicate alert`);
+    return;
+  }
+
+  const currency = (dispute.currency || 'gbp').toUpperCase();
+  const { error: insErr } = await supabase.from('booking_modifications').insert({
+    booking_id: bookingId,
+    admin_actor: 'stripe',
+    modification_type: 'dispute',
+    direction: 'none',
+    status: 'pending',
+    reason: `Dispute ${dispute.id} opened (${dispute.reason}); ${(dispute.amount / 100).toFixed(2)} ${currency}`,
+    stripe_payment_intent_id: paymentIntentId,
+    stripe_dispute_id: dispute.id,
+  });
+  // 23505 = a concurrent delivery already recorded (and alerted for) this dispute.
+  if (insErr?.code === '23505') {
+    console.log(`[Webhook] dispute ${dispute.id} recorded concurrently — skipping duplicate alert`);
+    return;
+  }
+  if (insErr) {
+    console.error(`[Webhook] failed to record dispute ${dispute.id} for booking ${bookingId}:`, insErr);
+  }
+
+  await sendWithRetry(
+    () =>
+      sendDisputeAlert(booking as Booking, (booking.clubs as Club) ?? null, {
+        amountPence: dispute.amount,
+        reason: dispute.reason || 'unknown',
+        disputeId: dispute.id,
+      }),
+    'dispute alert',
+    'admin',
+  );
+  console.log(`[Webhook] Recorded dispute ${dispute.id} for booking ${bookingId}`);
 }

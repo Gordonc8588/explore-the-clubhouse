@@ -368,6 +368,7 @@ export interface BookingModification {
   stripe_refund_id: string | null;
   stripe_checkout_session_id: string | null;
   stripe_payment_intent_id: string | null;
+  stripe_dispute_id: string | null;
   created_at: string;
   applied_at: string | null;
 }
@@ -389,6 +390,7 @@ export interface BookingModificationInsert {
   stripe_refund_id?: string | null;
   stripe_checkout_session_id?: string | null;
   stripe_payment_intent_id?: string | null;
+  stripe_dispute_id?: string | null;
   created_at?: string;
   applied_at?: string | null;
 }
@@ -402,6 +404,7 @@ export interface BookingModificationUpdate {
   stripe_refund_id?: string | null;
   stripe_checkout_session_id?: string | null;
   stripe_payment_intent_id?: string | null;
+  stripe_dispute_id?: string | null;
   applied_at?: string | null;
 }
 

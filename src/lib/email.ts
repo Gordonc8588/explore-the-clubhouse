@@ -849,6 +849,158 @@ export async function sendAdminNotification(
 }
 
 /**
+ * Alert the admin that a PAID booking could not be seated because a day filled up
+ * during the payment window (the public-checkout capacity guard refused it). The
+ * booking is left paid-but-unseated for manual resolution (add capacity & seat, or
+ * refund via the Cancel/Refund flow). The parent has NOT been sent a confirmation.
+ */
+export async function sendSeatingFailureAlert(
+  booking: Booking,
+  club: Club | null,
+  detail: string
+): Promise<SendEmailResult> {
+  const adminDashboardUrl = `${siteUrl}/admin/bookings/${booking.id}`;
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #D4843E;">
+      ⚠️ Action needed: paid booking couldn't be seated
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      A payment for <strong>${club?.name || 'a holiday club'}</strong> succeeded, but a day filled to
+      capacity before we could seat it. To protect staff ratios the booking was <strong>not</strong> added to
+      the day — it's paid but unseated. Please resolve it manually: add capacity and seat them, or refund via
+      Cancel/Refund. The parent has not been sent a confirmation.
+    </p>
+
+    <div style="background-color: #FDF6EE; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #D4843E;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #D4843E;">Booking Details</h3>
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 160px;">Booking ID</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500; font-family: monospace;">${booking.id}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Reason</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${detail}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Parent</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${booking.parent_name} (<a href="mailto:${booking.parent_email}" style="color: #D4843E;">${booking.parent_email}</a>)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Children</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${booking.num_children}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Amount Paid</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #7A7C4A;">${formatPrice(booking.total_amount)}</td>
+        </tr>
+      </table>
+    </div>
+
+    ${ctaButton('Resolve in Dashboard', adminDashboardUrl)}
+  `;
+
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { success: false, error: 'Email service not configured' };
+    }
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: adminEmail,
+      replyTo: fromEmail,
+      subject: `⚠️ Paid booking couldn't be seated - ${booking.parent_name}`,
+      html: emailTemplate(content),
+    });
+    if (error) {
+      console.error('[SeatingFailureAlert] Resend API error:', JSON.stringify(error));
+      return { success: false, error: error.message };
+    }
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[SeatingFailureAlert] Exception:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Alert the admin that a Stripe payment dispute / chargeback was opened against a
+ * booking. We do NOT auto-refund (Stripe holds the disputed funds; refunding on top
+ * would double-pay) — the admin must respond with evidence in the Stripe Dashboard.
+ */
+export async function sendDisputeAlert(
+  booking: Booking,
+  club: Club | null,
+  info: { amountPence: number; reason: string; disputeId: string }
+): Promise<SendEmailResult> {
+  const adminDashboardUrl = `${siteUrl}/admin/bookings/${booking.id}`;
+
+  const content = `
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #EF4444;">
+      ⚠️ Payment dispute opened
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 16px; color: #6B7280;">
+      A customer has disputed a payment for <strong>${club?.name || 'a holiday club'}</strong> with their bank.
+      Stripe is holding the disputed funds — <strong>do not issue a refund</strong> (it would double-pay).
+      Respond with evidence in the Stripe Dashboard before the deadline, or accept the dispute there.
+    </p>
+
+    <div style="background-color: #FEF2F2; border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #EF4444;">
+      <h3 style="margin: 0 0 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: #EF4444;">Dispute Details</h3>
+      <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%;">
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280; width: 160px;">Booking ID</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500; font-family: monospace;">${booking.id}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Dispute ID</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500; font-family: monospace;">${info.disputeId}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Amount Disputed</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #EF4444;">${formatPrice(info.amountPence)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Reason</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${info.reason}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Parent</td>
+          <td style="padding: 8px 0; font-size: 14px; font-weight: 500;">${booking.parent_name} (<a href="mailto:${booking.parent_email}" style="color: #D4843E;">${booking.parent_email}</a>)</td>
+        </tr>
+      </table>
+    </div>
+
+    ${ctaButton('View Booking', adminDashboardUrl)}
+  `;
+
+  try {
+    const resend = getResendClient();
+    if (!resend) {
+      return { success: false, error: 'Email service not configured' };
+    }
+    const { data, error } = await resend.emails.send({
+      from: `The Clubhouse <${fromEmail}>`,
+      to: adminEmail,
+      replyTo: fromEmail,
+      subject: `⚠️ Payment dispute opened - ${booking.parent_name}`,
+      html: emailTemplate(content),
+    });
+    if (error) {
+      console.error('[DisputeAlert] Resend API error:', JSON.stringify(error));
+      return { success: false, error: error.message };
+    }
+    return { success: true, messageId: data?.id };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[DisputeAlert] Exception:', errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
  * Send reminder email to parents who haven't completed child information
  */
 export async function sendIncompleteReminder(
