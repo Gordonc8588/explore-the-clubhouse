@@ -4,6 +4,7 @@ import {
   Filter,
   PoundSterling,
   BookOpen,
+  Plus,
 } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { BookingsTable } from "./BookingsTable";
@@ -87,19 +88,29 @@ export default async function BookingsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="rounded-2xl bg-white p-6 shadow-md">
-        <h2
-          className="text-2xl font-bold"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            color: "var(--craigies-dark-olive)",
-          }}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-6 shadow-md">
+        <div>
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--craigies-dark-olive)",
+            }}
+          >
+            Bookings
+          </h2>
+          <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
+            Manage and view all booking records
+          </p>
+        </div>
+        <Link
+          href="/admin/bookings/new"
+          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "var(--craigies-burnt-orange)" }}
         >
-          Bookings
-        </h2>
-        <p className="mt-1" style={{ color: "var(--craigies-dark-olive)" }}>
-          Manage and view all booking records
-        </p>
+          <Plus className="h-5 w-5" />
+          Add Free Booking
+        </Link>
       </div>
 
       {/* Summary Stats */}
