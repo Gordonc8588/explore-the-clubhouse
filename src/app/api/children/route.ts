@@ -148,28 +148,40 @@ export async function POST(request: NextRequest) {
     }
 
     if (booking.status !== "paid") {
-      return NextResponse.json(
-        { error: `Cannot add children to booking with status '${booking.status}'. Booking must be in 'paid' status.` },
-        { status: 400 }
-      );
+      // A parent with a stale tab may submit after someone else sent the last
+      // form — give them the human message, not the status-machine one.
+      const message = booking.status === "complete"
+        ? "Children information has already been submitted for this booking"
+        : `Cannot add children to booking with status '${booking.status}'. Booking must be in 'paid' status.`;
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    if (children.length !== booking.num_children) {
-      return NextResponse.json(
-        { error: `Expected ${booking.num_children} ${booking.num_children === 1 ? "child" : "children"}, but received ${children.length}` },
-        { status: 400 }
-      );
-    }
-
-    // Check if children already exist for this booking
-    const { data: existingChildren } = await supabase
+    // Forms can arrive per-child (e.g. one booking covering several families,
+    // each parent filling in their own child via the shared link), so accept
+    // any count up to the number still outstanding.
+    const { data: existingChildren, error: existingError } = await supabase
       .from('children')
-      .select('id')
+      .select('*')
       .eq('booking_id', bookingId);
 
-    if (existingChildren && existingChildren.length > 0) {
+    if (existingError) {
+      console.error("[Children API] Failed to load existing children:", existingError);
+      return NextResponse.json({ error: "Failed to save children information" }, { status: 500 });
+    }
+
+    const existingCount = existingChildren?.length || 0;
+    const remaining = booking.num_children - existingCount;
+
+    if (remaining <= 0) {
       return NextResponse.json(
         { error: "Children information has already been submitted for this booking" },
+        { status: 400 }
+      );
+    }
+
+    if (children.length > remaining) {
+      return NextResponse.json(
+        { error: `Only ${remaining} of ${booking.num_children} children still ${remaining === 1 ? "needs" : "need"} a form, but received ${children.length}` },
         { status: 400 }
       );
     }
@@ -263,42 +275,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save children information" }, { status: 500 });
     }
 
-    // Update booking status to 'complete' and save parent address if provided
-    const bookingUpdate: Record<string, string> = { status: 'complete' };
+    // The booking is only 'complete' once every child has a form; partial
+    // submissions leave it 'paid' so the remaining parents can still submit.
+    const formsReceived = existingCount + (savedChildren?.length || 0);
+    const isNowComplete = formsReceived >= booking.num_children;
+
+    const bookingUpdate: Record<string, string> = {};
+    if (isNowComplete) {
+      bookingUpdate.status = 'complete';
+    }
     if (parentAddress) {
       bookingUpdate.parent_address_line1 = parentAddress.line1;
       bookingUpdate.parent_address_line2 = parentAddress.line2 || "";
       bookingUpdate.parent_address_city = parentAddress.city;
       bookingUpdate.parent_address_postcode = parentAddress.postcode;
     }
-    const { error: updateError } = await supabase
-      .from('bookings')
-      .update(bookingUpdate)
-      .eq('id', bookingId);
+    if (Object.keys(bookingUpdate).length > 0) {
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update(bookingUpdate)
+        .eq('id', bookingId);
 
-    if (updateError) {
-      console.error("[Children API] Update booking error:", updateError);
-      return NextResponse.json({ error: "Failed to update booking status" }, { status: 500 });
+      if (updateError) {
+        console.error("[Children API] Update booking error:", updateError);
+        return NextResponse.json({ error: "Failed to update booking status" }, { status: 500 });
+      }
     }
 
-    // Send completion email
-    if (booking.clubs) {
+    // Send completion email once all forms are in, covering every child
+    if (isNowComplete && booking.clubs) {
       try {
         const timeSlot = booking.booking_options?.time_slot;
-        await sendBookingComplete(booking, booking.clubs, savedChildren || [], timeSlot);
+        const allChildren = [...(existingChildren || []), ...(savedChildren || [])];
+        await sendBookingComplete(booking, booking.clubs, allChildren, timeSlot);
         console.log(`[Children API] Sent completion email to ${booking.parent_email}`);
       } catch (emailError) {
         console.error("[Children API] Failed to send completion email:", emailError);
       }
     }
 
-    console.log(`[Children API] Successfully completed booking ${bookingId} with ${savedChildren?.length} children`);
+    console.log(`[Children API] Saved ${savedChildren?.length} children for booking ${bookingId} (${formsReceived}/${booking.num_children} forms in${isNowComplete ? ', booking complete' : ''})`);
 
     return NextResponse.json({
       success: true,
       message: `Successfully saved information for ${savedChildren?.length} ${savedChildren?.length === 1 ? "child" : "children"}`,
       children: savedChildren,
-      bookingStatus: 'complete',
+      bookingStatus: isNowComplete ? 'complete' : booking.status,
+      formsReceived,
+      formsRemaining: booking.num_children - formsReceived,
     });
   } catch (error) {
     console.error("[Children API] Error:", error);

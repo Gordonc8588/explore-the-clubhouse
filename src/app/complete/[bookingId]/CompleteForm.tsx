@@ -27,20 +27,31 @@ interface CompleteFormProps {
 
 export function CompleteForm({ booking, club, bookingOption, existingChildren, accessToken }: CompleteFormProps) {
   const router = useRouter();
+
+  // Forms already received (e.g. another parent on a shared booking filled
+  // theirs in first). Parents can complete the remaining children in any
+  // number of sittings, one or more children at a time.
+  const existingCount = existingChildren.length;
+  const remainingCount = Math.max(0, booking.num_children - existingCount);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isAutoVerifying, setIsAutoVerifying] = useState(booking.status === "pending");
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // How many of the remaining children this parent is filling in right now
+  const [fillCount, setFillCount] = useState(remainingCount);
+  // Set after a submission that still leaves forms outstanding
+  const [partialSaved, setPartialSaved] = useState<{ received: number; remaining: number } | null>(null);
   const [childrenData, setChildrenData] = useState<(ChildInfoFormValues | null)[]>(
-    Array(booking.num_children).fill(null)
+    Array(remainingCount).fill(null)
   );
   const [validationErrors, setValidationErrors] = useState<boolean[]>(
-    Array(booking.num_children).fill(false)
+    Array(remainingCount).fill(false)
   );
   // Use a ref to track data immediately without waiting for React state updates
   const childrenDataRef = useRef<(ChildInfoFormValues | null)[]>(
-    Array(booking.num_children).fill(null)
+    Array(remainingCount).fill(null)
   );
   const hasAutoVerified = useRef(false);
 
@@ -48,17 +59,18 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
   const isAddOnWorkshop = club.slug === "add-on-workshop";
   const [useSimplifiedForm, setUseSimplifiedForm] = useState(isAddOnWorkshop);
   const [simplifiedChildren, setSimplifiedChildren] = useState<SimplifiedChildData[]>(
-    Array(booking.num_children).fill(null).map(() => ({ childName: "", dateOfBirth: "" }))
+    Array(remainingCount).fill(null).map(() => ({ childName: "", dateOfBirth: "" }))
   );
   const [hasCompletedMainForms, setHasCompletedMainForms] = useState(true);
 
-  // Parent address state
+  // Parent address: only ask if the booking doesn't have one on file yet
+  const needsAddress = !booking.parent_address_line1;
   const [addressLine1, setAddressLine1] = useState(booking.parent_address_line1 || "");
   const [addressLine2, setAddressLine2] = useState(booking.parent_address_line2 || "");
   const [addressCity, setAddressCity] = useState(booking.parent_address_city || "");
   const [addressPostcode, setAddressPostcode] = useState(booking.parent_address_postcode || "");
 
-  const isAlreadyComplete = booking.status === "complete" || existingChildren.length > 0;
+  const isAlreadyComplete = booking.status === "complete" || remainingCount <= 0;
 
   // Auto-verify payment on mount if status is pending
   useEffect(() => {
@@ -150,8 +162,8 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
   const handleSubmitAll = async () => {
     setError(null);
 
-    // Trigger all form submissions to run validation
-    for (let i = 0; i < booking.num_children; i++) {
+    // Trigger the visible form submissions to run validation
+    for (let i = 0; i < fillCount; i++) {
       const form = document.getElementById("child-info-form-" + i) as HTMLFormElement | null;
       if (form) {
         form.requestSubmit();
@@ -165,7 +177,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
     const newErrors: boolean[] = [];
     let hasIncomplete = false;
 
-    for (let i = 0; i < booking.num_children; i++) {
+    for (let i = 0; i < fillCount; i++) {
       if (!childrenDataRef.current[i]) {
         newErrors[i] = true;
         hasIncomplete = true;
@@ -181,8 +193,8 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
       return;
     }
 
-    // Validate address
-    if (!addressLine1.trim() || !addressCity.trim() || !addressPostcode.trim()) {
+    // Validate address (only collected when the booking has none on file)
+    if (needsAddress && (!addressLine1.trim() || !addressCity.trim() || !addressPostcode.trim())) {
       setError("Please fill in your address (line 1, city, and postcode are required)");
       return;
     }
@@ -197,13 +209,17 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
         body: JSON.stringify({
           bookingId: booking.id,
           t: accessToken,
-          children: childrenDataRef.current,
-          parentAddress: {
-            line1: addressLine1.trim(),
-            line2: addressLine2.trim(),
-            city: addressCity.trim(),
-            postcode: addressPostcode.trim(),
-          },
+          children: childrenDataRef.current.slice(0, fillCount),
+          ...(needsAddress
+            ? {
+                parentAddress: {
+                  line1: addressLine1.trim(),
+                  line2: addressLine2.trim(),
+                  city: addressCity.trim(),
+                  postcode: addressPostcode.trim(),
+                },
+              }
+            : {}),
         }),
       });
 
@@ -213,7 +229,14 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
         throw new Error(result.error || "Failed to save children information");
       }
 
-      router.push("/confirmation/" + booking.id + "?t=" + accessToken);
+      if (result.bookingStatus === "complete") {
+        router.push("/confirmation/" + booking.id + "?t=" + accessToken);
+      } else {
+        setPartialSaved({
+          received: result.formsReceived ?? existingCount + fillCount,
+          remaining: result.formsRemaining ?? booking.num_children - (existingCount + fillCount),
+        });
+      }
     } catch (err) {
       console.error("Submit error:", err);
       setError(err instanceof Error ? err.message : "Failed to save information");
@@ -262,7 +285,14 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
         throw new Error(result.error || "Failed to save children information");
       }
 
-      router.push("/confirmation/" + booking.id + "?t=" + accessToken);
+      if (result.bookingStatus === "complete") {
+        router.push("/confirmation/" + booking.id + "?t=" + accessToken);
+      } else {
+        setPartialSaved({
+          received: result.formsReceived ?? existingCount + simplifiedChildren.length,
+          remaining: result.formsRemaining ?? 0,
+        });
+      }
     } catch (err) {
       console.error("Submit error:", err);
       setError(err instanceof Error ? err.message : "Failed to save information");
@@ -276,6 +306,48 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
     updated[index] = { ...updated[index], [field]: value };
     setSimplifiedChildren(updated);
   };
+
+  // Saved, but other children on this booking still need forms
+  if (partialSaved) {
+    return (
+      <div className="min-h-screen py-12" style={{ backgroundColor: "var(--craigies-cream)" }}>
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+            <CheckCircle className="mx-auto h-16 w-16" style={{ color: "var(--craigies-olive)" }} />
+            <h1
+              className="mt-4 text-3xl font-bold"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                color: "var(--craigies-dark-olive)",
+              }}
+            >
+              Information Saved
+            </h1>
+            <p className="mt-2 text-stone">
+              Thank you! We&apos;ve received {partialSaved.received} of {booking.num_children} child
+              information forms for this booking.
+            </p>
+            <p className="mt-2 text-stone">
+              {partialSaved.remaining} {partialSaved.remaining === 1 ? "child still needs a form" : "children still need forms"}.
+              If another parent is completing them, just share this page&apos;s link with them —
+              they&apos;ll be able to fill in their own child&apos;s details.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-6 inline-block text-white font-semibold py-3 px-6 rounded-lg transition-opacity hover:opacity-90"
+              style={{
+                backgroundColor: "var(--craigies-burnt-orange)",
+                fontFamily: "'Playfair Display', serif",
+              }}
+            >
+              Fill In Another Child Now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Already complete - show summary
   if (isAlreadyComplete) {
@@ -463,9 +535,9 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
             </h2>
 
             <div className="space-y-6">
-              {Array.from({ length: booking.num_children }, (_, index) => (
+              {Array.from({ length: remainingCount }, (_, index) => (
                 <div key={index} className="p-4 rounded-xl border border-cloud bg-cloud/30">
-                  <h3 className="font-medium text-bark mb-4">Child {index + 1}</h3>
+                  <h3 className="font-medium text-bark mb-4">Child {existingCount + index + 1}</h3>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label
@@ -584,6 +656,9 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
           </h1>
           <p className="text-stone mb-6">
             Please provide information for each child attending. This information helps us keep your children safe.
+            {remainingCount > 1 && (
+              <> If the children belong to different families, each parent can fill in their own child &mdash; just share this page&apos;s link with them.</>
+            )}
           </p>
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -617,7 +692,66 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
           </div>
         </div>
 
+        {/* Progress: forms already received + how many this parent is filling now */}
+        {(existingCount > 0 || remainingCount > 1) && (
+          <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+            {existingCount > 0 && (
+              <div className={remainingCount > 1 ? "mb-6" : ""}>
+                <h2
+                  className="text-xl font-bold mb-3"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    color: "var(--craigies-dark-olive)",
+                  }}
+                >
+                  Forms Already Received
+                </h2>
+                <ul className="space-y-2">
+                  {existingChildren.map((child) => (
+                    <li key={child.id} className="flex items-center gap-2 text-bark">
+                      <CheckCircle className="h-5 w-5 flex-shrink-0" style={{ color: "var(--craigies-olive)" }} />
+                      {child.name}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-sm text-stone">
+                  {remainingCount} of {booking.num_children} children still {remainingCount === 1 ? "needs a form" : "need forms"}.
+                </p>
+              </div>
+            )}
+            {remainingCount > 1 && (
+              <div>
+                <label
+                  htmlFor="fill-count"
+                  className="block font-medium mb-1.5"
+                  style={{ color: "var(--craigies-dark-olive)" }}
+                >
+                  How many children are you filling in now?
+                </label>
+                <p className="text-sm text-stone mb-3">
+                  You don&apos;t have to do them all at once &mdash; any remaining forms can be
+                  completed later or by another parent using this same link.
+                </p>
+                <select
+                  id="fill-count"
+                  value={fillCount}
+                  onChange={(e) => setFillCount(Number(e.target.value))}
+                  className="w-full sm:w-auto px-4 py-3 rounded-lg border bg-white transition-all focus:outline-none focus:ring-2"
+                  style={{ borderColor: "#D1D5DB", color: "var(--craigies-dark-olive)" }}
+                >
+                  {Array.from({ length: remainingCount }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? "child" : "children"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Parent Address */}
+        {needsAddress && (
         <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
           <div className="flex items-center gap-3 mb-4">
             <MapPin className="h-5 w-5" style={{ color: "var(--craigies-burnt-orange)" }} />
@@ -719,9 +853,10 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
             </div>
           </div>
         </div>
+        )}
 
         {/* Child Forms */}
-        {Array.from({ length: booking.num_children }, (_, index) => (
+        {Array.from({ length: fillCount }, (_, index) => (
           <div key={index} className={"bg-white rounded-2xl shadow-md p-6 mb-6 " + (validationErrors[index] ? "ring-2 ring-error" : "")}>
             <h2
               className="text-xl font-bold mb-4"
@@ -730,7 +865,7 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
                 color: "var(--craigies-dark-olive)",
               }}
             >
-              Child {index + 1} of {booking.num_children}
+              Child {existingCount + index + 1} of {booking.num_children}
               {childrenData[index] && (
                 <span className="ml-2 text-sm font-normal" style={{ color: "var(--craigies-olive)" }}>
                   (Filled)
@@ -764,7 +899,11 @@ export function CompleteForm({ booking, club, bookingOption, existingChildren, a
               fontFamily: "'Playfair Display', serif",
             }}
           >
-            {isSubmitting ? "Submitting..." : "Submit All Information"}
+            {isSubmitting
+              ? "Submitting..."
+              : existingCount + fillCount === booking.num_children
+                ? "Submit All Information"
+                : "Submit Information"}
           </button>
         </div>
       </div>
