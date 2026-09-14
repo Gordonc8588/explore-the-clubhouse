@@ -20,7 +20,7 @@ export default function CTASection() {
             >
               Date
             </h3>
-            <p style={{ color: 'var(--craigies-dark-olive)' }}>6-10, 13-17 &amp; 20-24 July 2026</p>
+            <p style={{ color: 'var(--craigies-dark-olive)' }}>Monday 12 &ndash; Friday 16 October 2026</p>
           </div>
 
           {/* Time Card */}
@@ -69,7 +69,7 @@ export default function CTASection() {
             Ready to Book?
           </h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: 'var(--craigies-dark-olive)' }}>
-            Spaces are limited! Secure your child&apos;s spot for an unforgettable Summer adventure on the farm.
+            Spaces are limited! Secure your child&apos;s spot for an unforgettable autumn adventure on the farm &mdash; pumpkins, ponies and a little spooky-season fun. 🎃
           </p>
 
           {/* CTA Button */}

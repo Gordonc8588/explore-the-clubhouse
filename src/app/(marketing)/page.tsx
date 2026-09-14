@@ -5,16 +5,16 @@ import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import CTASection from "@/components/CTASection";
-import SummerScheduleSection from "@/components/SummerScheduleSection";
+import HolidayScheduleSection from "@/components/HolidayScheduleSection";
 
 export const metadata: Metadata = {
-  title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
+  title: "The Clubhouse | October Holiday Club 2026 - Now Booking",
   description:
-    "Book now for Summer 2026! Join our outdoor holiday club for children aged 5-12 at Craigies Farm, South Queensferry. Animal care, harvest, woodland adventures, and farm activities across three weeks in July.",
+    "Book now for October 2026! Join our outdoor holiday club for children aged 5-12 at Craigies Farm, South Queensferry. Animal care, pumpkins, woodland adventures and spooky-season farm fun, 12-16 October.",
   openGraph: {
-    title: "The Clubhouse | Summer Holiday Club 2026 - Now Booking",
+    title: "The Clubhouse | October Holiday Club 2026 - Now Booking",
     description:
-      "Summer adventure at Craigies Farm! Care for animals, explore woodland trails, and enjoy hands-on farm activities. Ages 5-12. Limited spaces available.",
+      "Autumn adventure at Craigies Farm! Care for animals, explore the woods in their autumn colours, and enjoy hands-on farm fun with a touch of Halloween. Ages 5-12. Limited spaces available.",
   },
 };
 
@@ -109,11 +109,11 @@ export default function HomePage() {
         title="On the Farm!"
         content={`There really is no better setting for a classroom — from our farm-to-fork cooking classes to our STEM lessons exploring new farming technology and innovations. At The Clubhouse, children learn the science of growing, animal care, woodworking, and other traditional skills, all through hands-on experience.
 
-Summer is one of the most exciting times on the farm. The crops are thriving, the woods are at their lush, leafy best, and there's a real buzz around the place — bees in the wildflowers, birds in the hedgerows, and animals making the most of the long, sunny days. The kids will be right in the middle of it all.
+Autumn is one of the most magical times on the farm. The last of the harvest is coming in, the woods are turning gold and red, the pumpkins are ripening, and the animals are getting cosy for the colder months ahead. The kids will be right in the middle of it all.
 
-This summer, the children will get stuck into the harvest, picking and tasting fresh produce straight from the field, and learning how it travels from soil to plate. They'll help care for the animals, build and stock enrichment toys in the woodworking sessions, and make the most of wonderfully warm days spent outdoors.
+This October, the children will get stuck into the end of the harvest, get hands-on with pumpkins, and learn how the farm gets ready for winter. They'll help care for the animals, build and stock enrichment toys in the woodworking sessions, cook over the fire, and enjoy a little spooky-season fun along the way.
 
-Out in the fields they'll go on rounds with the farmers, see what's ready to harvest, learn how summer crops are watered and looked after, and find out what grows best in different parts of the farm. They'll visit the beehives, spot summer wildlife, and see how farming works on both small and large scales. 🌾`}
+Out in the fields they'll go on rounds with the farmers, see what's been harvested and what's being planted for next year, and find out how the farm changes with the seasons. They'll explore the woods in their autumn colours, spot autumn wildlife, and see how farming works on both small and large scales. 🎃`}
         imageUrl="https://res.cloudinary.com/dqicgqgmx/image/upload/v1768924052/IMG_1176-scaled_pemded.jpg"
         imageAlt="Farm activities and learning"
         imagePosition="right"
@@ -229,8 +229,8 @@ Whether it's holding a chick, brushing a pony, or scattering feed for the goats,
         </div>
       </section>
 
-      {/* Summer Schedule Section */}
-      <SummerScheduleSection />
+      {/* Holiday Schedule Section */}
+      <HolidayScheduleSection />
 
       {/* CTA Section */}
       <CTASection />

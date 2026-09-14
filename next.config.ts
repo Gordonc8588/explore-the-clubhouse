@@ -83,6 +83,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        // Old Facebook-ad landing page now points at the October club
+        source: "/lp/summer-2026",
+        destination: "/lp/october-2026",
+        permanent: false,
+      },
+      {
         source: "/:path*",
         has: [
           {

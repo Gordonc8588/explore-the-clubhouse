@@ -16,7 +16,7 @@ export default function HeroSection() {
                 color: 'var(--craigies-dark-olive)'
               }}
             >
-              Join us on the farm this Summer!
+              Join us on the farm this October!
             </h1>
 
             {/* CTA Button */}
@@ -31,7 +31,7 @@ export default function HeroSection() {
             {/* Microcopy */}
             <p className="mt-6 text-sm leading-relaxed" style={{ color: 'var(--craigies-dark-olive)' }}>
               <strong className="block mb-1 text-base" style={{ color: 'var(--craigies-olive)' }}>LIMITED PLACES AVAILABLE!</strong>
-              Our Summer sessions fill up fast. Book early to secure your child&apos;s spot!
+              Our October sessions fill up fast. Book early to secure your child&apos;s spot!
             </p>
           </div>
 
@@ -56,10 +56,10 @@ export default function HeroSection() {
                       color: 'var(--craigies-dark-olive)'
                     }}
                   >
-                    Summer 2026
+                    October 2026
                   </h2>
                   <p className="text-lg" style={{ color: 'var(--craigies-dark-olive)' }}>
-                    6-10, 13-17 &amp; 20-24 July
+                    Monday 12 &ndash; Friday 16 October
                   </p>
                 </div>
               </div>
@@ -69,6 +69,13 @@ export default function HeroSection() {
                 <p><strong>Ages:</strong> 5-12 years</p>
                 <p><strong>Location:</strong> Craigies Farm, South Queensferry</p>
               </div>
+
+              <p
+                className="mt-4 pt-4 border-t text-sm font-semibold"
+                style={{ color: 'var(--craigies-burnt-orange)', borderTopColor: 'var(--craigies-cream)' }}
+              >
+                🎃 Pumpkins, ponies &amp; a little spooky-season fun
+              </p>
             </div>
           </div>
         </div>

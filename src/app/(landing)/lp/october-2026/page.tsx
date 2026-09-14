@@ -7,14 +7,14 @@ import { LandingCTAButton } from '@/components/landing/LandingCTAButton';
 const BOOK_URL = '/clubs#upcoming-events';
 
 export const metadata: Metadata = {
-  title: 'Summer Holiday Club 2026 | The Clubhouse at Craigies Farm',
+  title: 'October Holiday Club 2026 | The Clubhouse at Craigies Farm',
   description:
-    'Book your child\'s Summer adventure at Craigies Farm, South Queensferry. Farm animals, harvest, forest exploration & creative learning for ages 5-12 across three weeks in July. Limited spaces - book now!',
+    'Book your child\'s October adventure at Craigies Farm, South Queensferry. Farm animals, pumpkins, forest exploration & creative learning for ages 5-12, 12-16 October. Limited spaces - book now!',
   robots: { index: false, follow: false },
   openGraph: {
-    title: 'Summer Holiday Club 2026 | The Clubhouse',
+    title: 'October Holiday Club 2026 | The Clubhouse',
     description:
-      'Farm animals, forest adventures & creative learning at Craigies Farm. Ages 5-12, July school holidays. Limited spaces available!',
+      'Farm animals, forest adventures & a little spooky-season fun at Craigies Farm. Ages 5-12, October school holidays. Limited spaces available!',
     type: 'website',
     locale: 'en_GB',
     siteName: 'The Clubhouse',
@@ -41,7 +41,7 @@ const activities = [
   {
     title: 'Forest Adventures',
     description:
-      'Explore woodland trails at their summer best, build dens, discover wildlife and enjoy the great outdoors.',
+      'Explore woodland trails in their autumn colours, build dens, discover wildlife and enjoy the great outdoors.',
     image:
       'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-12-46_vonx6d.jpg',
     alt: 'Children exploring the forest',
@@ -49,7 +49,7 @@ const activities = [
   {
     title: 'Workshops',
     description:
-      'Nature crafts, outdoor cooking, science experiments and hands-on summer harvest projects.',
+      'Nature crafts, outdoor cooking, science experiments and hands-on pumpkin & harvest projects.',
     image:
       'https://res.cloudinary.com/dqicgqgmx/image/upload/w_600,c_limit/v1771618410/PHOTO-2026-02-20-20-11-14_mj2ndq.jpg',
     alt: 'Children in a workshop activity',
@@ -101,7 +101,7 @@ const testimonials = [
   },
 ];
 
-export default function SummerLandingPage() {
+export default function OctoberLandingPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--craigies-cream)' }}>
       {/* Minimal Header */}
@@ -119,11 +119,11 @@ export default function SummerLandingPage() {
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <h1 className="font-display text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
-                Summer Holiday Club 2026
+                October Holiday Club 2026
               </h1>
               <p className="mt-6 text-lg text-white/90 sm:text-xl">
                 Farm animals, forest adventures &amp; creative learning at Craigies Farm, South Queensferry.
-                Ages 5&ndash;12, July school holidays.
+                Ages 5&ndash;12, October school holidays.
               </p>
               <div className="mt-8">
                 <LandingCTAButton href={BOOK_URL} position="hero">
@@ -207,7 +207,7 @@ export default function SummerLandingPage() {
           </h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 text-left">
             {[
-              { label: 'Dates', value: '6-10, 13-17 & 20-24 July 2026' },
+              { label: 'Dates', value: 'Monday 12 - Friday 16 October 2026' },
               { label: 'Times', value: 'Drop-off 8:30-9:30am, Pick-up 3:00pm' },
               { label: 'Ages', value: '5 to 12 years' },
               { label: 'Location', value: 'Craigies Farm, South Queensferry' },
@@ -275,7 +275,7 @@ export default function SummerLandingPage() {
             Ready to Book?
           </h2>
           <p className="mt-4 text-lg text-white/90">
-            Spaces are limited and fill up fast. Secure your child&apos;s place at our Summer holiday club today.
+            Spaces are limited and fill up fast. Secure your child&apos;s place at our October holiday club today.
           </p>
           <div className="mt-8">
             <LandingCTAButton href={BOOK_URL} position="bottom">
@@ -306,9 +306,9 @@ export default function SummerLandingPage() {
 
       {/* Tracking */}
       <LandingPageTracker
-        contentName="Summer Holiday Club 2026"
+        contentName="October Holiday Club 2026"
         contentCategory="holiday_club"
-        contentId="summer-2026"
+        contentId="october-2026"
         value={35}
       />
     </div>
