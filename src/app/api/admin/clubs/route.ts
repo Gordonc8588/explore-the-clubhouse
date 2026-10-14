@@ -229,39 +229,95 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Delete existing club days and recreate
-    await supabase.from("club_days").delete().eq("club_id", clubId);
+    // Sync club days in place. Days with bookings can't be deleted (FK RESTRICT),
+    // so update existing rows by date rather than delete-and-recreate.
+    const { data: existingDays, error: existingDaysError } = await supabase
+      .from("club_days")
+      .select("id, date, booking_days(count)")
+      .eq("club_id", clubId);
 
-    if (data.days && data.days.length > 0) {
-      const clubDays = data.days
-        .filter((day: { isSkipped: boolean }) => !day.isSkipped)
-        .map((day: { date: string; morningCapacity: number; afternoonCapacity: number }) => ({
-          club_id: clubId,
-          date: day.date,
-          morning_capacity: day.morningCapacity,
-          afternoon_capacity: day.afternoonCapacity,
-          is_available: true,
-        }));
+    if (existingDaysError) {
+      console.error("Error loading club days:", existingDaysError);
+      return NextResponse.json(
+        { error: "Failed to load club days", details: existingDaysError.message },
+        { status: 500 }
+      );
+    }
 
-      if (clubDays.length > 0) {
-        await supabase.from("club_days").insert(clubDays);
+    const wantedDays = ((data.days || []) as Array<{
+      date: string;
+      morningCapacity: number;
+      afternoonCapacity: number;
+      isSkipped: boolean;
+    }>).filter((day) => !day.isSkipped);
+    const wantedDates = new Set(wantedDays.map((day) => day.date));
+    const existingByDate = new Map((existingDays || []).map((day) => [day.date, day]));
+
+    for (const day of wantedDays) {
+      const existing = existingByDate.get(day.date);
+      const values = {
+        morning_capacity: day.morningCapacity,
+        afternoon_capacity: day.afternoonCapacity,
+        is_available: true,
+      };
+      const { error } = existing
+        ? await supabase.from("club_days").update(values).eq("id", existing.id)
+        : await supabase.from("club_days").insert({ ...values, club_id: clubId, date: day.date });
+
+      if (error) {
+        console.error(`Error saving club day ${day.date}:`, error);
+        return NextResponse.json(
+          { error: `Failed to save ${day.date}`, details: error.message },
+          { status: 500 }
+        );
       }
     }
 
-    // Delete existing booking options and recreate
-    await supabase.from("booking_options").delete().eq("club_id", clubId);
+    // Days removed from the form: delete if unbooked, otherwise mark unavailable
+    for (const day of existingDays || []) {
+      if (wantedDates.has(day.date)) continue;
+      const bookingCount = (day.booking_days as unknown as Array<{ count: number }>)?.[0]?.count ?? 0;
+      const { error } = bookingCount === 0
+        ? await supabase.from("club_days").delete().eq("id", day.id)
+        : await supabase.from("club_days").update({ is_available: false }).eq("id", day.id);
 
-    if (data.bookingOptions && data.bookingOptions.length > 0) {
-      const options = data.bookingOptions.map((opt: {
-        name: string;
-        description: string;
-        optionType: string;
-        timeSlot: string;
-        pricePerChild: number;
-        sortOrder: number;
-        isActive: boolean;
-      }) => ({
-        club_id: clubId,
+      if (error) {
+        console.error(`Error removing club day ${day.date}:`, error);
+        return NextResponse.json(
+          { error: `Failed to remove ${day.date}`, details: error.message },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Sync booking options in place (bookings reference them, so never recreate)
+    const { data: existingOptions, error: existingOptionsError } = await supabase
+      .from("booking_options")
+      .select("id")
+      .eq("club_id", clubId);
+
+    if (existingOptionsError) {
+      console.error("Error loading booking options:", existingOptionsError);
+      return NextResponse.json(
+        { error: "Failed to load booking options", details: existingOptionsError.message },
+        { status: 500 }
+      );
+    }
+
+    const existingOptionIds = new Set((existingOptions || []).map((opt) => opt.id));
+    const keptOptionIds = new Set<string>();
+
+    for (const opt of (data.bookingOptions || []) as Array<{
+      id?: string;
+      name: string;
+      description: string;
+      optionType: string;
+      timeSlot: string;
+      pricePerChild: number;
+      sortOrder: number;
+      isActive: boolean;
+    }>) {
+      const values = {
         name: opt.name,
         description: opt.description || null,
         option_type: opt.optionType,
@@ -269,9 +325,40 @@ export async function PUT(request: NextRequest) {
         price_per_child: opt.pricePerChild,
         sort_order: opt.sortOrder,
         is_active: opt.isActive,
-      }));
+      };
+      const isExisting = !!opt.id && existingOptionIds.has(opt.id);
+      if (isExisting) keptOptionIds.add(opt.id!);
 
-      await supabase.from("booking_options").insert(options);
+      const { error } = isExisting
+        ? await supabase.from("booking_options").update(values).eq("id", opt.id!)
+        : await supabase.from("booking_options").insert({ ...values, club_id: clubId });
+
+      if (error) {
+        console.error(`Error saving booking option ${opt.name}:`, error);
+        return NextResponse.json(
+          { error: `Failed to save option "${opt.name}"`, details: error.message },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Options removed from the form: delete, or deactivate if bookings use them
+    for (const id of existingOptionIds) {
+      if (keptOptionIds.has(id)) continue;
+      const { error: deleteError } = await supabase.from("booking_options").delete().eq("id", id);
+      if (deleteError) {
+        const { error } = await supabase
+          .from("booking_options")
+          .update({ is_active: false })
+          .eq("id", id);
+        if (error) {
+          console.error(`Error removing booking option ${id}:`, error);
+          return NextResponse.json(
+            { error: "Failed to remove booking option", details: error.message },
+            { status: 500 }
+          );
+        }
+      }
     }
 
     return NextResponse.json({ success: true });
